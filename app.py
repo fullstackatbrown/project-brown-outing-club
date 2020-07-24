@@ -1,6 +1,8 @@
 import os
 from flask import Flask, render_template, request
 from flask_sqlalchemy import SQLAlchemy
+from flask_admin import Admin
+from flask_admin.contrib.sqla import ModelView
 
 app = Flask(__name__)
 app.config.from_object(os.environ['APP_SETTINGS'])
@@ -11,6 +13,10 @@ from models import *
 # The segment below will recreate database on runtime (comment out if data is valuable)
 db.drop_all()
 db.create_all()
+
+# Check out /admin/user/
+admin = Admin(app)
+admin.add_view(ModelView(User, db.session))
 
 # Serve a template from index
 @app.route('/')
