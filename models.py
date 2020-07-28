@@ -2,6 +2,7 @@ from app import db
 from sqlalchemy import CheckConstraint
 
 class User(db.Model):
+    __tablename__ = 'user'
     # Table columns
     id = db.Column(db.Integer, primary_key=True, autoincrement=True, index=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
@@ -18,6 +19,7 @@ class User(db.Model):
 # Define an arbitrary amount of these classes below...
 
 class Trips(db.Model):
+    __tablename__ = 'trips'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True, index=True)
     name = db.Column(db.String(80), unique=True, nullable=False)
     date = db.Column(db.Date, nullable=False)
@@ -31,3 +33,12 @@ class Trips(db.Model):
     # String representation of this object (for logging)
     def __repr__(self):
         return '<Trip %r>' % self.name
+
+class Responses(db.Model):
+    __tablename__ = 'reponses'
+    trip_id = db.Column(db.Integer, db.ForeignKey('trips.id'), nullable=False)
+    trips = db.relationship('Trips', backref = db.backref('responses'))
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    trips = db.relationship('User', backref = db.backref('responses'))
+    financial_aid= db.Column(db.Boolean)
+    car = db.Column(db.Boolean)
