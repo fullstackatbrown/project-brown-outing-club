@@ -9,8 +9,11 @@ class User(db.Model):
     email = db.Column(db.String(120), unique=True, nullable=False)
     first_name = db.Column(db.String(120), nullable=False)
     last_name = db.Column(db.String(120), nullable=False)
-    fullname = column_property(first_name+" "+last_name)
-    weight = dbColumn(db.Float(1, 10), nullable=False, default=1.0)
+    # says column property not defined, but it's in the documentation?
+    # fullname = column_property(first_name+" "+last_name)
+
+    #float with 1 digit before decimal, 10 after
+    weight = db.Column(db.Float(1, 10), nullable=False, default=1.0)
 
     # String representation of this object (for logging)
     def __repr__(self):
@@ -21,10 +24,10 @@ class User(db.Model):
 class Trips(db.Model):
     __tablename__ = 'trips'
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(80), unique=True, nullable=False)
-    date = db.Column(db.Date, nullable=False)
-    time = db.Column(db.Time, nullable=False)
-    description = db.Column(db.String(500))
+    name = db.Column(db.String(120), unique=True, nullable=False)
+    date = db.Column(db.Date(), nullable=False)
+    time = db.Column(db.Time(), nullable=False)
+    description = db.Column(db.Text())
     signup_deadline = db.Column(db.DateTime(timezone=False), nullable=False)
     price = db.Column(db.Float(3, 2), nullable=False)
     car_cap = db.Column(db.Integer)
@@ -36,9 +39,10 @@ class Trips(db.Model):
 
 class Responses(db.Model):
     __tablename__ = 'reponses'
+    id = db.Column(db.Integer, primary_key=True)
     trip_id = db.Column(db.Integer, db.ForeignKey('trips.id'), nullable=False)
     trips = db.relationship('Trips', backref = db.backref('responses'))
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     trips = db.relationship('User', backref = db.backref('responses'))
-    financial_aid= db.Column(db.Boolean)
-    car = db.Column(db.Boolean)
+    financial_aid= db.Column(db.Boolean, default=False)
+    car = db.Column(db.Boolean, default=False)
