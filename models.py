@@ -9,8 +9,7 @@ class User(db.Model):
     email = db.Column(db.String(120), unique=True, nullable=False)
     first_name = db.Column(db.String(120), nullable=False)
     last_name = db.Column(db.String(120), nullable=False)
-    # says column property not defined, but it's in the documentation?
-    # fullname = column_property(first_name+" "+last_name)
+    fullname = db.column_property(first_name+" "+last_name)
 
     #float with 1 digit before decimal, 10 after
     weight = db.Column(db.Float(1, 10), nullable=False, default=1.0)
