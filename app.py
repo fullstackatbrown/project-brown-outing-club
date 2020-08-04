@@ -14,6 +14,10 @@ from models import *
 db.drop_all()
 db.create_all()
 
+#trying out adding a user
+user_test = User(username = "username", email = "test@email.com", first_name = "first", last_name = "last")
+db.session.add(user_test)
+db.session.commit()
 # Check out /admin/user/
 admin = Admin(app)
 admin.add_view(ModelView(User, db.session))
