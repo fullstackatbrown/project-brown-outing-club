@@ -24,7 +24,8 @@ class Trips(db.Model):
     __tablename__ = 'trips'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(120), unique=True, nullable=False)
-    date = db.Column(db.Date(), nullable=False)
+    leave_date = db.Column(db.Date(), nullable=False)
+    return_date = db.Column(db.Date(), nullable=False)
     time = db.Column(db.Time(), nullable=False)
     description = db.Column(db.Text())
     signup_deadline = db.Column(db.DateTime(timezone=False), nullable=False)
@@ -42,6 +43,6 @@ class Responses(db.Model):
     trip_id = db.Column(db.Integer, db.ForeignKey('trips.id'), nullable=False)
     trips = db.relationship('Trips', backref = db.backref('responses'))
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    trips = db.relationship('User', backref = db.backref('responses'))
+    users = db.relationship('User', backref = db.backref('responses'))
     financial_aid= db.Column(db.Boolean, default=False)
     car = db.Column(db.Boolean, default=False)
