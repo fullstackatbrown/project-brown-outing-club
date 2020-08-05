@@ -9,7 +9,6 @@ class User(db.Model):
     email = db.Column(db.String(120), unique=True, nullable=False)
     first_name = db.Column(db.String(120), nullable=False)
     last_name = db.Column(db.String(120), nullable=False)
-    # says column property not defined, but it's in the documentation?
     fullname = db.column_property(first_name+" "+last_name)
 
     #float with 1 digit before decimal, 10 after
@@ -25,7 +24,8 @@ class Trips(db.Model):
     __tablename__ = 'trips'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(120), unique=True, nullable=False)
-    date = db.Column(db.Date(), nullable=False)
+    leave_date = db.Column(db.Date(), nullable=False)
+    return_date = db.Column(db.Date(), nullable=False)
     time = db.Column(db.Time(), nullable=False)
     description = db.Column(db.Text())
     signup_deadline = db.Column(db.DateTime(timezone=False), nullable=False)
@@ -43,6 +43,6 @@ class Responses(db.Model):
     trip_id = db.Column(db.Integer, db.ForeignKey('trips.id'), nullable=False)
     trips = db.relationship('Trips', backref = db.backref('responses'))
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    trips = db.relationship('User', backref = db.backref('responses'))
+    users = db.relationship('User', backref = db.backref('responses'))
     financial_aid= db.Column(db.Boolean, default=False)
     car = db.Column(db.Boolean, default=False)
