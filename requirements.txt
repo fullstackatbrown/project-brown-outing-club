@@ -3,6 +3,3 @@ Flask-SQLAlchemy
 python-dotenv
 PyMySQL
 flask-admin
-requests
-authlib
-six
