@@ -34,13 +34,13 @@ auth0 = oauth.register(
 db = SQLAlchemy(app)
 from models import *
 # The segment below will recreate database on runtime (comment out if data is valuable)
-db.drop_all()
-db.create_all()
+# db.drop_all()
+# db.create_all()
 
 #trying out adding a user
-user_test = User(username = "username", email = "test@email.com", first_name = "first", last_name = "last")
-db.session.add(user_test)
-db.session.commit()
+# user_test = User(username = "username", email = "test@email.com", first_name = "first", last_name = "last")
+# db.session.add(user_test)
+# db.session.commit()
 # Check out /admin/user/
 admin = Admin(app)
 admin.add_view(ModelView(User, db.session))
@@ -78,15 +78,6 @@ def login():
     #change redirect_uri after development passes
     return auth0.authorize_redirect(redirect_uri='http://127.0.0.1:5000/')
 
-# @app.route('/dashboard')
-# @login_required
-# def dashboard():
-#     upcoming_trips = db.session.execute(
-#         'SELECT '
-#     )
-#     past_trips = db.session.execute()
-#     return render_template('upcoming.html', upcoming_trips = upcoming_trips, past_trips=past_trips)
-
 def login_required(f):
     @wraps(f)
     def check_login(*args, **kwargs):
@@ -94,6 +85,24 @@ def login_required(f):
             return redirect(url_for('auth.login'))
         return f(*args, **kwargs)
     return check_login
+
+@app.route('/dashboard')
+# @login_required
+def dashboard():
+    #selects rows where the current date matches or is earlier than the sign up deadline
+    #converts database date time to EST then to just the date to compare w signup_deadline
+    upcoming_trips = db.session.execute(
+        'SELECT * FROM trips'
+        ' WHERE signup_deadline >= CONVERT(date,'
+        ' GETDATE() AT TIME ZONE \'Eastern Standard Time\')'
+    )
+    past_trips = db.session.execute(
+        'SELECT * FROM trips'
+        ' WHERE signup_deadline < CONVERT(date,'
+        ' GETDATE() AT TIME ZONE \'Eastern Standard Time\')'
+    )
+    past_trips = db.session.execute()
+    return render_template('upcoming.html', upcoming_trips = upcoming_trips, past_trips=past_trips)
 
 if __name__ == '__main__':
     app.run()

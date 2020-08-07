@@ -33,7 +33,7 @@ class Trips(db.Model):
     return_date = db.Column(db.Date(), nullable=False)
     departure_location = db.Column(db.String(120))
     departure_time = db.Column(db.Time(), nullable=False)
-    signup_deadline = db.Column(db.DateTime(timezone=False), nullable=False)
+    signup_deadline = db.Column(db.Date(), nullable=False)
     
     price = db.Column(db.Float(3, 2), nullable=False)
     car_cap = db.Column(db.Integer)
