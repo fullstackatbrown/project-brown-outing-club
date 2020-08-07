@@ -1,4 +1,0 @@
-# This .env file is a default development env file, please change it to your needs
-APP_SETTINGS=config.DevelopmentConfig
-DATABASE_URL=mysql+pymysql://admin:EOKg9ICKKiC98wyW4Rmx@dev-mariadb.catkywuq5bap.us-east-1.rds.amazonaws.com:3306/test
-FLASK_ENV=development
