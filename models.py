@@ -24,8 +24,9 @@ class Trips(db.Model):
     __tablename__ = 'trips'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(120), unique=True, nullable=False)
-    leave_date = db.Column(db.Date(), nullable=False)
+    departure_date = db.Column(db.Date(), nullable=False)
     return_date = db.Column(db.Date(), nullable=False)
+    departure_location = db.Column(db.String(120))
     time = db.Column(db.Time(), nullable=False)
     description = db.Column(db.Text())
     signup_deadline = db.Column(db.DateTime(timezone=False), nullable=False)

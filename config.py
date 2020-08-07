@@ -15,3 +15,13 @@ class ProductionConfig(Config):
 class DevelopmentConfig(Config):
     DEVELOPMENT = True
     DEBUG = True
+
+class authConfig():
+    client_id='J28X7Tck3Wh7xrch1Z3OQYN379zanO6Z',
+    client_secret='S1PAZdX5lAm3eGIv5tnmJfycfIW9W4Msv8Bi5_5N3uhjVmOVONCUbjaI0Ht6fp_k',
+    api_base_url='https://dev-h395rto6.us.auth0.com',
+    access_token_url='https://dev-h395rto6.us.auth0.com/oauth/token',
+    authorize_url='https://dev-h395rto6.us.auth0.com/authorize',
+    client_kwargs={
+        'scope': 'openid profile email',
+    }
