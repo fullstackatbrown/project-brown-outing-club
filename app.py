@@ -11,9 +11,16 @@ app.config.from_object(os.environ['APP_SETTINGS'])
 db = SQLAlchemy(app)
 from models import *
 # The segment below will recreate database on runtime (comment out if data is valuable)
-db.drop_all()
-db.create_all()
+try:
+    db.drop_all()
+    db.create_all()
+except:
+    print("issue encountered regenerating database")
 
+#trying out adding a user
+user_test = User(username = "username", email = "test@email.com", first_name = "first", last_name = "last")
+db.session.add(user_test)
+db.session.commit()
 # Check out /admin/user/
 admin = Admin(app)
 admin.add_view(ModelView(User, db.session))
