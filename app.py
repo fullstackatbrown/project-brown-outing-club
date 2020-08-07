@@ -34,8 +34,8 @@ auth0 = oauth.register(
 db = SQLAlchemy(app)
 from models import *
 # The segment below will recreate database on runtime (comment out if data is valuable)
-# db.drop_all()
-# db.create_all()
+db.drop_all()
+db.create_all()
 
 #trying out adding a user
 user_test = User(username = "username", email = "test@email.com", first_name = "first", last_name = "last")
