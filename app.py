@@ -64,12 +64,22 @@ def callback_handling():
     auth0.authorize_access_token()
     resp = auth0.get('userinfo')
     userinfo = resp.json()
+    console.log(userinfo)
 
     session['jwt_payload'] = userinfo
     session['profile'] = {
         'user_id': userinfo['sub'],
-        'name': userinfo['name']
+        'first_name': userinfo['given_name'],
+        'last_name': userinfo['family_name'],
+        'full_name': userinfo['name'],
+        'email': userinfo['email']
     }
+
+    check_new_user = sqlalchemy.text("SELECT id FROM user WHERE email = :x")
+    if db.execute(check_new_user, userinfo['email']).fetchone() is None:
+        new_user = User(username = userinfo['username'], email = userinfo['email'], first_name = userinfo['given_name'], last_name = userinfo['family_name'])             
+        db.session.add(new_user)
+        db.session.commit()
 
     return redirect('/dashboard')
 
@@ -91,18 +101,31 @@ def login_required(f):
 def dashboard():
     #selects rows where the current date matches or is earlier than the sign up deadline
     #converts database date time to EST then to just the date to compare w signup_deadline
-    upcoming_trips = db.session.execute(
+    upcoming_trips = db.execute(
         'SELECT * FROM trips'
         ' WHERE signup_deadline >= CONVERT(date,'
         ' GETDATE() AT TIME ZONE \'Eastern Standard Time\')'
-    )
-    past_trips = db.session.execute(
+    ).fetchall()
+    past_trips = db.execute(
         'SELECT * FROM trips'
         ' WHERE signup_deadline < CONVERT(date,'
         ' GETDATE() AT TIME ZONE \'Eastern Standard Time\')'
-    )
-    past_trips = db.session.execute()
-    return render_template('upcoming.html', upcoming_trips = upcoming_trips, past_trips=past_trips)
+    ).fetchall()
+
+    #name of the user if available
+    if session.get('first_name') is not None:
+        name = session.get('first_name')
+    elif session.get('full_name') is not None:
+        name = session.get('full_name')
+    else:
+        name = ""
+    return render_template('upcoming.html', upcoming_trips = upcoming_trips, past_trips = past_trips, name = name)
+
+@app.route('/logout')
+def logout():
+    session.clear()
+    params = {'returnTo': url_for('index', _external=True), 'client_id': 'J28X7Tck3Wh7xrch1Z3OQYN379zanO6Z'}
+    return redirect(auth0.api_base_url + '/v2/logout?' + urlencode(params))
 
 if __name__ == '__main__':
     app.run()
