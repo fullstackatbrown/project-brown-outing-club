@@ -97,13 +97,10 @@ def login_required(f):
 @app.route('/dashboard')
 @login_required
 def dashboard():
-    # print(func.currentdate())
     #selects rows where the current date matches or is earlier than the sign up deadline
+    #NOTE: current date uses the server clock to fetch the date, so make sure the app is deployed on an Eastern Server
     upcoming_text = select([Trip]).where(Trip.signup_deadline >= func.current_date())
     past_text = select([Trip]).where(Trip.signup_deadline < func.current_date())
-
-    # print(conn.execute(upcoming_trips).fetchone())
-    # print(conn.execute(past_trips).fetchone())
     #name of the user if available
     # if session.get('first_name') is not None:
     #     name = session.get('first_name')
