@@ -3,8 +3,8 @@ from flask import Flask, render_template, request, jsonify, redirect, session, u
 from flask_sqlalchemy import SQLAlchemy
 from flask_admin import Admin
 from flask_admin.contrib.sqla import ModelView
-from sqlalchemy.sql import select
-from sqlalchemy import create_engine
+from sqlalchemy.sql import select, func, text
+from sqlalchemy import create_engine, Date, cast
 
 #for OAuth
 from functools import wraps
@@ -22,7 +22,7 @@ conn = engine.connect()
 
 oauth = OAuth(app)
 
-# auth0 = oauth.register('auth0', os.environ['AUTH_SETTINGS'],)
+# auth0 = oauth.register(os.environ['AUTH_SETTINGS'])
 auth0 = oauth.register(
     'auth0',
     client_id='J28X7Tck3Wh7xrch1Z3OQYN379zanO6Z',
@@ -38,18 +38,7 @@ auth0 = oauth.register(
 # Sync SQLAlchemy with database
 db = SQLAlchemy(app)
 from models import *
-# The segment below will recreate database on runtime (comment out if data is valuable)
-# db.drop_all()
-# db.create_all()
 
-#trying out adding a user
-# user_test = User(username = "username", email = "test@email.com", first_name = "first", last_name = "last")
-# db.session.add(user_test)
-# trip_test = Trip(name = "adriondack hiking", description = "this is a test", 
-# departure_date = "2020-09-13", return_date = "2020-09-15", departure_location = "Faunce", departure_time = "15:10",
-# signup_deadline = "2020-09-13", price = 80.50, noncar_cap = 50)
-# db.session.add(trip_test)
-# db.session.commit()
 # Check out /admin/user/
 admin = Admin(app)
 admin.add_view(ModelView(User, db.session))
@@ -86,15 +75,10 @@ def callback_handling():
     }
 
     check_new_user = select([User]).where(User.email == userinfo['email'])
-    print(conn.execute(check_new_user).fetchone())
     if conn.execute(check_new_user).fetchone() is None:
         new_user = User(username = userinfo['sub'], email = userinfo['email'], first_name = userinfo['name'], last_name = "last")             
         db.session.add(new_user)
         db.session.commit()
-
-    # user_test = User(username = "username", email = "test2@email.com", first_name = "first", last_name = "last")
-    # db.session.add(user_test)
-    # db.session.commit()
 
     return redirect('/dashboard')
 
@@ -113,26 +97,20 @@ def login_required(f):
 @app.route('/dashboard')
 @login_required
 def dashboard():
+    # print(func.currentdate())
     #selects rows where the current date matches or is earlier than the sign up deadline
-    #converts database date time to EST then to just the date to compare w signup_deadline
-    upcoming_trips = db.session.query(
-        '* FROM trips'
-        ' WHERE signup_deadline >= CONVERT(date,'
-        ' GETDATE() AT TIME ZONE \'Eastern Standard Time\')'
-    )
-    past_trips = db.session.query(
-        '* FROM trips'
-        ' WHERE signup_deadline < CONVERT(date,'
-        ' GETDATE() AT TIME ZONE \'Eastern Standard Time\')'
-    )
+    upcoming_trips = select([Trip]).where(Trip.signup_deadline >= func.current_date())
+    past_trips = select([Trip]).where(Trip.signup_deadline < func.current_date())
 
+    # print(conn.execute(upcoming_trips).fetchone())
+    # print(conn.execute(past_trips).fetchone())
     #name of the user if available
-    if session.get('first_name') is not None:
-        name = session.get('first_name')
-    elif session.get('full_name') is not None:
-        name = session.get('full_name')
-    else:
-        name = ""
+    # if session.get('first_name') is not None:
+    #     name = session.get('first_name')
+    # elif session.get('full_name') is not None:
+    #     name = session.get('full_name')
+    # else:
+    #     name = ""
     return render_template('upcoming.html',
     upcoming_trips = upcoming_trips, past_trips = past_trips, name = name)
 
