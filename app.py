@@ -99,8 +99,8 @@ def login_required(f):
 def dashboard():
     # print(func.currentdate())
     #selects rows where the current date matches or is earlier than the sign up deadline
-    upcoming_trips = select([Trip]).where(Trip.signup_deadline >= func.current_date())
-    past_trips = select([Trip]).where(Trip.signup_deadline < func.current_date())
+    upcoming_text = select([Trip]).where(Trip.signup_deadline >= func.current_date())
+    past_text = select([Trip]).where(Trip.signup_deadline < func.current_date())
 
     # print(conn.execute(upcoming_trips).fetchone())
     # print(conn.execute(past_trips).fetchone())
@@ -111,6 +111,8 @@ def dashboard():
     #     name = session.get('full_name')
     # else:
     #     name = ""
+    upcoming_trips = conn.execute(upcoming_text).fetchall()
+    past_trips = conn.execute(past_text).fetchall()
     return render_template('upcoming.html',
     upcoming_trips = upcoming_trips, past_trips = past_trips, name = name)
 
