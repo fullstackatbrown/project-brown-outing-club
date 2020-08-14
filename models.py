@@ -27,11 +27,11 @@ class Trip(db.Model):
     image = db.Column(db.Text())
 
     departure_date = db.Column(db.Date(), nullable=False)
-    return_date = db.Column(db.Date(), nullable=False)
     departure_location = db.Column(db.String(120), nullable=False)
     departure_time = db.Column(db.Time(), nullable=False)
-    signup_deadline = db.Column(db.Date(), nullable=False)
+    return_date = db.Column(db.Date(), nullable=False)
     
+    signup_deadline = db.Column(db.Date(), nullable=False)
     price = db.Column(db.Float(3, 2), nullable=False)
     car_cap = db.Column(db.Integer)
     noncar_cap = db.Column(db.Integer, nullable=False)
@@ -44,8 +44,8 @@ class Response(db.Model):
     __tablename__ = 'reponses'
     id = db.Column(db.Integer, primary_key=True)
     trip_id = db.Column(db.Integer, db.ForeignKey('trips.id'), nullable=False)
-    trips = db.relationship('Trip', backref = db.backref('responses'))
+    trip = db.relationship('Trip', backref = db.backref('responses'))
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    users = db.relationship('User', backref = db.backref('responses'))
+    user = db.relationship('User', backref = db.backref('responses'))
     financial_aid= db.Column(db.Boolean, default=False)
     car = db.Column(db.Boolean, default=False)
