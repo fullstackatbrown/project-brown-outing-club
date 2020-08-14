@@ -2,7 +2,6 @@ import os
 from flask import Flask, render_template, request, jsonify, redirect, session, url_for
 from flask_sqlalchemy import SQLAlchemy
 from flask_admin import Admin
-from flask_admin.contrib.sqla import ModelView
 from sqlalchemy.sql import select, func, text
 from sqlalchemy import create_engine, Date, cast
 
@@ -38,10 +37,13 @@ auth0 = oauth.register(
 # Sync SQLAlchemy with database
 db = SQLAlchemy(app)
 from models import *
+from adminviews import *
 
 # Check out /admin/user/
 admin = Admin(app)
-admin.add_view(ModelView(User, db.session))
+admin.add_view(UserView(User, db.session))
+admin.add_view(TripView(Trip, db.session))
+admin.add_view(ResponseView(Response, db.session))
 
 # Serve a template from index
 @app.route('/')
