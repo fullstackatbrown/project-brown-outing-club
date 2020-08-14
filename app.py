@@ -22,7 +22,7 @@ conn = engine.connect()
 
 oauth = OAuth(app)
 
-# auth0 = oauth.register(os.environ['AUTH_SETTINGS'])
+# auth0 = oauth.register('auth0', os.environ['AUTH_SETTINGS'])
 auth0 = oauth.register(
     'auth0',
     client_id='J28X7Tck3Wh7xrch1Z3OQYN379zanO6Z',
@@ -67,16 +67,12 @@ def callback_handling():
     session['jwt_payload'] = userinfo
     session['profile'] = {
         'user_id': userinfo['sub'],
-        # 'first_name': userinfo['given_name'],
-        # 'last_name': userinfo['family_name'],
-        'name': userinfo['name'],
-        'email': userinfo['email'],
-        'picture': userinfo['picture']
+        'email': userinfo['email']
     }
 
     check_new_user = select([User]).where(User.email == userinfo['email'])
     if conn.execute(check_new_user).fetchone() is None:
-        new_user = User(username = userinfo['sub'], email = userinfo['email'], first_name = userinfo['name'], last_name = "last")             
+        new_user = User(auth_id = userinfo['sub'], email = userinfo['email'])             
         db.session.add(new_user)
         db.session.commit()
 
@@ -101,17 +97,12 @@ def dashboard():
     #NOTE: current date uses the server clock to fetch the date, so make sure the app is deployed on an Eastern Server
     upcoming_text = select([Trip]).where(Trip.signup_deadline >= func.current_date())
     past_text = select([Trip]).where(Trip.signup_deadline < func.current_date())
-    #name of the user if available
-    # if session.get('first_name') is not None:
-    #     name = session.get('first_name')
-    # elif session.get('full_name') is not None:
-    #     name = session.get('full_name')
-    # else:
-    #     name = ""
+
     upcoming_trips = conn.execute(upcoming_text).fetchall()
     past_trips = conn.execute(past_text).fetchall()
+
     return render_template('upcoming.html',
-    upcoming_trips = upcoming_trips, past_trips = past_trips, name = name)
+    upcoming_trips = upcoming_trips, past_trips = past_trips)
 
 @app.route('/logout')
 def logout():
