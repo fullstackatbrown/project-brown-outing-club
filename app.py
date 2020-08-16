@@ -51,8 +51,6 @@ admin.add_view(UserView(User, db.session))
 admin.add_view(TripView(Trip, db.session))
 admin.add_view(ResponseView(Response, db.session))
 
-db.session.add(AdminClearance(email = "test@brown.edu", can_create = True, can_edit = True, can_delete = True))
-db.session.commit()
 # Serve a template from index
 @app.route('/')
 def index():
