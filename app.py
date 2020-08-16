@@ -13,12 +13,15 @@ from dotenv import load_dotenv, find_dotenv
 from authlib.integrations.flask_client import OAuth
 from six.moves.urllib.parse import urlencode
 
+#instantiate Flask app
 app = Flask(__name__)
 app.config.from_object(os.environ['APP_SETTINGS'])
 
+#create connection to database
 engine = create_engine(os.environ['DATABASE_URL'], echo=True)
 conn = engine.connect()
 
+#instantiate 0auth authentication
 oauth = OAuth(app)
 
 # auth0 = oauth.register('auth0', os.environ['AUTH_SETTINGS'])
@@ -36,15 +39,20 @@ auth0 = oauth.register(
 
 # Sync SQLAlchemy with database
 db = SQLAlchemy(app)
+
 from models import *
 from adminviews import *
 
-# Check out /admin/user/
+#instantiate flask-admin
+# Check out /admin/{table name}/
 admin = Admin(app)
+admin.add_view(ReqClearance(AdminClearance, db.session, name = 'Admin'))
 admin.add_view(UserView(User, db.session))
 admin.add_view(TripView(Trip, db.session))
 admin.add_view(ResponseView(Response, db.session))
 
+db.session.add(AdminClearance(email = "test@brown.edu", can_create = True, can_edit = True, can_delete = True))
+db.session.commit()
 # Serve a template from index
 @app.route('/')
 def index():
@@ -59,6 +67,8 @@ def test():
     else:
         return 'GET request received'
 
+#called after authentication
+#stores new users in database if email is not in User Table already
 @app.route('/callback')
 def callback_handling():
     print("callback")
@@ -80,10 +90,12 @@ def callback_handling():
 
     return redirect('/dashboard')
 
+#redirects user to auth0 login
 @app.route('/login')
 def login():
     return auth0.authorize_redirect(redirect_uri='http://127.0.0.1:5000/callback')
 
+#tag that restricts access to only those logged in
 def login_required(f):
     @wraps(f)
     def check_login(*args, **kwargs):
@@ -92,6 +104,7 @@ def login_required(f):
         return f(*args, **kwargs)
     return check_login
 
+#dashboard that is the target of redirect from login page
 @app.route('/dashboard')
 @login_required
 def dashboard():
@@ -106,6 +119,7 @@ def dashboard():
     return render_template('upcoming.html',
     upcoming_trips = upcoming_trips, past_trips = past_trips)
 
+#logout function to be called via button on front
 @app.route('/logout')
 def logout():
     session.clear()

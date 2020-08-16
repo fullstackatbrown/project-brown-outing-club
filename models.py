@@ -1,6 +1,21 @@
 from app import db
 from sqlalchemy import CheckConstraint
 
+class AdminClearance(db.Model):
+    __tablename__ = 'adminclearance'
+    # Table columns
+    id = db.Column(db.Integer, primary_key=True)
+    email = db.Column(db.String(120), unique=True, nullable=False)
+
+    #dictates what each admin is able to do with the data
+    can_create = db.Column(db.Boolean, nullable=False)
+    can_edit = db.Column(db.Boolean, nullable=False)
+    can_delete = db.Column(db.Boolean, nullable=False)
+
+    # String representation of this object (for logging)
+    def __repr__(self):
+        return '<Admin %r>' % self.email
+
 class User(db.Model):
     __tablename__ = 'user'
     # Table columns
@@ -13,9 +28,7 @@ class User(db.Model):
 
     # String representation of this object (for logging)
     def __repr__(self):
-        return '<User %r>' % self.username
-
-# Define an arbitrary amount of these classes below...
+        return '<User %r>' % self.email
 
 class Trip(db.Model):
     __tablename__ = 'trips'
@@ -45,7 +58,11 @@ class Response(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     trip_id = db.Column(db.Integer, db.ForeignKey('trips.id'), nullable=False)
     trip = db.relationship('Trip', backref = db.backref('responses'))
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    user_email = db.Column(db.String(120), db.ForeignKey('user.email'), nullable=False)
     user = db.relationship('User', backref = db.backref('responses'))
     financial_aid= db.Column(db.Boolean, default=False)
     car = db.Column(db.Boolean, default=False)
+    lottery_slot = db.Column(db.Boolean)
+
+    def __repr__(self):
+        return '<Response to %r by %r>' % (self.trip_id, self.user_id)
