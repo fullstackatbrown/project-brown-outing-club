@@ -36,16 +36,18 @@ class Trip(db.Model):
     name = db.Column(db.String(120), unique=True, nullable=False)
     description = db.Column(db.Text())
     contact = db.Column(db.String(120))
+    destination = db.Column(db.String(80))
     #for src filepath
     image = db.Column(db.Text())
 
     departure_date = db.Column(db.Date(), nullable=False)
     departure_location = db.Column(db.String(120), nullable=False)
     departure_time = db.Column(db.Time(), nullable=False)
-    return_date = db.Column(db.Date(), nullable=False)
+    return_date = db.Column(db.Date(), nullable=True)
+    return_time = db.Column(db.Time(), nullable=True)
     
     signup_deadline = db.Column(db.Date(), nullable=False)
-    price = db.Column(db.Float(3, 2), nullable=False)
+    price = db.Column(db.Numeric(3, 2), nullable=False)
     car_cap = db.Column(db.Integer)
     noncar_cap = db.Column(db.Integer, nullable=False)
 

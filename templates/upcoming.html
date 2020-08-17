@@ -1,5 +1,31 @@
 <div class="logged-in-box auth0-box logged-in">
     <h1 id="logo"><img src="//cdn.auth0.com/samples/auth0_logo_final_blue_RGB.png" /></h1>
-    <h2>Welcome </h2>
+    {% for trip in upcoming_trips %}
+        <article class = "trips">
+            <header>
+                <h1>{{ trip['name'] }}</h1>
+            </header>
+            <div>
+                <div class = "details">
+                    {{ trip['destination'] }} &sdot; ${{ trip['price'] }}
+                    <br>
+                    {{ trip['departure_date'].strftime('%m/%d/%Y') }} 
+                    {% if trip['return_date'] is not defined %}
+                        - {{ trip['return_date'].strftime('%m/%d/%Y') }} 
+                    {% endif %}
+                    <br>
+                    Meet at {{ trip['departure_location'] }}, {{ trip['departure_time'].strftime("%I:%M %p") }}
+                    {% if trip['return_date'] is not defined %}
+                        Return at {{ trip['return_time'].strftime("%I:%M %p") }} 
+                    {% endif %} 
+                    <br>
+                    Contact: {{ trip['contact'] }}
+                </div>
+            </div>
+        </article>
+        {% if not loop.last %}
+            <hr>
+        {% endif %}
+    {% endfor %}
     <a class="btn btn-primary btn-lg btn-logout btn-block" href="/logout">Logout</a>
 </div>
