@@ -1,15 +1,18 @@
 .row {
     display: flex;
-    align-items: center;
+    justify-content: center;
+    flex-direction: column;
 }
 
 .trips {
     display: grid;
-    grid-template-columns: 1fr 3fr 1fr;
+    grid-template-columns: 1fr 2fr 1fr;
     grid-column-gap: 2vw;
     grid-row-gap: 2vh
 }
 
 #lottery {
-    padding: 1vw 1vh;
+    margin: 3vh 1vw;
+    padding: 0 1vw;
+    background-color: #F5E7D7;
 }
