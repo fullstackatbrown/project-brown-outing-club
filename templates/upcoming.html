@@ -1,12 +1,23 @@
-<div class="logged-in-box auth0-box logged-in">
-    <h1 id="logo"><img src="//cdn.auth0.com/samples/auth0_logo_final_blue_RGB.png" /></h1>
+<!DOCTYPE html>
+
+<head>
+    <link rel ="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+</head>
+
+<body>
+    <div class = "header">
+        <h1>Upcoming Trips</h1>
+    </div>
     {% for trip in upcoming_trips %}
-        <article class = "trips">
-            <header>
-                <h1>{{ trip['name'] }}</h1>
-            </header>
-            <div>
-                <div class = "details">
+        <div class = "trips">
+            <div class = "row" id ="img">
+                <img src = "{{ trip['image'] }}">
+            </div>
+            <div class = "row" id ="details">
+                <header>
+                    <h1>{{ trip['name'] }}</h1>
+                </header>
+                <div>
                     {{ trip['destination'] }} &sdot; ${{ trip['price'] }}
                     <br>
                     {{ trip['departure_date'].strftime('%m/%d/%Y') }} 
@@ -22,10 +33,19 @@
                     Contact: {{ trip['contact'] }}
                 </div>
             </div>
-        </article>
+            <div class = "row" id = "lottery">
+                {{ trip['noncar_cap'] }} spots
+                <br>
+                Lottery closes at {{ trip['signup_deadline'].strftime('%m/%d') }} @ 11:59 pm
+                <br>
+                <a href = "#lottery">
+                    Enter Lottery
+                </a>
+            </div>
+        </div>
         {% if not loop.last %}
             <hr>
         {% endif %}
     {% endfor %}
     <a class="btn btn-primary btn-lg btn-logout btn-block" href="/logout">Logout</a>
-</div>
+    </body>

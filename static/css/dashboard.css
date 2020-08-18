@@ -1,0 +1,15 @@
+.row {
+    display: flex;
+    align-items: center;
+}
+
+.trips {
+    display: grid;
+    grid-template-columns: 1fr 3fr 1fr;
+    grid-column-gap: 2vw;
+    grid-row-gap: 2vh
+}
+
+#lottery {
+    padding: 1vw 1vh;
+}
