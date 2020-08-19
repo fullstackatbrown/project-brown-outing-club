@@ -2,6 +2,7 @@
 
 <head>
     <link rel ="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@200&display=swap" rel="stylesheet">
 </head>
 
 <body>
@@ -48,7 +49,6 @@
             </div>
         </div>
         {% if not loop.last %}
-            <hr>
         {% endif %}
     {% endfor %}
     </div>
