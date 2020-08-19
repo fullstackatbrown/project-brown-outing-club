@@ -1,18 +1,45 @@
+.body {
+    width: 85%;
+    margin: auto;
+}
+
 .row {
     display: flex;
     justify-content: center;
     flex-direction: column;
 }
 
-.trips {
-    display: grid;
-    grid-template-columns: 1fr 2fr 1fr;
-    grid-column-gap: 2vw;
-    grid-row-gap: 2vh
+.row h2{
+    margin: 0 0 0.3em 0;
 }
 
-#lottery {
-    margin: 3vh 1vw;
-    padding: 0 1vw;
+.trips {
+    display: grid;
+    grid-template-columns: 2fr 3fr 2fr;
+    grid-column-gap: 2vw;
+    grid-row-gap: 2vh;
+    border-style: solid;
+}
+
+#lottery{
+    margin: 1em 1em;
+    padding: 0 1em;
     background-color: #F5E7D7;
+}
+
+#img {
+    margin: 1em 1em;
+}
+
+.refphoto {
+    height: 10em;
+}
+
+.triplink {
+    color: black;
+    font-size: 1.5em;
+}
+
+.triplink #hover{
+    cursor: pointer;
 }

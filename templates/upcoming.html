@@ -7,16 +7,16 @@
 <body>
     <div class = "header">
         <h1>Upcoming Trips</h1>
+        <a class="btn btn-primary btn-lg btn-logout btn-block" href="/logout">Logout</a>
     </div>
+    <div class = "body">
     {% for trip in upcoming_trips %}
         <div class = "trips">
             <div class = "row" id ="img">
-                <img src = "{{ trip['image'] }}">
+                <img src = "{{ trip['image'] }}" class = "refphoto">
             </div>
             <div class = "row" id ="details">
-                <header>
-                    <h1>{{ trip['name'] }}</h1>
-                </header>
+                <a href="#moreinformation" class = "triplink">{{ trip['name'] }}</a>
                 <div>
                     {{ trip['destination'] }} &sdot; ${{ trip['price'] }}
                     <br>
@@ -34,7 +34,11 @@
                 </div>
             </div>
             <div class = "row" id = "lottery">
-                {{ trip['noncar_cap'] }} spots
+                {% if trip['noncar_cap'] == 0 %}
+                    Unlimited spots
+                {% else %}
+                    {{ trip['noncar_cap'] }} spots
+                {% endif %} 
                 <br>
                 Lottery closes at {{ trip['signup_deadline'].strftime('%m/%d') }} @ 11:59 pm
                 <br>
@@ -47,5 +51,5 @@
             <hr>
         {% endif %}
     {% endfor %}
-    <a class="btn btn-primary btn-lg btn-logout btn-block" href="/logout">Logout</a>
-    </body>
+    </div>
+</body>

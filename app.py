@@ -112,8 +112,8 @@ def login_required(f):
 def dashboard():
     #selects rows where the current date matches or is earlier than the sign up deadline
     #NOTE: current date uses the server clock to fetch the date, so make sure the app is deployed on an Eastern Server
-    upcoming_text = select([Trip]).where(Trip.signup_deadline >= func.current_date())
-    past_text = select([Trip]).where(Trip.signup_deadline < func.current_date())
+    upcoming_text = select([Trip]).where(Trip.signup_deadline >= func.current_date()).order_by(Trip.signup_deadline)
+    past_text = select([Trip]).where(Trip.signup_deadline < func.current_date()).order_by(Trip.signup_deadline.desc())
 
     upcoming_trips = conn.execute(upcoming_text).fetchall()
     past_trips = conn.execute(past_text).fetchall()
