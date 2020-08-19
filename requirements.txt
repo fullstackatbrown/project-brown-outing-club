@@ -3,3 +3,5 @@ Flask-SQLAlchemy
 python-dotenv
 PyMySQL
 flask-admin
+Requests
+OAuth
