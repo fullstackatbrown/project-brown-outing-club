@@ -23,6 +23,11 @@ class User(db.Model):
     auth_id = db.Column(db.String(80), unique=True, nullable=True)
     email = db.Column(db.String(120), unique=True, nullable=False)
 
+    #lottery determinants
+    # first_time = db.Column(db.Boolean, nullable=True, default=True)
+    # got_last_trip = db.Column(db.Boolean, nullable=True, default=True)
+    # total_trips = db.Column(db.Integer, nullable=False, default = 0)
+
     #float with 1 digit before decimal, 10 after
     weight = db.Column(db.Float(1, 10), nullable=False, default=1.0)
 
@@ -64,6 +69,8 @@ class Response(db.Model):
     user = db.relationship('User', backref = db.backref('responses'))
     financial_aid= db.Column(db.Boolean, default=False)
     car = db.Column(db.Boolean, default=False)
+
+    #update when lottery is ran, true means they received a lottery spot
     lottery_slot = db.Column(db.Boolean)
 
     def __repr__(self):

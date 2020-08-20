@@ -1,15 +1,67 @@
-.row {
+.header {
     display: flex;
-    align-items: center;
+    justify-content: space-between;
+}
+
+.header img {
+    height: 50px;
+}
+
+.logout {
+    display: flex;
+    flex-direction: column;
+}
+
+.nav {
+    display:flex;
+    flex-direction: row;
+}
+
+.nav h1 {
+    margin: 0.75em 0 1em 1.5em;
 }
 
 .trips {
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+}
+
+.trips a{
+    font-size: 1.25em;
+}
+
+.body {
     display: grid;
-    grid-template-columns: 1fr 3fr 1fr;
-    grid-column-gap: 2vw;
-    grid-row-gap: 2vh
+    grid-template-columns: 1fr 1fr 1fr;
+    grid-column-gap: 2.5em;
+    grid-row-gap: 2vh;
+    width: 95%;
+    margin: auto;
+    font-family: 'Source Sans Pro', sans-serif;
+}
+
+#details {
+    padding: 0.5em 0.5em;
 }
 
 #lottery {
-    padding: 1vw 1vh;
+    margin: 0.75em 0;
+    padding: 0.75em 1em;
+    background-color: #F5E7D7;
+}
+
+.row img {
+    width: 16em;
+    height: 11.5em;
+    object-fit: cover;
+}
+
+.triplink {
+    color: black;
+    font-size: 1.5em;
+}
+
+.triplink #hover{
+    cursor: pointer;
 }
