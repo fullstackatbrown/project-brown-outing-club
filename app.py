@@ -111,17 +111,53 @@ def login_required(f):
 @login_required
 def dashboard():
     #selects rows where the current date matches or is earlier than the sign up deadline
-    #NOTE: current date uses the server clock to fetch the date, so make sure the app is deployed on an Eastern Server
+    #NOTE: current date uses the server clock to fetch the date, so make sure the app is deployed on an Eastern Time Server
     upcoming_text = select([Trip]).where(Trip.signup_deadline >= func.current_date()).order_by(Trip.signup_deadline)
-    past_text = select([Trip]).where(Trip.signup_deadline < func.current_date()).order_by(Trip.signup_deadline.desc())
-
     upcoming_trips = conn.execute(upcoming_text).fetchall()
+
+    #list of trips that have lotteries the user has signed up for
+    signed_text = select([Response.trip_id]).where(Response.user_email == session.get('profile').get('email'))
+    signed_up = conn.execute(signed_text).fetchall()
+
+    return render_template('upcoming.html', upcoming_trips = upcoming_trips, signed_up = signed_up)
+
+#displays past trips
+@app.route('/pasttrips')
+def pasttrips():
+    #selects rows where the current date is after the sign up deadline
+    #NOTE: current date uses the server clock to fetch the date, so make sure the app is deployed on an Eastern Time Server
+    past_text = select([Trip]).where(Trip.signup_deadline < func.current_date()).order_by(Trip.signup_deadline.desc())
     past_trips = conn.execute(past_text).fetchall()
 
-    return render_template('upcoming.html',
-    upcoming_trips = upcoming_trips, past_trips = past_trips)
+    return render_template('past.html', past_trips = past_trips)
 
-#logout function to be called via button on front
+#gets trip object from its id
+def get_trip(id):
+    trip_text = select([Trip]).where(Trip.id == id)
+    trip = conn.execute(trip_text).fetchone()
+
+    if trip is None:
+        abort(404, "Trip doesn't exist.")
+
+    return trip
+
+#page linked with "Enter Lottery" from dashboard, should collect information necessary to create Response row in db using a form
+@app.route('/lotterysignup/<int:id>', methods=('GET', 'POST'))
+@login_required
+def lotterysignup(id):
+    trip = get_trip(id)
+
+    if request.method == 'POST':
+        car = request.form['car']
+        financial_aid = request.form['financial_aid']
+
+        new_response = Response(trip_id = id, user_email = session.get('profile').get('email'), financial_aid = financial_aid, car = car)
+        db.session.add(new_response)
+        db.session.commit()
+        return redirect(url_for('dashboard'))
+    return render_template('lottery.html', id = id)
+
+#logout function
 @app.route('/logout')
 def logout():
     session.clear()

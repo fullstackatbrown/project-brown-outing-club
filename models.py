@@ -69,6 +69,8 @@ class Response(db.Model):
     user = db.relationship('User', backref = db.backref('responses'))
     financial_aid= db.Column(db.Boolean, default=False)
     car = db.Column(db.Boolean, default=False)
+
+    #update when lottery is ran, true means they received a lottery spot
     lottery_slot = db.Column(db.Boolean)
 
     def __repr__(self):
