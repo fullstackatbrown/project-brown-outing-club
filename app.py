@@ -43,6 +43,10 @@ db = SQLAlchemy(app)
 from models import *
 from adminviews import *
 
+#refresh database 
+db.drop_all()
+db.create_all()
+
 #instantiate flask-admin
 # Check out /admin/{table name}/
 admin = Admin(app)
