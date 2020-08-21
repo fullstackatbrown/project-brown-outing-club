@@ -169,6 +169,7 @@ def lotterysignup(id):
 
     return render_template('lottery.html', id = id)
 
+#returns a list of the users that won the lottery for the trip associated w input id
 @login_required
 def runlottery(id):
     #get user emails that joined the lottery for the trip associated w input id
@@ -180,8 +181,8 @@ def runlottery(id):
 
     for user in winners:
         user.lottery_slot = True
-
-    render_template('admin/runlottery.html', winnners = winners)
+    
+    return winners
 
 #logout function
 @app.route('/logout')
