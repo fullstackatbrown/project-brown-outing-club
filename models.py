@@ -71,7 +71,7 @@ class Response(db.Model):
     car = db.Column(db.Boolean, default=False)
 
     #update when lottery is ran, true means they received a lottery spot
-    lottery_slot = db.Column(db.Boolean)
+    lottery_slot = db.Column(db.Boolean, default=False)
 
     def __repr__(self):
         return '<Response to %r by %r>' % (self.trip_id, self.user_id)

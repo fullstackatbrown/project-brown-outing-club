@@ -1,15 +1,22 @@
 .header {
     display: flex;
     justify-content: space-between;
+    margin: 1.5em 0 1em 2.5%;
+    font-family: 'Source Sans Pro', sans-serif;
+}
+
+.header a {
+    margin-right: 2em;
 }
 
 .header img {
-    height: 50px;
+    height: 65px;
 }
 
 .logout {
     display: flex;
     flex-direction: column;
+    align-items: center;
 }
 
 .nav {
@@ -17,28 +24,47 @@
     flex-direction: row;
 }
 
-.nav h1 {
-    margin: 0.75em 0 1em 1.5em;
+.header a{
+    color: #893F3D;
 }
 
 .trips {
     display: flex;
-    align-items: center;
     flex-direction: column;
 }
 
-.trips a{
-    font-size: 1.25em;
+#lottery a{
+    font-size: 1.15em;
+}
+
+.trips a:hover {
+    cursor: pointer;
+}
+
+#details a {
+    font-weight: 400;
+    font-size: 1.35em;
+}
+
+.info {
+    font-size: 1.1em;
+    margin-top: 0.5em;
+}
+
+.info a {
+    font-weight: 300;
+    color: black;
 }
 
 .body {
     display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
-    grid-column-gap: 2.5em;
+    grid-template-columns: repeat(3, 20em);
+    grid-column-gap: 7.5em;
     grid-row-gap: 2vh;
-    width: 95%;
+    width: 90%;
     margin: auto;
     font-family: 'Source Sans Pro', sans-serif;
+    font-weight: 300;
 }
 
 #details {
@@ -52,16 +78,7 @@
 }
 
 .row img {
-    width: 16em;
-    height: 11.5em;
+    width: 20em;
+    height: 14.5em;
     object-fit: cover;
-}
-
-.triplink {
-    color: black;
-    font-size: 1.5em;
-}
-
-.triplink #hover{
-    cursor: pointer;
 }
