@@ -4,6 +4,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_admin import Admin
 from sqlalchemy.sql import select, func, text
 from sqlalchemy import create_engine, Date, cast
+from datetime import date
 
 #for OAuth
 from functools import wraps
@@ -42,6 +43,10 @@ db = SQLAlchemy(app)
 
 from models import *
 from adminviews import *
+
+#refresh database 
+db.drop_all()
+db.create_all()
 
 #instantiate flask-admin
 # Check out /admin/{table name}/
@@ -93,6 +98,9 @@ def callback_handling():
     return redirect('/dashboard')
 
 #redirects user to auth0 login
+#User: test@brown.edu
+#Password: #xzAeGCrTenjR9jt
+
 @app.route('/login')
 def login():
     return auth0.authorize_redirect(redirect_uri='http://127.0.0.1:5000/callback')
@@ -150,12 +158,30 @@ def lotterysignup(id):
     if request.method == 'POST':
         car = request.form['car']
         financial_aid = request.form['financial_aid']
+        
+        if date.today() > trip.get('signup_deadline'):
+            flash("Deadline has passed to sign up for this lottery")
+        else:
+            new_response = Response(trip_id = id, user_email = session.get('profile').get('email'), financial_aid = financial_aid, car = car)
+            db.session.add(new_response)
+            db.session.commit()
+            return redirect(url_for('dashboard'))
 
-        new_response = Response(trip_id = id, user_email = session.get('profile').get('email'), financial_aid = financial_aid, car = car)
-        db.session.add(new_response)
-        db.session.commit()
-        return redirect(url_for('dashboard'))
     return render_template('lottery.html', id = id)
+
+@login_required
+def runlottery(id):
+    #get user emails that joined the lottery for the trip associated w input id
+    get_users_text = select(Response.user_email).where(Response.trip_id == id)
+    users = conn.execute(get_users_text).fetchall()
+
+    #lottery mechanism to produce list of users that won a spot
+    winners = users
+
+    for user in winners:
+        user.lottery_slot = True
+
+    render_template('admin/runlottery.html', winnners = winners)
 
 #logout function
 @app.route('/logout')

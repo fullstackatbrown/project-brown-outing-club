@@ -2,18 +2,18 @@
 
 <head>
     <link rel ="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
-    <link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@200&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@200;300;400;600&display=swap" rel="stylesheet">
 </head>
 
-<body>
+<body id="page">
     <div class = "header">
-        <div class = "nav">
-            <h1>Upcoming Trips</h1>
-            <h1><a href="/pasttrips">Past Trips</a></h1>
-        </div>
         <div class = "logout">
             <img src = "static/img/bocLogoNegative.png">
-            <a class="btn btn-primary btn-lg btn-logout btn-block" href="/logout">Logout</a>
+        </div>
+        <div class = "nav">
+            <h1><a href="/dashboard" id="upcoming">Upcoming Trips</a></h1>
+            <h1><a href="/pasttrips" id ="past">Past Trips</a></h1>
+            <h1><a class="btn btn-primary btn-lg btn-logout btn-block" href="/logout">Logout</a></h1>
         </div>
     </div>
     <div class = "body">
@@ -24,18 +24,19 @@
             </div>
             <div class = "info">
                 <div class = "row" id ="details">
-                    <a href="#moreinformation" class = "triplink">{{ trip['name'] }}</a>
+                    <a href="#moreinformation">{{ trip['name'] }}</a>
                     <div>
                         {{ trip['destination'] }} &sdot; ${{ trip['price'] }}
                         <br>
                         {{ trip['departure_date'].strftime('%m/%d/%Y') }} 
-                        {% if trip['return_date'] is not defined %}
+                        {% if trip['return_date'] is not none %}
                             - {{ trip['return_date'].strftime('%m/%d/%Y') }} 
                         {% endif %}
                         <br>
                         Meet at {{ trip['departure_location'] }}, {{ trip['departure_time'].strftime("%I:%M %p") }}
-                        {% if trip['return_date'] is not defined %}
-                            Return at {{ trip['return_time'].strftime("%I:%M %p") }} 
+                        <br>
+                        {% if trip['return_time'] is not none %}
+                            Return to campus at {{ trip['return_time'].strftime("%I:%M %p") }} 
                         {% endif %} 
                         <br>
                         Contact: {{ trip['contact'] }}
