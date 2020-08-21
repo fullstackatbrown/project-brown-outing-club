@@ -44,6 +44,10 @@ db = SQLAlchemy(app)
 from models import *
 from adminviews import *
 
+#refresh database 
+db.drop_all()
+db.create_all()
+
 #instantiate flask-admin
 # Check out /admin/{table name}/
 admin = Admin(app)
@@ -94,6 +98,9 @@ def callback_handling():
     return redirect('/dashboard')
 
 #redirects user to auth0 login
+#User: test@brown.edu
+#Password: #xzAeGCrTenjR9jt
+
 @app.route('/login')
 def login():
     return auth0.authorize_redirect(redirect_uri='http://127.0.0.1:5000/callback')
