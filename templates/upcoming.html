@@ -18,6 +18,7 @@
     </div>
     <div class = "body">
     {% for trip in upcoming_trips %}
+        {% set counter = 0 %}
         <div class = "trips">
             <div class = "row">
                 <img src = "{{ trip['image'] }}">
@@ -46,7 +47,12 @@
                     {% if trip['noncar_cap'] == 0 %}
                         Unlimited spots
                     {% else %}
-                        {{ trip['noncar_cap'] }} spots
+                        {{ trip['noncar_cap'] }} spots total - 
+                        {% if taken_spots.get(trip['id']) is not none %}
+                            {{ taken_spots[trip['id']] }} spots taken
+                        {% else %}
+                            0 spots taken
+                        {% endif %} 
                     {% endif %} 
                     <br>
                     Lottery closes at {{ trip['signup_deadline'].strftime('%m/%d') }} @ 11:59 pm
@@ -62,8 +68,7 @@
             </div>
 
         </div>
-        {% if not loop.last %}
-        {% endif %}
+        {% set counter = counter + 1 %} 
     {% endfor %}
     </div>
 </body>

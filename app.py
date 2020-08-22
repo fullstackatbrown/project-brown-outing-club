@@ -45,8 +45,11 @@ from models import *
 from adminviews import *
 
 #refresh database 
-db.drop_all()
-db.create_all()
+# db.drop_all()
+# db.create_all()
+
+# db.session.add(AdminClearance(email = "test@brown.edu", can_create=True, can_edit=True, can_delete=True))
+# db.session.commit()
 
 #instantiate flask-admin
 # Check out /admin/{table name}/
@@ -56,10 +59,6 @@ admin.add_view(UserView(User, db.session))
 admin.add_view(TripView(Trip, db.session))
 admin.add_view(ResponseView(Response, db.session))
 
-# db.drop_all()
-# db.create_all()
-# db.session.add(AdminClearance(email = 'test@brown.edu', can_create=True, can_edit = True, can_delete=True))
-# db.session.commit()
 # Serve a template from index
 @app.route('/')
 def index():
@@ -123,11 +122,19 @@ def dashboard():
     upcoming_text = select([Trip]).where(Trip.signup_deadline >= func.current_date()).order_by(Trip.signup_deadline)
     upcoming_trips = conn.execute(upcoming_text).fetchall()
 
-    #list of trips that have lotteries the user has signed up for
+    # #number of responses to each trip, in the same order as the upcoming trips list
+    taken_text = select([Response.trip_id, func.count(Response.user_email)]).group_by(Response.trip_id)
+    taken_spots = conn.execute(taken_text).fetchall()
+
+    taken = {}
+    for trip_id, spot in taken_spots:
+        taken[trip_id] = spot
+
+    # #list of trips that have lotteries the user has signed up for
     signed_text = select([Response.trip_id]).where(Response.user_email == session.get('profile').get('email'))
     signed_up = conn.execute(signed_text).fetchall()
 
-    return render_template('upcoming.html', upcoming_trips = upcoming_trips, signed_up = signed_up)
+    return render_template('upcoming.html', upcoming_trips = upcoming_trips, signed_up = signed_up, taken_spots = taken)
 
 #displays past trips
 @app.route('/pasttrips')

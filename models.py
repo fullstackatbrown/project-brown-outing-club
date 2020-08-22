@@ -52,7 +52,7 @@ class Trip(db.Model):
     return_time = db.Column(db.Time(), nullable=True)
     
     signup_deadline = db.Column(db.Date(), nullable=False)
-    price = db.Column(db.Numeric(3, 2), nullable=False)
+    price = db.Column(db.Numeric(5, 2), nullable=False)
     car_cap = db.Column(db.Integer)
     noncar_cap = db.Column(db.Integer, nullable=False)
 
@@ -61,7 +61,7 @@ class Trip(db.Model):
         return '<Trip %r>' % self.name
 
 class Response(db.Model):
-    __tablename__ = 'reponses'
+    __tablename__ = 'responses'
     id = db.Column(db.Integer, primary_key=True)
     trip_id = db.Column(db.Integer, db.ForeignKey('trips.id'), nullable=False)
     trip = db.relationship('Trip', backref = db.backref('responses'))
