@@ -18,7 +18,6 @@
     </div>
     <div class = "body">
     {% for trip in upcoming_trips %}
-        {% set counter = 0 %}
         <div class = "trips">
             <div class = "row">
                 <img src = "{{ trip['image'] }}">
@@ -68,7 +67,6 @@
             </div>
 
         </div>
-        {% set counter = counter + 1 %} 
     {% endfor %}
     </div>
 </body>
