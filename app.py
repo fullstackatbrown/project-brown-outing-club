@@ -44,7 +44,7 @@ db = SQLAlchemy(app)
 from models import *
 from adminviews import *
 
-#refresh database 
+# refresh database 
 # db.drop_all()
 # db.create_all()
 
@@ -60,19 +60,14 @@ admin.add_view(UserView(User, db.session))
 admin.add_view(TripView(Trip, db.session))
 admin.add_view(ResponseView(Response, db.session))
 
+#eventually add a lottery view for the lottery table to be created
+# admin.add_view(LotteryView(Lotter, db.session))
+
 # Serve a template from index
 @app.route('/')
 def index():
     #create a landing page w welcome, explanation of purpose, login button
     return render_template('test.html', name="name")
-
-# Serve an API endpoint from test
-@app.route('/test', methods=['GET', 'POST'])
-def test():
-    if request.method == 'POST':
-        return 'POST request received'
-    else:
-        return 'GET request received'
 
 #called after authentication
 #stores new users in database if email is not in User Table already
@@ -176,21 +171,6 @@ def lotterysignup(id):
             return redirect(url_for('dashboard'))
 
     return render_template('lottery.html', id = id)
-
-#returns a list of the users that won the lottery for the trip associated w input id
-@login_required
-def runlottery(id):
-    #get user emails that joined the lottery for the trip associated w input id
-    get_users_text = select(Response.user_email).where(Response.trip_id == id)
-    users = conn.execute(get_users_text).fetchall()
-
-    #lottery mechanism to produce list of users that won a spot
-    winners = users
-
-    for user in winners:
-        user.lottery_slot = True
-    
-    return winners
 
 #logout function
 @app.route('/logout')

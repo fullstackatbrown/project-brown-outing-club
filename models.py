@@ -56,6 +56,9 @@ class Trip(db.Model):
     car_cap = db.Column(db.Integer)
     noncar_cap = db.Column(db.Integer, nullable=False)
 
+    #boolean indicating if lottery has been for the trip run or not
+    lottery_completed = db.Column(db.Boolean, default=False)
+
     # String representation of this object (for logging)
     def __repr__(self):
         return '<Trip %r>' % self.name
