@@ -85,7 +85,7 @@ def callback_handling():
     }
 
     check_new_user = select([User]).where(User.email == userinfo['email'])
-    if conn.execute(check_new_user).fetchone() is None:
+    if db.session.execute(check_new_user).fetchone() is None:
         new_user = User(auth_id = userinfo['sub'], email = userinfo['email'])             
         db.session.add(new_user)
         db.session.commit()
@@ -116,11 +116,11 @@ def dashboard():
     #selects rows where the current date matches or is earlier than the sign up deadline
     #NOTE: current date uses the server clock to fetch the date, so make sure the app is deployed on an Eastern Time Server
     upcoming_text = select([Trip]).where(Trip.signup_deadline >= func.current_date()).order_by(Trip.signup_deadline)
-    upcoming_trips = conn.execute(upcoming_text).fetchall()
+    upcoming_trips = db.session.execute(upcoming_text).fetchall()
 
     # #number of responses to each trip, in the same order as the upcoming trips list
     taken_text = select([Response.trip_id, func.count(Response.user_email)]).group_by(Response.trip_id)
-    taken_spots = conn.execute(taken_text).fetchall()
+    taken_spots = db.session.execute(taken_text).fetchall()
 
     taken = {}
     for trip_id, spot in taken_spots:
@@ -128,7 +128,7 @@ def dashboard():
 
     # #list of trips that have lotteries the user has signed up for
     signed_text = select([Response.trip_id]).where(Response.user_email == session.get('profile').get('email'))
-    signed_up = conn.execute(signed_text).fetchall()
+    signed_up = db.session.execute(signed_text).fetchall()
 
     return render_template('upcoming.html', upcoming_trips = upcoming_trips, signed_up = signed_up, taken_spots = taken)
 
@@ -138,14 +138,14 @@ def pasttrips():
     #selects rows where the current date is after the sign up deadline
     #NOTE: current date uses the server clock to fetch the date, so make sure the app is deployed on an Eastern Time Server
     past_text = select([Trip]).where(Trip.signup_deadline < func.current_date()).order_by(Trip.signup_deadline.desc())
-    past_trips = conn.execute(past_text).fetchall()
+    past_trips = db.session.execute(past_text).fetchall()
 
     return render_template('past.html', past_trips = past_trips)
 
 #gets trip object from its id
 def get_trip(id):
     trip_text = select([Trip]).where(Trip.id == id)
-    trip = conn.execute(trip_text).fetchone()
+    trip = db.session.execute(trip_text).fetchone()
 
     if trip is None:
         abort(404, "Trip doesn't exist.")

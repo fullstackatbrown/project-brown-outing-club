@@ -1,23 +1,19 @@
 from flask_admin.contrib.sqla import ModelView, filters
 from flask import session, url_for, Markup, flash, redirect
-from sqlalchemy import create_engine
-import os
-from sqlalchemy.sql import select
+import os, sqlalchemy
+from sqlalchemy.sql import select, update, insert
 from models import AdminClearance
 from flask_admin import expose
 from flask_admin.helpers import get_form_data
-
-engine = create_engine(os.environ['DATABASE_URL'])
-conn = engine.connect()
 
 #evenutally needs to be moved into lottery.py
 #---------------------------------------------------------------------------------------
 from models import *
 #returns a list of the users that won the lottery for the trip associated w input id
-def runlottery(id):
+def runlottery(self, id):
     #get user emails that joined the lottery for the trip associated w input id
     get_users_text = select([Response.user_email]).where(Response.trip_id == id)
-    users = conn.execute(get_users_text).fetchall()
+    users = self.session.execute(get_users_text).fetchall()
 
     #replace witht the actual lottery mechanism to produce list of users that won a spot
     winners = users
@@ -34,7 +30,7 @@ class ReqClearance(ModelView):
         if (session.get('profile') is not None):
             if (session.get('profile').get('email') is not None):
                 check_clearance = select([AdminClearance]).where(AdminClearance.email == session.get('profile').get('email'))
-                admin = conn.execute(check_clearance).fetchone()
+                admin = self.session.execute(check_clearance).fetchone()
                 if admin is not None:
                     can_create = admin['can_create']
                     can_edit = admin['can_edit']
@@ -56,20 +52,34 @@ class UserView(ReqClearance):
     # # Add filters for weight column
     column_filters = ['weight']
 
+    list_template = 'admin/resetweights.html'
+
+    #resets all user weights to default value of 1
+    @expose('reset', methods=['POST'])
+    def reset_weights(self):
+        reset_text = self.session.query(User).update({User.weight: 1})
+        self.session.commit()
+        
+        return redirect(self.get_url('.index_view'))
+
 class TripView(ReqClearance):
     # renames image column to clarify input should be a filepath
     column_labels = dict(image='Image Source Filepath')
 
     # excludes image column from list view
     column_list = (
-        'name', 'contact', 'destination', 'departure_date', 'departure_location', 'departure_time', 'return_date', 'return_time',
-        'signup_deadline', 'price', 'car_cap', 'noncar_cap', 'Run Lottery'
+        'name', 'contact', 'destination', 'departure_date', 'departure_location', 
+        'departure_time', 'return_date', 'return_time','signup_deadline', 
+        'price', 'car_cap', 'noncar_cap', 'Run Lottery'
         )
 
     # Enable search functionality - it will search for trips
     column_searchable_list = ['name', 'contact']
 
     column_sortable_list = ('name', 'departure_date')
+
+    #exlude admin from being able to input responses or lottery_completed values when creating a trip
+    form_excluded_columns = ('lottery_completed')
 
     #creates the html form with a button that will call lottery_view method to run for a specific trip
     def format_runlottery(view, context, model, name):
@@ -110,7 +120,7 @@ class TripView(ReqClearance):
 
         #updates the values in the db
         try:
-            runlottery(trip_id)
+            runlottery(self, trip_id)
             self.session.commit()
         except Exception:
             flash('Failed to run lottery on the trip', 'error')
