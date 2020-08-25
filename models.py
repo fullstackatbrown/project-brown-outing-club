@@ -23,11 +23,6 @@ class User(db.Model):
     auth_id = db.Column(db.String(80), unique=True, nullable=True)
     email = db.Column(db.String(120), unique=True, nullable=False)
 
-    #lottery determinants
-    # first_time = db.Column(db.Boolean, nullable=True, default=True)
-    # got_last_trip = db.Column(db.Boolean, nullable=True, default=True)
-    # total_trips = db.Column(db.Integer, nullable=False, default = 0)
-
     #float with 1 digit before decimal, 10 after
     weight = db.Column(db.Float(1, 10), nullable=False, default=1.0)
 
@@ -61,7 +56,7 @@ class Trip(db.Model):
 
     # String representation of this object (for logging)
     def __repr__(self):
-        return '<Trip %r>' % self.name
+        return '<Trip %r - %s>' % (self.name, self.departure_date.strftime('%m/%d/%Y'))
 
 class Response(db.Model):
     __tablename__ = 'responses'
@@ -76,5 +71,8 @@ class Response(db.Model):
     #update when lottery is ran, true means they received a lottery spot
     lottery_slot = db.Column(db.Boolean, default=False)
 
+    #update when user responds to their trip spot offer
+    user_behavior = db.Column(db.String(10))
+
     def __repr__(self):
-        return '<Response to %r by %r>' % (self.trip_id, self.user_id)
+        return '<Response to %r by %r>' % (self.trip_id, self.user_email)

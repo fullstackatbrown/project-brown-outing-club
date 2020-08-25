@@ -5,6 +5,7 @@ from sqlalchemy.sql import select, update, insert
 from models import AdminClearance
 from flask_admin import expose
 from flask_admin.helpers import get_form_data
+from decimal import Decimal
 
 #evenutally needs to be moved into lottery.py
 #---------------------------------------------------------------------------------------
@@ -22,6 +23,24 @@ def runlottery(self, id):
         user.lottery_slot = True
     
     return winners
+
+#updates user weights based on if they declined or did not show
+def update_userweights(self, behavior, user_email):
+    #get user weight from user email
+    get_user_text = select([User.weight]).where(User.email == user_email)
+    current_weight = self.session.execute(get_user_text).fetchone()
+    user_weight = current_weight[0]
+
+    #adjust weight according to behavior
+    if behavior == "Declined":
+        user_weight -= Decimal(0.05)
+    elif behavior == "No Show":
+        user_weight -= Decimal(0.15)
+    #ensure weight doesn't drop to below 0.25
+    if user_weight < 0.25:
+        user_weight = Decimal(0.25)
+
+    self.session.query(User).update({User.weight: user_weight})
 
 #---------------------------------------------------------------------------------------
 
@@ -129,7 +148,76 @@ class TripView(ReqClearance):
 
 class ResponseView(ReqClearance):
     # renames financial_aid and car columns
-    column_labels = dict(financial_aid='Needs Financial Aid', car='Has a Car')
+    column_labels = dict(
+        financial_aid='Needs Financial Aid', car='Has a Car', user_email = "User Email", 
+        trip_id = 'Trip Id', user_behavior="User Behavior"
+        )
+
+    column_searchable_list = ['user_email', 'trip_id']
+
+    column_filters = ['trip', 'financial_aid']
+
+    column_list = ['trip', 'trip_id', 'user', 'financial_aid', 'car', 'lottery_slot', 'user_behavior']
+
+    form_choices = {
+        'user_behavior': [
+            ("Declined", "Declined"),
+            ("No Show", "No Show")
+        ]
+    }
+
+    #creates the html form with a button that will call lottery_view method to run for a specific trip
+    def format_userbehavior(view, context, model, name):
+        if model.user_behavior is not None:
+            return model.user_behavior
+
+        select_behavior = '''
+            <form action="{update_behavior}" method="POST" onsubmit="return confirm('Are you sure you want to update user behavior?');">
+                <input id="user_email" name="user_email"  type="hidden" value="{user_email}">
+                <input id="response_id" name="response_id"  type="hidden" value="{response_id}">
+                <select id="behavior" name="behavior">
+                    <option value="Declined">Declined</option>
+                    <option value="No Show">No Show</option>
+                </select>
+                <button type='submit'>Submit</button>
+            </form>
+        '''.format(update_behavior=url_for('.update_behavior'), response_id=model.id, user_email=model.user_email)
+
+        return Markup(select_behavior)
+    
+    #sets the format of the column User Behavior
+    #displays a selection of options to update user behavior to if necessary (i.e. decline, no show)
+    column_formatters = {
+        'user_behavior': format_userbehavior
+    }
+
+    #creates a /response/updatebehavior endpoint that lowers user weights according to their behavior
+    @expose('updatebehavior', methods=['POST'])
+    def update_behavior(self):
+        response_index = self.get_url('.index_view')
+        form = get_form_data()
+
+        if not form:
+            flash("Could not process update request", 'error')
+            return redirect(response_index)
+
+        #get user email, response id and response from the form submission
+        user_email = form['user_email']
+        response_id = form['response_id']
+        response = self.get_one(response_id)
+
+        #update user_behavior according to form submission
+        behavior = form['behavior']
+        response.user_behavior = behavior
+
+        #updates the values in the db
+        update_userweights(self, behavior, user_email)
+        try:
+            self.session.commit()
+        except Exception:
+            flash('Failed to update user weights', 'error')
+
+        return redirect(response_index)
 
 #eventually display the lottery table to be created
 # class LotteryView(ReqClearance):

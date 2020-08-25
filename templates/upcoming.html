@@ -24,7 +24,7 @@
             </div>
             <div class = "info">
                 <div class = "row" id ="details">
-                    <a href="#moreinformation">{{ trip['name'] }}</a>
+                    <a href="#moreinformation" class="hover">{{ trip['name'] }}</a>
                     <div>
                         {{ trip['destination'] }} &sdot; ${{ trip['price'] }}
                         <br>
@@ -56,10 +56,10 @@
                     <br>
                     Lottery closes at {{ trip['signup_deadline'].strftime('%m/%d') }} @ 11:59 pm
                     <br>
-                    {% if trip['id'] in signed_up %}
-                        Signed up
+                    {% if (trip['id'],) is in signed_up %}
+                        <a>Signed up</a>
                     {% else %}
-                        <a href = "{{ url_for('lotterysignup', id=trip['id']) }}">
+                        <a href = "{{ url_for('lotterysignup', id=trip['id']) }}" class="hover">
                             Enter Lottery
                         </a>
                     {% endif %} 
