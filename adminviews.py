@@ -6,23 +6,46 @@ from models import AdminClearance
 from flask_admin import expose
 from flask_admin.helpers import get_form_data
 from decimal import Decimal
+import datetime
 
 #evenutally needs to be moved into lottery.py
 #---------------------------------------------------------------------------------------
 from models import *
-#returns a list of the users that won the lottery for the trip associated w input id
+
+userweight_floor = Decimal(0.25)
+
+#returns a list of the user emails that won the lottery for the trip associated w input id
 def runlottery(self, id):
-    #get user emails that joined the lottery for the trip associated w input id
-    get_users_text = select([Response.user_email]).where(Response.trip_id == id)
-    users = self.session.execute(get_users_text).fetchall()
+    print('Start')
+    #get responses to the trip id inputted
+    get_responses = select([Response.id, Response.user_email]).where(Response.trip_id == id)
+    responses = self.session.execute(get_responses).fetchall()
 
-    #replace witht the actual lottery mechanism to produce list of users that won a spot
-    winners = users
-
-    for user in winners:
-        user.lottery_slot = True
+    #get response ids and user emails from the list of tuples fetchall() returns
+    response_ids = []
+    user_emails = []
+    #list of actual user rows to allow access to fields, (e.g. user.weight)
+    users = []
+    for r_id, email in responses:
+        response_ids.append(r_id)
+        user_emails.append(email)
+        users.append(self.session.query(User).filter(User.email == email).first())
     
-    return winners
+    #ACTION REQUIRED: 
+    #replace with the actual lottery mechanism to produce list of users that won a spot
+    winner_ids = response_ids
+    winner_emails = user_emails
+
+    #update lottery_slot field in responses that won a spot
+    for index in range(len(winner_ids)):
+        self.session.query(Response).filter(Response.id == winner_ids[index]).update({Response.lottery_slot: True})
+        user = self.session.query(User).filter(User.email == winner_emails[index]).first()
+        if user.weight - Decimal(0.05) < userweight_floor:
+            user.weight = userweight_floor
+        else:
+            user.weight = user.weight - Decimal(0.05)
+    
+    return winner_emails
 
 #updates user weights based on if they declined or did not show
 def update_userweights(self, behavior, user_email):
@@ -37,8 +60,8 @@ def update_userweights(self, behavior, user_email):
     elif behavior == "No Show":
         user_weight -= Decimal(0.15)
     #ensure weight doesn't drop to below 0.25
-    if user_weight < 0.25:
-        user_weight = Decimal(0.25)
+    if user_weight < userweight_floor:
+        user_weight = userweight_floor
 
     self.session.query(User).update({User.weight: user_weight})
 
@@ -102,6 +125,9 @@ class TripView(ReqClearance):
 
     #creates the html form with a button that will call lottery_view method to run for a specific trip
     def format_runlottery(view, context, model, name):
+        if model.signup_deadline > datetime.date.today():
+            return "Signup Deadline Hasn't Passed"
+
         if model.lottery_completed:
             return 'Completed'
 
@@ -138,8 +164,8 @@ class TripView(ReqClearance):
         trip.lottery_completed=True
 
         #updates the values in the db
+        runlottery(self, trip_id)
         try:
-            runlottery(self, trip_id)
             self.session.commit()
         except Exception:
             flash('Failed to run lottery on the trip', 'error')
@@ -147,18 +173,31 @@ class TripView(ReqClearance):
         return redirect(trip_index)
 
 class ResponseView(ReqClearance):
-    # renames financial_aid and car columns
-    column_labels = dict(
-        financial_aid='Needs Financial Aid', car='Has a Car', user_email = "User Email", 
-        trip_id = 'Trip Id', user_behavior="User Behavior"
-        )
+    # renames columns for legibility
+    column_labels = {
+        'financial_aid': 'Needs Financial Aid',
+        'car': 'Has a Car',
+        'user_behavior': 'User Behavior (Declined Offer, No Show)',
+        'trip.name': 'trip name',
+        'user_email' : 'user email',
+        'trip.departure_date': 'Departure Date',
+        'trip.signup_deadline': 'Signup Deadline',
+        'trip.contact': 'Trip Contact',
+        'trip.price': 'Price',
+        'trip.noncar_cap': 'Max Trip Spots',
+        'trip.car_cap': 'Number of Cars Needed'
+    }
+    
+    column_searchable_list = ['user_email', 'trip.name']
 
-    column_searchable_list = ['user_email', 'trip_id']
+    column_filters = [
+        'trip.departure_date', 'trip.signup_deadline', 'trip.contact', 'trip.price', 
+        'trip.noncar_cap', 'trip.car_cap', 'financial_aid'
+    ]
 
-    column_filters = ['trip', 'financial_aid']
+    column_list = ['trip', 'user', 'financial_aid', 'car', 'lottery_slot', 'user_behavior']
 
-    column_list = ['trip', 'trip_id', 'user', 'financial_aid', 'car', 'lottery_slot', 'user_behavior']
-
+    #sets options for user_behavior (null, declined, or no show)
     form_choices = {
         'user_behavior': [
             ("Declined", "Declined"),
@@ -168,6 +207,9 @@ class ResponseView(ReqClearance):
 
     #creates the html form with a button that will call lottery_view method to run for a specific trip
     def format_userbehavior(view, context, model, name):
+        if not model.lottery_slot:
+            return 'N/A'
+
         if model.user_behavior is not None:
             return model.user_behavior
 
