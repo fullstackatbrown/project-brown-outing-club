@@ -18,10 +18,6 @@ from six.moves.urllib.parse import urlencode
 app = Flask(__name__)
 app.config.from_object(os.environ['APP_SETTINGS'])
 
-#create connection to database
-engine = create_engine(os.environ['DATABASE_URL'], echo=True)
-conn = engine.connect()
-
 #instantiate 0auth authentication
 oauth = OAuth(app)
 
@@ -105,7 +101,7 @@ def login_required(f):
     @wraps(f)
     def check_login(*args, **kwargs):
         if 'profile' not in session:
-            return redirect(url_for('test'))
+            return redirect(url_for('index'))
         return f(*args, **kwargs)
     return check_login
 
