@@ -55,6 +55,7 @@ admin.add_view(ReqClearance(AdminClearance, db.session, name = 'Admin'))
 admin.add_view(UserView(User, db.session))
 admin.add_view(TripView(Trip, db.session))
 admin.add_view(ResponseView(Response, db.session))
+admin.add_view(WaitlistView(Waitlist, db.session))
 
 #eventually add a lottery view for the lottery table to be created
 # admin.add_view(LotteryView(Lotter, db.session))

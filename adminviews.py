@@ -1,71 +1,13 @@
 from flask_admin.contrib.sqla import ModelView, filters
-from flask import session, url_for, Markup, flash, redirect
+from flask import session, url_for, Markup, flash, redirect, abort
 import os, sqlalchemy
-from sqlalchemy.sql import select, update, insert
+from sqlalchemy.sql import select, update, insert, func
 from models import AdminClearance
 from flask_admin import expose
 from flask_admin.helpers import get_form_data
 from decimal import Decimal
 import datetime
-
-#evenutally needs to be moved into lottery.py
-#---------------------------------------------------------------------------------------
-from models import *
-
-userweight_floor = Decimal(0.25)
-
-#returns a list of the user emails that won the lottery for the trip associated w input id
-def runlottery(self, id):
-    print('Start')
-    #get responses to the trip id inputted
-    get_responses = select([Response.id, Response.user_email]).where(Response.trip_id == id)
-    responses = self.session.execute(get_responses).fetchall()
-
-    #get response ids and user emails from the list of tuples fetchall() returns
-    response_ids = []
-    user_emails = []
-    #list of actual user rows to allow access to fields, (e.g. user.weight)
-    users = []
-    for r_id, email in responses:
-        response_ids.append(r_id)
-        user_emails.append(email)
-        users.append(self.session.query(User).filter(User.email == email).first())
-    
-    #ACTION REQUIRED: 
-    #replace with the actual lottery mechanism to produce list of users that won a spot
-    winner_ids = response_ids
-    winner_emails = user_emails
-
-    #update lottery_slot field in responses that won a spot
-    for index in range(len(winner_ids)):
-        self.session.query(Response).filter(Response.id == winner_ids[index]).update({Response.lottery_slot: True})
-        user = self.session.query(User).filter(User.email == winner_emails[index]).first()
-        if user.weight - Decimal(0.05) < userweight_floor:
-            user.weight = userweight_floor
-        else:
-            user.weight = user.weight - Decimal(0.05)
-    
-    return winner_emails
-
-#updates user weights based on if they declined or did not show
-def update_userweights(self, behavior, user_email):
-    #get user weight from user email
-    get_user_text = select([User.weight]).where(User.email == user_email)
-    current_weight = self.session.execute(get_user_text).fetchone()
-    user_weight = current_weight[0]
-
-    #adjust weight according to behavior
-    if behavior == "Declined":
-        user_weight -= Decimal(0.05)
-    elif behavior == "No Show":
-        user_weight -= Decimal(0.15)
-    #ensure weight doesn't drop to below 0.25
-    if user_weight < userweight_floor:
-        user_weight = userweight_floor
-
-    self.session.query(User).update({User.weight: user_weight})
-
-#---------------------------------------------------------------------------------------
+from lottery import *
 
 class ReqClearance(ModelView):
     def is_accessible(self):
@@ -79,10 +21,6 @@ class ReqClearance(ModelView):
                     can_delete = admin['can_delete']
                     return True
         return False
-
-    def inaccessible_callback(self, name, **kwargs):
-        # redirect to login page if user doesn't have access
-        return redirect(url_for('app.login', next=request.url))
 
 class UserView(ReqClearance):
     # Show only weight and email columns in list view
@@ -261,10 +199,88 @@ class ResponseView(ReqClearance):
 
         return redirect(response_index)
 
-#eventually display the lottery table to be created
-# class LotteryView(ReqClearance):
-#     column_list = ('name', 'contact', 'destination', 'lottery_completed')
+class WaitlistView(ReqClearance):
+    column_list = ['trip', 'response', 'waitlist_rank', 'Award Trip Spot']
 
-#     column_labels = dict(image='Image Source Filepath')
+    column_filters = [
+        'trip.departure_date', 'trip.signup_deadline', 'trip.contact', 
+        'trip.noncar_cap'
+    ]
 
-#     list_template = 'admin/runlottery.html'
+    column_searchable_list = ['response.user_email', 'trip.name']
+
+    column_labels = {
+        'trip.name': 'Trip Name',
+        'trip.departure_date': 'Departure Date',
+        'trip.signup_deadline': 'Signup Deadline',
+        'trip.contact': 'Trip Contact',
+        'trip.noncar_cap': 'Max Trip Spots',
+        'response.user_email': 'User Email'
+    }
+
+    #displays only waitlist rows that are not off the waitlist yet by default
+    def get_query(self):
+      return self.session.query(self.model).filter(self.model.off==False)
+
+    def get_count_query(self):
+      return self.session.query(func.count('*')).filter(self.model.off==False)
+
+    #creates the html form with a button that will call move user off waitlist (updating their response)
+    def format_awardspot(view, context, model, name):
+        #if the waitlist row isn't the top of the waitlist, display a message saying so
+        if model.waitlist_rank != 1:
+            return "Not Next In Line"
+
+        award_button = '''
+            <form action="{award_spot}" method="POST" onsubmit="return confirm('Are you sure you want to move the user off the waitlist?');">
+            <input id="trip_id" name="trip_id"  type="hidden" value="{trip_id}">
+                <input id="waitlist_id" name="waitlist_id"  type="hidden" value="{waitlist_id}">
+                <input id="response_id" name="response_id"  type="hidden" value="{response_id}">
+                <button type='submit'>Move Off Waitlist</button>
+            </form>
+        '''.format(award_spot=url_for('.award_spot'), trip_id=model.trip_id, waitlist_id=model.id, response_id=model.response_id)
+
+        return Markup(award_button)
+    
+    #sets the format of the column Award Trip Spot
+    #displays a button to move the response off the waitlist
+    column_formatters = {
+        'Award Trip Spot': format_awardspot
+    }
+
+    #creates a /waitlist/awardspot endpoint that runs the award_spot method
+    @expose('awardspot', methods=['POST'])
+    def award_spot(self):
+        waitlist_index = self.get_url('.index_view')
+        form = get_form_data()
+
+        if not form:
+            flash("Could not process waitlist edit request", 'error')
+            return redirect(waitlist_index)
+
+        #get waitlist id, response id, response, and waitlist from the form submission
+        waitlist_id = form['waitlist_id']
+        response_id = form['response_id']
+        trip_id = form['trip_id']
+
+        response = self.session.query(Response).filter_by(id=response_id).first()
+        waitlist = self.get_one(waitlist_id)
+
+        #set lottery_slot and off fields to true
+        response.lottery_slot=True
+        waitlist.off=True
+
+        #supdate ranking for remaining waitlist rows on waitlist
+        self.session.query(Waitlist).filter_by(trip_id=trip_id).filter_by(off=False).update({Waitlist.waitlist_rank: Waitlist.waitlist_rank-1})
+        user = self.session.query(User).filter(User.email == response.user_email).first()
+        gotspot(user)
+
+        #ACTION REQUIRED: 
+        #send email updating user about their spot in the trip
+
+        try:
+            self.session.commit()
+        except Exception:
+            flash('Failed to move response off waitlist', 'error')
+
+        return redirect(waitlist_index)
