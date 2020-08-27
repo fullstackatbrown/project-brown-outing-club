@@ -75,19 +75,22 @@ class Response(db.Model):
     user_behavior = db.Column(db.String(10))
 
     def __repr__(self):
-        return '<Response to %r by %r>' % (self.trip_id, self.user_email)
+        trip = Trip.query.filter_by(id = self.trip_id).first()
+        return '<Response to %r by %r>' % (trip.name+' - '+trip.departure_date.strftime('%m/%d/%Y'), self.user_email)
 
-# class Waitlist(db.Model):
-#     __tablename__ = 'waitlist'
-#     id = db.Column(db.Integer, primary_key=True)
-#     trip_id = db.Column(db.Integer, db.ForeignKey('trips.id'), nullable=False)
-#     trip = db.relationship('Trip', backref = db.backref('waitlist'))
-#     user_email = db.Column(db.String(120), db.ForeignKey('user.email'), nullable=False)
-#     user = db.relationship('User', backref = db.backref('waitlist'))
-#     waitlist_rank = db.Column(db.Integer, nullable=False)
-#     #Yes, as relationship is an ORM concept that helps map the SQL table relationships to the object world, 
-#     # but it does not define them.
-#     responses = db.relationship('Response', backref = db.backref('waitlist'))
+class Waitlist(db.Model):
+    __tablename__ = 'waitlist'
+    id = db.Column(db.Integer, primary_key=True)
+    trip_id = db.Column(db.Integer, db.ForeignKey('trips.id'), nullable=False)
+    trip = db.relationship('Trip', backref = db.backref('waitlist'))
+    #Yes, as relationship is an ORM concept that helps map the SQL table relationships to the object world, 
+    # but it does not define them.
+    response_id = db.Column(db.Integer, db.ForeignKey('responses.id'), nullable=False)
+    response = db.relationship('Response', backref = db.backref('waitlist'))
+    waitlist_rank = db.Column(db.Integer, nullable=False)
 
-#     #want it to appear only for those where you can select a trip where lottery_completed is true but
-#     #some responses lottery_slot is false
+    #indicates if moved off the waitlist
+    off = db.Column(db.Boolean, default=False)
+
+    #want it to appear only for those where you can select a trip where lottery_completed is true but
+    #some responses lottery_slot is false
