@@ -3,7 +3,7 @@ from flask import session, url_for, Markup, flash, redirect, abort
 import os, sqlalchemy
 from sqlalchemy.sql import select, update, insert, func
 from models import AdminClearance
-from flask_admin import expose
+from flask_admin import expose, BaseView
 from flask_admin.helpers import get_form_data
 from decimal import Decimal
 import datetime
@@ -287,3 +287,8 @@ class WaitlistView(ReqClearance):
             flash('Failed to move response off waitlist', 'error')
 
         return redirect(waitlist_index)
+
+class BackToDashboard(BaseView):
+    @expose('/')
+    def back_to_dashboard(self):
+        return redirect(url_for('dashboard'))

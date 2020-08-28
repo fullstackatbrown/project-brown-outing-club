@@ -13,6 +13,9 @@
         <div class = "nav">
             <h1><a href="/dashboard" id="upcoming">Upcoming Trips</a></h1>
             <h1><a href="/pasttrips" id ="past">Past Trips</a></h1>
+            {% if is_admin %}
+                <h1><a href="/admin" id ="admin">Admin View</a></h1>
+            {% endif %} 
             <h1><a class="btn btn-primary btn-lg btn-logout btn-block" href="/logout">Logout</a></h1>
         </div>
     </div>

@@ -56,10 +56,7 @@ admin.add_view(UserView(User, db.session))
 admin.add_view(TripView(Trip, db.session))
 admin.add_view(ResponseView(Response, db.session))
 admin.add_view(WaitlistView(Waitlist, db.session))
-
-
-#eventually add a lottery view for the lottery table to be created
-# admin.add_view(LotteryView(Lotter, db.session))
+admin.add_view(BackToDashboard(name="Back to Main Site"))
 
 # Serve a template from index
 @app.route('/')
@@ -116,7 +113,7 @@ def dashboard():
     upcoming_text = select([Trip]).where(Trip.signup_deadline >= func.current_date()).order_by(Trip.signup_deadline)
     upcoming_trips = db.session.execute(upcoming_text).fetchall()
 
-    # #number of responses to each trip, in the same order as the upcoming trips list
+    #number of responses to each trip, in the same order as the upcoming trips list
     taken_text = select([Response.trip_id, func.count(Response.user_email)]).group_by(Response.trip_id)
     taken_spots = db.session.execute(taken_text).fetchall()
 
@@ -124,11 +121,15 @@ def dashboard():
     for trip_id, spot in taken_spots:
         taken[trip_id] = spot
 
-    # #list of trips that have lotteries the user has signed up for
-    signed_text = select([Response.trip_id]).where(Response.user_email == session.get('profile').get('email'))
+    #list of trips that have lotteries the user has signed up for
+    currentuser_email = session.get('profile').get('email')
+    signed_text = select([Response.trip_id]).where(Response.user_email == currentuser_email)
     signed_up = db.session.execute(signed_text).fetchall()
 
-    return render_template('upcoming.html', upcoming_trips = upcoming_trips, signed_up = signed_up, taken_spots = taken)
+    #checks if current user email is in adminclearance table
+    is_admin = db.session.query(AdminClearance).filter_by(email = currentuser_email).first() is not None
+
+    return render_template('upcoming.html', upcoming_trips = upcoming_trips, signed_up = signed_up, taken_spots = taken, is_admin = is_admin)
 
 #displays past trips
 @app.route('/pasttrips')
