@@ -279,6 +279,7 @@ class WaitlistView(ReqClearance):
 
         #ACTION REQUIRED: 
         #send email updating user about their spot in the trip
+        #send_email(user)
 
         try:
             self.session.commit()
