@@ -1,0 +1,59 @@
+body {
+    --boc-green: #1f7303;
+}
+
+.navbar-dark {
+    background-color: var(--boc-green);
+}
+
+.navbar, .nav-link {
+    font-family: 'Roboto', sans-serif;
+}
+
+.slide-subhead, .slide-text {
+    font-family: 'Lato', sans-serif;
+}
+
+.carousel-image {
+    height: 50vh;
+    width: 80vw;
+    object-fit: cover;
+}
+
+#trip-title {
+    text-align: center;
+}
+
+/*i can't figure this out */
+@media (max-width: 300px) {
+    .carousel-image {
+        width: 100vw;
+        height: 30vh;
+        object-fit: cover;
+    }
+}
+
+.carousel-control {
+    position: relative;
+}
+
+.content-label {
+    font-family: 'Open Sans', sans-serif;
+    font-weight: 700;
+    font-size: 10px;
+}
+
+.content {
+    font-family: 'Roboto', sans-serif;
+    font-weight: 250;
+    font-size: 16px;
+    color: black;
+
+}
+.same-line {
+    display: inline-block;
+}
+
+.trip-table {
+    width: 100%;
+}

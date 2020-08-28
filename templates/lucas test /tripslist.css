@@ -1,15 +1,60 @@
+/* original
 body {
     --boc-orange: #D38637;
     --boc-green: #366E1F;
     --boc-red: #A42324;
     --section-gray: #c7c7c7;
+} */
+
+/* template 
+body {
+    --boc-orange:
+    --boc-green:
+    --boc-red:
 }
+*/
+
+/*
+body {
+    --boc-orange: #275361;
+    --boc-green: #00c78b;
+    --boc-red: #ce3e33;
+}
+*/
+
+/*
+body {
+    --boc-orange: #1421C7;
+    --boc-green: #317A0C; 
+    --boc-red: #7A2906;
+} */
+
+/*
+body {
+    --boc-orange: #0C457a;
+    --boc-green: #42c700;
+    --boc-red: #7a480c;
+}
+*/
+/*
+body {
+    --boc-orange: #194c61;
+    --boc-green: #00c793;
+    --boc-red: #fa1945;
+} */
+
+body {
+    --boc-orange: #288230;
+    --boc-green: #1f7303;
+    --boc-red: #b14711;
+}
+
 
 .navbar-dark {
     background-color: var(--boc-green);
 }
 
-.navbar, nav-link {
+.navbar, .nav-link {
     font-family: 'Roboto', sans-serif;
 }
 
