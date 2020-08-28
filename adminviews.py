@@ -138,6 +138,7 @@ class ResponseView(ReqClearance):
     #sets options for user_behavior (null, declined, or no show)
     form_choices = {
         'user_behavior': [
+            ("Confirmed", "Confirmed"),
             ("Declined", "Declined"),
             ("No Show", "No Show")
         ]
@@ -146,7 +147,7 @@ class ResponseView(ReqClearance):
     #creates the html form with a button that will call lottery_view method to run for a specific trip
     def format_userbehavior(view, context, model, name):
         if not model.lottery_slot:
-            return 'N/A'
+            return 'Not Given a Spot'
 
         if model.user_behavior is not None:
             return model.user_behavior
@@ -156,6 +157,7 @@ class ResponseView(ReqClearance):
                 <input id="user_email" name="user_email"  type="hidden" value="{user_email}">
                 <input id="response_id" name="response_id"  type="hidden" value="{response_id}">
                 <select id="behavior" name="behavior">
+                    <option value="Confirmed">Confirmed</option>
                     <option value="Declined">Declined</option>
                     <option value="No Show">No Show</option>
                 </select>
