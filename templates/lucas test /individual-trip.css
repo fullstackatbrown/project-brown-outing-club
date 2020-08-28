@@ -11,7 +11,7 @@ body {
 }
 
 .slide-subhead, .slide-text {
-    font-family: 'Lato', sans-serif;
+    font-family: 'Open Sans', sans-serif;
 }
 
 .carousel-image {
@@ -33,8 +33,29 @@ body {
     }
 }
 
+#lottery-info {
+    font-family: 'Lato', sans-serif;
+}
+
+.lottery-button {
+    font-family: 'Roboto', sans-serif;
+}
+
+
 .carousel-control {
     position: relative;
+}
+
+#trip-images {
+    margin: auto;
+}
+
+#trip-description {
+    font-family: 'Open Sans', sans-serif;
+}
+
+#trip-title {
+    font-family: 'Roboto', sans-serif;
 }
 
 .content-label {
