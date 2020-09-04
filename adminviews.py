@@ -3,7 +3,7 @@ from flask import session, url_for, Markup, flash, redirect, abort
 import os, sqlalchemy
 from sqlalchemy.sql import select, update, insert, func
 from models import AdminClearance
-from flask_admin import expose
+from flask_admin import expose, BaseView
 from flask_admin.helpers import get_form_data
 from decimal import Decimal
 import datetime
@@ -138,6 +138,7 @@ class ResponseView(ReqClearance):
     #sets options for user_behavior (null, declined, or no show)
     form_choices = {
         'user_behavior': [
+            ("Confirmed", "Confirmed"),
             ("Declined", "Declined"),
             ("No Show", "No Show")
         ]
@@ -146,7 +147,7 @@ class ResponseView(ReqClearance):
     #creates the html form with a button that will call lottery_view method to run for a specific trip
     def format_userbehavior(view, context, model, name):
         if not model.lottery_slot:
-            return 'N/A'
+            return 'Not Given a Spot'
 
         if model.user_behavior is not None:
             return model.user_behavior
@@ -156,6 +157,7 @@ class ResponseView(ReqClearance):
                 <input id="user_email" name="user_email"  type="hidden" value="{user_email}">
                 <input id="response_id" name="response_id"  type="hidden" value="{response_id}">
                 <select id="behavior" name="behavior">
+                    <option value="Confirmed">Confirmed</option>
                     <option value="Declined">Declined</option>
                     <option value="No Show">No Show</option>
                 </select>
@@ -277,6 +279,7 @@ class WaitlistView(ReqClearance):
 
         #ACTION REQUIRED: 
         #send email updating user about their spot in the trip
+        #send_email(user)
 
         try:
             self.session.commit()
@@ -284,3 +287,8 @@ class WaitlistView(ReqClearance):
             flash('Failed to move response off waitlist', 'error')
 
         return redirect(waitlist_index)
+
+class BackToDashboard(BaseView):
+    @expose('/')
+    def back_to_dashboard(self):
+        return redirect(url_for('dashboard'))

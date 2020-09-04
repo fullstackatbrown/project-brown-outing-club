@@ -10,6 +10,7 @@ def gotspot(user):
     else:
         user.weight = user.weight - Decimal(0.05)
 
+#ACTION REQUIRED:
 # def send_email(user):
     #fill in with code to send an email given a user as input (to be used in runlottery and WaitlistView's award_spot method)
 

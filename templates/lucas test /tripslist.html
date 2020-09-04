@@ -9,13 +9,209 @@
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">        
     <link rel = "stylesheet" href  = "tripslist.css">
 
+    <!-- Fonts -->
+        <link href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&family=Open+Sans:ital,wght@0,300;0,400;0,600;0,700;0,800;1,300;1,400;1,600;1,700;1,800&family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap" rel="stylesheet"> 
+        
+    
+        
     </head>
     <body>
-    </body>
+        <header>
+        </header>
+              <nav class = "navbar navbar-expand-lg navbar-dark fixed-top" id = "main-nav">
+                   <button class = "navbar-toggler" type = "button" data-toggle = "collapse" data-target = "#navbarResponsive" aria-expanded = "false" aria-label = "Toggle navigation">
+            <span class = "navbar-toggler-icon"></span>
+            </button>
+                 <a class = "navbar-brand js-scroll-trigger" href = "#">Brown Outing Club</a>
+            <div class = "collapse navbar-collapse" id = "navbarResponsive">
+                <ul class = "navbar-nav ml-auto">
+                <li class = "nav-item">
+                    <a class = "nav-link js-scroll-trigger" href = "#upcoming">Upcoming Trips</a>
+                    </li>
+                    <li class = "nav-item">
+                    <a class = "nav-link js-scroll-trigger" href = "#past">Past Trips</a>
+                    </li>
+                </ul>
+            </div>
+      </nav>
+        
+        <div class = "container">
+            <br><br><br><br>
+            <div class = "row section-label">
+                <h2 class = "section-title">Upcoming Trips</h2>
+            </div>
+            <div class = "row" id = "trip-section">
+                <div class = "trip-table-container">
+                <table class = "trip-table">
+                    <tr>
+                        <td class = "trip-img">
+                            <img class = "trip-thumb" src = "backpacking.jpg">
+                        </td>
+                        <td class = "trip-details">
+                            <h5 class = "trip-title">Sunday Night Climb</h5>
+                            
+                            <h6 class = "same-line content-label">WHERE</h6>
+                            <h6 class = "same-line content">Warwick, RI</h6>
+                            <br>
+                            
+                            <h6 class = "same-line content-label">WHEN</h6>
+                            <h6 class = "same-line content">May 15, 8pm-11pm</h6>
+                            <br>
+                            
+                            <h6 class = "same-line content-label">CONTACT</h6>
+                            <h6 class = "same-line content">
+                            <a class = "contact-info" href ="mailto:kshitij_sachan@brown.edu?subject:Sunday Night Climb">kshitij_sachan@brown.edu</a></h6>
+                        </td>
+                        <td class = "trip-lottery">
+                            <h6 class = "content-label same-line" style="font-weight: 300;">13 IN LOTTERY / </h6>
+                            <h6 class = "content-label same-line">10 SPOTS</h6> 
+                                        
+                            <br>
+                            <h6 class = "content-label same-line">
+                                LOTTERY CLOSES
+                            </h6>
+                            <h6 class = "content same-line">May 4, 11:59pm</h6>
+                            <br>
+                            
+                            <h6 class = "content-label same-line">PRICE</h6>
+                            <h6 class = "content same-line">$50</h6>
+                            
+                            
+                            <a href = "#" class = "btn btn-block lottery-button">ENTER LOTTERY</a>
+                        </td>
+
+                    </tr>
+                </table>
+            </div>
+
+        <div class = "trip-table-container">
+            <table class = "trip-table">
+                <tr>
+                    <td class = "trip-img">
+                        <img class = "trip-thumb" src = "canoes.jpg">
+                    </td>
+                    <td class = "trip-details">
+                        <h5 class = "trip-title">Peconic River Canoeing</h5>
+                        
+                        <h6 class = "same-line content-label">WHERE</h6>
+                        <h6 class = "same-line content">Riverhead, NY</h6>
+                        <br>
+                        
+                        <h6 class = "same-line content-label">WHEN</h6>
+                        <h6 class = "same-line content">May 19 — 22</h6>
+                        <br>
+                        
+                        <h6 class = "same-line content-label">CONTACT</h6>
+                        <h6 class = "same-line content">
+                        <a class = "contact-info" href ="mailto:kshitij_sachan@brown.edu?subject:Sunday Night Climb">aidan_wang@brown.edu</a></h6>
+                    </td>
+                    <td class = "trip-lottery">
+                        <h6 class = "content-label same-line" style="font-weight: 300;">26 IN LOTTERY / </h6>
+                        <h6 class = "content-label same-line">12 SPOTS</h6> 
+                                    
+                        <br>
+                        <h6 class = "content-label same-line">
+                            LOTTERY CLOSES
+                        </h6>
+                        <h6 class = "content same-line">May 10, 11:59pm</h6>
+                        <br>
+                        
+                        <h6 class = "content-label same-line">PRICE</h6>
+                        <h6 class = "content same-line">$200</h6>
+                        
+                        
+                        <a href = "#" class = "btn btn-block lottery-button">ENTER LOTTERY</a>
+                    </td>
+
+                </tr>
+            </table>
+        </div>
+        <div class = "trip-table-container">
+            <table class = "trip-table">
+                <tr>
+                    <td class = "trip-img">
+                        <img class = "trip-thumb" src = "mountain.jpg">
+                    </td>
+                    <td class = "trip-details">
+                        <h5 class = "trip-title">White Mountain Camping</h5>
+                        
+                        <h6 class = "same-line content-label">WHERE</h6>
+                        <h6 class = "same-line content">Ipswich, NH</h6>
+                        <br>
+                        
+                        <h6 class = "same-line content-label">WHEN</h6>
+                        <h6 class = "same-line content">May 25 — 29</h6>
+                        <br>
+                        
+                        <h6 class = "same-line content-label">CONTACT</h6>
+                        <h6 class = "same-line content">
+                        <a class = "contact-info" href ="mailto:kshitij_sachan@brown.edu?subject:Sunday Night Climb">clara_guo@brown.edu</a></h6>
+                    </td>
+                    <td class = "trip-lottery">
+                        <h6 class = "content-label same-line" style="font-weight: 300;">6 IN LOTTERY / </h6>
+                        <h6 class = "content-label same-line">8 SPOTS</h6> 
+                                    
+                        <br>
+                        <h6 class = "content-label same-line">
+                            LOTTERY CLOSES
+                        </h6>
+                        <h6 class = "content same-line">May 20, 11:59pm</h6>
+                        <br>
+                        
+                        <h6 class = "content-label same-line">PRICE</h6>
+                        <h6 class = "content same-line">$130</h6>
+                        
+                        
+                        <a href = "#" class = "btn btn-block lottery-button">ENTER LOTTERY</a>
+                    </td>
+
+                </tr>
+            </table>
+        </div>
+
+
+
+    </div>
+    <div class = "row section-label">
+        <h2 class = "section-title">Past Trips</h2>
+        <div class = "trip-table-container">
+            <table class = "trip-table">
+                <tr>
+                    <td class = "trip-img">
+                        <img class = "trip-thumb" src = "mountain.jpg">
+                    </td>
+                    <td class = "trip-details">
+                        <h5 class = "trip-title">White Mountain Camping</h5>
+                        
+                        <h6 class = "same-line content-label">WHERE</h6>
+                        <h6 class = "same-line content">Ipswich, NH</h6>
+                        <br>
+                        
+                        <h6 class = "same-line content-label">WHEN</h6>
+                        <h6 class = "same-line content">May 25 — 29</h6>
+                        <br>
+                        
+                
+                    </td>
+                    <td class = "trip-lottery">
+                        <h6 class = "content-label same-line">LOTTERY CLOSED</h6> 
+                                <br>
+                        <h6 class = "content-label same-line">PRICE</h6>
+                        <h6 class = "content same-line">$130</h6>
+                        
+                    </td>
+
+                </tr>
+            </table>
+        </div>
     
     <!-- jQuery first, then Popper.js, then Bootstrap JS -->
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js" integrity="sha384-OgVRvuATP1z7JjHLkuOU7Xw704+h835Lr+6QL9UvYjZE3Ipu6Tp75j7Bh/kR0JKI" crossorigin="anonymous"></script>
     
+    </body>
+
+
+
 </html>
