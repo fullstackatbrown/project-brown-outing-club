@@ -21,12 +21,8 @@ mail = Mail(app)
 @app.route('/')
 def index():
     # to change to pull from the database
-<<<<<<< HEAD
     winners = [{'name' : 'name', 'email' : 'email'}]
-=======
-    winners = [{'name' : 'Anna', 'email' : '68annazhao@gmail.com'}, {'name' : 'Bob', 'email' : 'anna_j_zhao@brown.edu'}]
->>>>>>> 448c8b038748afbd0472600f34dbb7ba130e8b59
-
+    
     with mail.connect() as conn:
         for user in winners:
             msg = Message('Lottery Selection', recipients = [user['email']])
