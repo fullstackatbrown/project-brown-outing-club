@@ -52,7 +52,8 @@ class Trip(db.Model):
     noncar_cap = db.Column(db.Integer, nullable=False)
 
     #boolean indicating if lottery has been for the trip run or not
-    lottery_completed = db.Column(db.Boolean, default=False)
+    lottery_completed = db.Column(db.Boolean, default=False, nullable=False)
+    car_capy = db.Column(db.Integer, nullable=False)
 
     # String representation of this object (for logging)
     def __repr__(self):
@@ -61,9 +62,9 @@ class Trip(db.Model):
 class Response(db.Model):
     __tablename__ = 'responses'
     id = db.Column(db.Integer, primary_key=True)
-    trip_id = db.Column(db.Integer, db.ForeignKey('trips.id'), nullable=False)
+    trip_id = db.Column(db.Integer, db.ForeignKey('trips.id', ondelete="CASCADE"), nullable=False)
     trip = db.relationship('Trip', backref = db.backref('responses'))
-    user_email = db.Column(db.String(120), db.ForeignKey('user.email'), nullable=False)
+    user_email = db.Column(db.String(120), db.ForeignKey('user.email', ondelete="CASCADE"), nullable=False)
     user = db.relationship('User', backref = db.backref('responses'))
     financial_aid= db.Column(db.Boolean, default=False)
     car = db.Column(db.Boolean, default=False)
@@ -81,11 +82,11 @@ class Response(db.Model):
 class Waitlist(db.Model):
     __tablename__ = 'waitlist'
     id = db.Column(db.Integer, primary_key=True)
-    trip_id = db.Column(db.Integer, db.ForeignKey('trips.id'), nullable=False)
+    trip_id = db.Column(db.Integer, db.ForeignKey('trips.id', ondelete="CASCADE"), nullable=False)
     trip = db.relationship('Trip', backref = db.backref('waitlist'))
     #Yes, as relationship is an ORM concept that helps map the SQL table relationships to the object world, 
     # but it does not define them.
-    response_id = db.Column(db.Integer, db.ForeignKey('responses.id'), nullable=False)
+    response_id = db.Column(db.Integer, db.ForeignKey('responses.id', ondelete="CASCADE"), nullable=False)
     response = db.relationship('Response', backref = db.backref('waitlist'))
     waitlist_rank = db.Column(db.Integer, nullable=False)
 
