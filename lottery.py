@@ -2,7 +2,8 @@ from sqlalchemy.sql import select, update, insert
 from decimal import Decimal
 from models import *
 
-userweight_floor = Decimal(0.25)
+userweight_floor = Decimal(0.5)
+userweight_roof = Decimal(5.0)
 
 def gotspot(user):
     if user.weight - Decimal(0.05) < userweight_floor:
@@ -53,12 +54,18 @@ def update_userweights(self, behavior, user_email):
 
     #adjust weight according to behavior
     if behavior == "Declined":
-        user_weight -= Decimal(0.05)
+        user_weight *= Decimal(0.95)
     elif behavior == "No Show":
-        user_weight -= Decimal(0.15)
+        user_weight *= Decimal(0.7)
+    elif behavior == "Confirmed":
+        user_weight *= Decimal (0.7)
+    #add did not get result
+
     #ensure weight doesn't drop to below 0.25
     if user_weight < userweight_floor:
         user_weight = userweight_floor
+    if user_weight > userweight_roof:
+        user_weight = userweight_roof
 
     self.session.query(User).update({User.weight: user_weight})
 
