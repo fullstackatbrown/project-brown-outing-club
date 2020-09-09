@@ -41,8 +41,8 @@ from models import *
 from adminviews import *
 
 # refresh database 
-db.drop_all()
-db.create_all()
+# db.drop_all()
+# db.create_all()
 
 # db.session.add(AdminClearance(email = "test@brown.edu", can_create=True, can_edit=True, can_delete=True))
 # db.session.add(Trip(name="Adirondack Hiking", description="this is a test", contact="test@brown.edu", destination="NYC, NY", image="https://www.adirondack.net/images/mountainrangefall.jpg", departure_date="2021-08-20", departure_location="Faunce", departure_time="15:00:00", return_date="2021-08-23", signup_deadline="2021-08-13", price=15.75, noncar_cap=15))
