@@ -53,7 +53,6 @@ class Trip(db.Model):
 
     #boolean indicating if lottery has been for the trip run or not
     lottery_completed = db.Column(db.Boolean, default=False, nullable=False)
-    car_capy = db.Column(db.Integer, nullable=False)
 
     # String representation of this object (for logging)
     def __repr__(self):

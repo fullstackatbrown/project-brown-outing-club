@@ -29,7 +29,7 @@
                 <div class = "row" id ="details">
                     <a href="#moreinformation" class="hover">{{ trip['name'] }}</a>
                     <div>
-                        {{ trip['destination'] }} &sdot; ${{ trip['price'] }}
+                        {{ trip.['destination'] }} &sdot; ${{ trip.['price'] }}
                         <br>
                         {{ trip['departure_date'].strftime('%m/%d/%Y') }} 
                         {% if trip['return_date'] is not none %}
