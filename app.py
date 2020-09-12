@@ -133,7 +133,7 @@ def dashboard():
 
 
 #{{ url_for('invidual_trip', id=trip['id']) }}
-@bp.route('/<int:id>/trip')
+@app.route('/<int:id>/trip')
 @login_required
 def invidual_trip(id):
     trip = get_trip(id)
