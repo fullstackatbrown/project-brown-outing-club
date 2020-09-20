@@ -131,14 +131,11 @@ def dashboard():
 
     return render_template('upcoming.html', upcoming_trips = upcoming_trips, signed_up = signed_up, taken_spots = taken, is_admin = is_admin)
 
-
-#{{ url_for('invidual_trip', id=trip['id']) }}
 @app.route('/<int:id>/trip')
 @login_required
-def invidual_trip(id):
+def individual_trip(id):
     trip = get_trip(id)
-    # signup_deadline = trip.get('signup_deadline')
-    return render_template('trip.html')
+    return render_template('trip.html', trip = trip)
 
 #displays past trips
 @app.route('/pasttrips')
