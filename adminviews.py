@@ -1,6 +1,7 @@
 from flask_admin.contrib.sqla import ModelView, filters
 from flask import session, url_for, Markup, flash, redirect, abort
 import os, sqlalchemy
+from sqlalchemy import or_
 from sqlalchemy.sql import select, update, insert, func
 from models import AdminClearance
 from flask_admin import expose, BaseView
@@ -21,6 +22,9 @@ class ReqClearance(ModelView):
                     can_delete = admin['can_delete']
                     return True
         return False
+
+# class AdminView(ReqClearance):
+#     list_template = 'admin/guide.html'
 
 class UserView(ReqClearance):
     # Show only weight and email columns in list view
@@ -267,19 +271,31 @@ class WaitlistView(ReqClearance):
 
         response = self.session.query(Response).filter_by(id=response_id).first()
         waitlist = self.get_one(waitlist_id)
+        trip = self.session.query(Trip).filter_by(id=trip_id).first()
 
-        #set lottery_slot and off fields to true
-        response.lottery_slot=True
-        waitlist.off=True
+        #counts the number of responses to the trip in question that have been awarded a lottery spot and have either accepted, or have not declined
+        # taken_spots = self.session.query(Response).filter(Response.id == trip_id, Response.lottery_slot == True, or_(Response.user_behavior == None, Response.user_behavior == "Confirmed")).count()
+        taken_spots = self.session.query(Response).filter_by(id = trip_id, lottery_slot = True).count()
+        #calculate total spots taken for the trip
+        total_spots = trip.noncar_cap
+        if trip.car_cap is not None:
+            total_spots += trip.car_cap
 
-        #supdate ranking for remaining waitlist rows on waitlist
-        self.session.query(Waitlist).filter_by(trip_id=trip_id).filter_by(off=False).update({Waitlist.waitlist_rank: Waitlist.waitlist_rank-1})
-        user = self.session.query(User).filter(User.email == response.user_email).first()
-        gotspot(user)
+        if (total_spots - taken_spots > 0):
+            #set lottery_slot and off fields to true
+            response.lottery_slot=True
+            waitlist.off=True
 
-        #ACTION REQUIRED: 
-        #send email updating user about their spot in the trip
-        #send_email(user)
+            #supdate ranking for remaining waitlist rows on waitlist
+            self.session.query(Waitlist).filter_by(trip_id=trip_id).filter_by(off=False).update({Waitlist.waitlist_rank: Waitlist.waitlist_rank-1})
+            user = self.session.query(User).filter(User.email == response.user_email).first()
+            gotspot(user)
+
+            #ACTION REQUIRED: 
+            #send email updating user about their spot in the trip
+            #send_email(user)
+        else :
+            flash('Not enough spots available to move someone off the waitlist', 'error')
 
         try:
             self.session.commit()
@@ -292,3 +308,8 @@ class BackToDashboard(BaseView):
     @expose('/')
     def back_to_dashboard(self):
         return redirect(url_for('dashboard'))
+
+class UserGuide(BaseView):
+    @expose('/')
+    def user_guide(self):
+        return redirect(url_for('guide'))

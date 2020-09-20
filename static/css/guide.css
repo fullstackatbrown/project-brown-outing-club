@@ -1,0 +1,39 @@
+body {
+    font-family: 'Source Sans Pro', sans-serif;
+}
+
+.header {
+    display:flex;
+    justify-content: space-between;
+}
+
+a {
+    font-size: 30px;
+    color: #893F3D
+}
+
+.general {
+    width: 50%;
+}
+
+h3{
+    text-decoration: underline;
+    margin-bottom: 0;
+}
+
+h4, ul{
+    margin-top:10px;
+}
+
+.features {
+    display:grid;
+    grid-template-columns: repeat(3, 1fr);
+}
+
+.section {
+    padding: 0 20px;
+}
+
+h4{
+    font-size: 1.1em;
+}

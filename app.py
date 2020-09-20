@@ -1,5 +1,5 @@
 import os
-from flask import Flask, render_template, request, jsonify, redirect, session, url_for
+from flask import Flask, render_template, request, jsonify, redirect, session, url_for, flash
 from flask_sqlalchemy import SQLAlchemy
 from flask_admin import Admin
 from sqlalchemy.sql import select, func, text
@@ -52,10 +52,12 @@ from adminviews import *
 # Check out /admin/{table name}/
 admin = Admin(app)
 admin.add_view(ReqClearance(AdminClearance, db.session, name = 'Admin'))
+# admin.add_view(AdminView(AdminClearance, db.session))
 admin.add_view(UserView(User, db.session))
 admin.add_view(TripView(Trip, db.session))
 admin.add_view(ResponseView(Response, db.session))
 admin.add_view(WaitlistView(Waitlist, db.session))
+admin.add_view(UserGuide(name="Admin User Guide"))
 admin.add_view(BackToDashboard(name="Back to Main Site"))
 
 # Serve a template from index
@@ -176,6 +178,17 @@ def lotterysignup(id):
             return redirect(url_for('dashboard'))
 
     return render_template('lottery.html', id = id)
+
+@app.route('/adminviewguide')
+@login_required
+def guide(): 
+    # flash("Could not process lottery request", 'error')
+    check_clearance = select([AdminClearance]).where(AdminClearance.email == session.get('profile').get('email'))
+    if check_clearance is not None:
+        return render_template('admin/guide.html')
+    else:
+        flash("Only authorized users can view", 'error')
+        return render_template('upcoming.html')
 
 #logout function
 @app.route('/logout')

@@ -27,7 +27,7 @@
             </div>
             <div class = "info">
                 <div class = "row" id ="details">
-                    <a href="#moreinformation" class="hover">{{ trip['name'] }}</a>
+                    <a href= "{{ url_for('individual_trip', id=trip['id']) }}" class="hover">{{ trip['name'] }}</a>
                     <div>
                         {{ trip['destination'] }} &sdot; ${{ trip['price'] }}
                         <br>
