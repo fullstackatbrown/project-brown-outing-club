@@ -5,6 +5,8 @@ body {
 .header {
     display:flex;
     justify-content: space-between;
+    width: 95%;
+    margin:auto;
 }
 
 a {
@@ -12,8 +14,13 @@ a {
     color: #893F3D
 }
 
+a:hover {
+    color: #a06563
+}
+
 .general {
     width: 50%;
+    margin-left: 2.5%;
 }
 
 h3{
@@ -24,8 +31,11 @@ h3{
 h4, ul{
     margin-top:10px;
 }
-
 .features {
+    width:95%;
+    margin: auto;
+}
+.sections {
     display:grid;
     grid-template-columns: repeat(3, 1fr);
 }
