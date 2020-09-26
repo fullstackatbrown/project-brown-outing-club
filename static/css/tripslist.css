@@ -1,0 +1,139 @@
+body {
+    --boc-1: #194c61;
+    --boc-2: #00c793;
+    --boc-3: #fa1945;
+} 
+
+.navbar-dark {
+    background-color: var(--boc-1);
+}
+
+.navbar, .nav-link {
+    font-family: 'Roboto', sans-serif;
+}
+
+.section-label {
+    height: 100px;
+    background-color: var(--boc-1);
+    margin-top: 20px;
+    border-radius: 10px;
+}
+
+.trip-section {
+    padding-left: 50px;
+    border: 1px var(--boc-1);
+}
+
+.trip-table {
+    margin-top: 10px;
+    margin-bottom: 10px;
+    width: 100%;
+}
+
+
+.trip-table-container {
+    width: 100%;
+    border: 0.5px;
+    border-color: var(--boc-1);
+    border-style :solid;
+    border-collapse: collapse;
+    border-radius: 10px;
+    overflow: hidden;
+    margin-top: 20px;
+    padding-right: 40px;
+}
+
+.trip-title {
+    text-decoration: none;   
+    font-family: 'Lato', sans-serif;
+    
+}
+
+.trip-title:hover, .contact-info:hover {
+    color: var(--boc-1);
+}
+
+.trip-img {
+    width: 25%;
+    padding-left: 10px;
+    padding-right: 10px;
+}
+
+.trip-thumb {
+    width: 100%;
+    height: 100%;
+}
+
+.section-title {
+    padding-top: 30px;
+    padding-left: 30px;
+    font-family: 'Lato', sans-serif;
+    color: white;
+    padding-bottom: 20px;
+}
+
+.trip-details {
+    width: 35%;
+    padding-left: 10px;
+    padding-right: 10px;
+}
+.trip-lottery {
+    width: 35%;
+    padding-left: 10px;
+    padding-right: 10px;
+}
+
+.trip-date {
+    display: inline-block;
+}
+.same-line {
+    display: inline-block;
+}
+
+.content-label {
+    font-family: 'Open Sans', sans-serif;
+    font-weight: 700;
+    font-size: 10px;
+}
+
+.content {
+    font-family: 'Roboto', sans-serif;
+    font-weight: 250;
+    font-size: 16px;
+    color: black;
+
+}
+
+.contact-info:hover {
+    text-decoration: none;
+}
+
+.in-lottery {
+    font-family: 'Lato', sans-serif;
+    font-weight: 550;
+}
+
+.lottery-spots {
+    font-family: 'Lato', sans-serif;
+    font-weight: 300;
+}
+
+
+.contact-info {
+    color: black;
+}
+
+.lottery-button {
+    background-color: var(--boc-3);
+    border-color: var(--boc-3);
+    font-family: 'Lato', sans-serif;
+    font-weight: 600;
+    font-size: 16px;
+    color: white;
+}
+
+.lottery-button:hover {
+    background-color: var(--boc-1);
+    border-color: var(--boc-1);
+    color:white;
+}

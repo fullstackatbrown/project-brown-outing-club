@@ -115,6 +115,9 @@ def dashboard():
     upcoming_text = select([Trip]).where(Trip.signup_deadline >= func.current_date()).order_by(Trip.signup_deadline)
     upcoming_trips = db.session.execute(upcoming_text).fetchall()
 
+    past_text = upcoming_text = select([Trip]).where(Trip.signup_deadline < func.current_date()).order_by(Trip.signup_deadline)
+    past_trips = db.session.execute(past_text).fetchall()
+
     #number of responses to each trip, in the same order as the upcoming trips list
     taken_text = select([Response.trip_id, func.count(Response.user_email)]).group_by(Response.trip_id)
     taken_spots = db.session.execute(taken_text).fetchall()
@@ -130,10 +133,10 @@ def dashboard():
 
     #checks if current user email is in adminclearance table
     is_admin = db.session.query(AdminClearance).filter_by(email = currentuser_email).first() is not None
+    print(upcoming_trips)
+    return render_template('upcoming.html', past_trips=past_trips, upcoming_trips = upcoming_trips, signed_up = signed_up, taken_spots = taken, is_admin = is_admin)
 
-    return render_template('upcoming.html', upcoming_trips = upcoming_trips, signed_up = signed_up, taken_spots = taken, is_admin = is_admin)
-
-@app.route('/<int:id>/trip')
+@app.route('/trip/<int:id>')
 @login_required
 def individual_trip(id):
     trip = get_trip(id)
