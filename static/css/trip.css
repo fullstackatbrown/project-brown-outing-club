@@ -1,0 +1,17 @@
+body {
+    --boc-1: #194c61;
+    --boc-2: #00c793;
+    --boc-3: #fa1945;
+} 
+
+.navbar-dark {
+    background-color: var(--boc-1);
+}
+
+.navbar, .nav-link {
+    font-family: 'Roboto', sans-serif;
+}
+
+.navbar, .nav-link {
+    font-family: 'Roboto', sans-serif;
+}

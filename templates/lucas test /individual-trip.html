@@ -20,20 +20,27 @@
 
 <body>
     <header>
-        <nav class="navbar navbar-expand-lg navbar-dark fixed-top" id="main-nav">
-            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarResponsive"
-                aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <a class="navbar-brand js-scroll-trigger" href="#">Brown Outing Club</a>
-            <div class="collapse navbar-collapse" id="navbarResponsive">
-                <ul class="navbar-nav ml-auto">
-                    <li class="nav-item">
-                        <a class="nav-link js-scroll-trigger" href="#upcoming">See All Trips</a>
-                    </li>
-                </ul>
-            </div>
-        </nav>
+        <nav class = "navbar navbar-expand-lg navbar-dark fixed-top" id = "main-nav">
+            <button class = "navbar-toggler" type = "button" data-toggle = "collapse" data-target = "#navbarResponsive" aria-expanded = "false" aria-label = "Toggle navigation">
+     <span class = "navbar-toggler-icon"></span>
+     </button>
+          <a class = "navbar-brand js-scroll-trigger" href = "#">Brown Outing Club</a>
+     <div class = "collapse navbar-collapse" id = "navbarResponsive">
+         <ul class = "navbar-nav ml-auto">
+         <li class = "nav-item">
+             <a class = "nav-link js-scroll-trigger" href = "#">Upcoming Trips</a>
+             </li>
+             <li class = "nav-item">
+             <a class = "nav-link js-scroll-trigger" href = "#">Past Trips</a>
+             </li>
+             {% if is_admin %} 
+                 <li class="nav-item">
+                     <a class="nav-link js-scroll-trigger" href="/admin" id="admin">Admin</a>
+                 </li>
+             {% endif %}
+         </ul>
+     </div>
+</nav>
     </header>
     <div class="container">
         <div class="row">

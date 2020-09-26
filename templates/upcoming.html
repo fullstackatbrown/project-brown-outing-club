@@ -55,9 +55,10 @@
                             <img class = "trip-thumb" src = "backpacking.jpg">
                         </td>
                         <td class = "trip-details">
-                            <a class = "trip-title" href="{{ url_for('individual_trip', id=trip.id) }}">{{ trip.name }}</a>
-                            
+                            <a id = "trip-title" href="{{ url_for('individual_trip', id=trip.id) }}">{{ trip.name }}</a>
+                            <br>
                             <h6 class = "same-line content-label">WHERE</h6>
+                            <br>
                             <h6 class = "same-line content">{{ trip.destination }}</h6>
                             <br>
                             

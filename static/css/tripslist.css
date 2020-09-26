@@ -46,7 +46,8 @@ body {
 .trip-title {
     text-decoration: none;   
     font-family: 'Lato', sans-serif;
-    
+    font-size: 32px !important;
+    color: black !important;
 }
 
 .trip-title:hover, .contact-info:hover {
