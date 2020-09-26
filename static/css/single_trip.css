@@ -13,5 +13,5 @@ body {
 }
 
 #trip-card-text {
-    background-color: var(--boc-1);
+    background-color: var(--boc-1) !important;
 }
