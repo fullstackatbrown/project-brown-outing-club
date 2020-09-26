@@ -54,11 +54,6 @@ body {
     color: var(--boc-1);
 }
 
-.trip-img {
-    width: 25%;
-    padding-left: 10px;
-    padding-right: 10px;
-}
 
 .trip-thumb {
     width: 100%;
@@ -74,12 +69,12 @@ body {
 }
 
 .trip-details {
-    width: 35%;
+    width: 50%;
     padding-left: 10px;
     padding-right: 10px;
 }
 .trip-lottery {
-    width: 35%;
+    width: 50%;
     padding-left: 10px;
     padding-right: 10px;
 }

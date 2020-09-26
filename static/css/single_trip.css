@@ -12,6 +12,6 @@ body {
     font-family: 'Roboto', sans-serif;
 }
 
-.navbar, .nav-link {
-    font-family: 'Roboto', sans-serif;
+#trip-card-text {
+    background-color: var(--boc-1);
 }
