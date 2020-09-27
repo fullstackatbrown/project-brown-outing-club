@@ -2,7 +2,7 @@ import os
 from flask import Flask, render_template, request, jsonify, redirect, session, url_for, flash
 from flask_sqlalchemy import SQLAlchemy
 from flask_admin import Admin
-from sqlalchemy.sql import select, func, text
+from sqlalchemy.sql import select, func, text, delete
 from sqlalchemy import create_engine, Date, cast
 from datetime import date
 
@@ -172,7 +172,7 @@ def get_trip(id):
 @login_required
 def lotterysignup(id):
     trip = get_trip(id)
-
+    print(request.form)
     # car = request.form['car']
     # financial_aid = request.form['financial_aid']
         
@@ -188,6 +188,7 @@ def lotterysignup(id):
 @login_required
 def lotterywithdraw(id):
     Response.delete.where(Response.trip_id == id)
+    return redirect(url_for('dashboard'))
 
 @app.route('/adminviewguide')
 @login_required
