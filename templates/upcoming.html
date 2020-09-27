@@ -58,7 +58,7 @@
                 <table class="trip-table">
                     <tr id=>
                         <td class="trip-details">
-                            <a class="trip-title" href="{{ url_for('individual_trip', id=trip.id) }}">{{ trip.name }}</a>
+                            <a class="trip-title" href="{{ url_for('individual_trip', id=trip.id, taken_spots = taken_spots.get(trip.id), signed_up = signed_up) }}">{{ trip.name }}</a>
                             <br>
                             <h6 class="same-line content-label">WHERE</h6>
                             <br>
@@ -73,7 +73,10 @@
                                 {% endif %} </h6>
                             <br>
                             <h6 class="same-lin content-label">RETURN</h6>
-                            <h6 class="same-line content">{{ trip['return_date'].strftime('%b %d, %Y') }}
+                            <h6 class="same-line content">
+                                {% if trip['return_date'] is not none %}
+                                {{ trip['return_date'].strftime('%b %d, %Y') }}
+                                {% endif %} 
                                 {% if trip['return_time'] is not none %}
                                 @ {{ trip['return_time'].strftime("%_I:%M %p") }}
                                 {% endif %} </h6>
@@ -104,7 +107,7 @@
 
 
                             <a class="btn btn-block lottery-button hover"
-                                href="{{url_for('individual_trip', id=trip.id) }}">ENTER LOTTERY</a>
+                                href="{{ url_for('individual_trip', id=trip.id, taken_spots = taken_spots.get(trip.id), signed_up = signed_up) }}">ENTER LOTTERY</a>
 
                         </td>
 
@@ -125,7 +128,7 @@
                 <table class="trip-table">
                     <tr id=>
                         <td class="trip-details">
-                            <a class="trip-title" href="{{ url_for('individual_trip', id=trip.id) }}">{{ trip.name }}</a>
+                            <a class="trip-title" href="{{ url_for('individual_trip', id=trip.id, taken_spots = taken_spots.get(trip.id), signed_up = signed_up) }}">{{ trip.name }}</a>
                             <br>
                             <h6 class="same-line content-label">WHERE</h6>
                             <br>
@@ -140,7 +143,10 @@
                                 {% endif %} </h6>
                             <br>
                             <h6 class="same-lin content-label">RETURN</h6>
-                            <h6 class="same-line content">{{ trip['return_date'].strftime('%b %d, %Y') }}
+                            <h6 class="same-line content">
+                                {% if trip['return_date'] is not none %}
+                                {{ trip['return_date'].strftime('%b %d, %Y') }}
+                                {% endif %} 
                                 {% if trip['return_time'] is not none %}
                                 @ {{ trip['return_time'].strftime("%_I:%M %p") }}
                                 {% endif %} </h6>
@@ -166,12 +172,11 @@
                                 {% else %}
                                 FREE
                                 {% endif %}
-
                             </h6>
 
 
                             <a class="btn btn-block lottery-button hover"
-                                href="{{url_for('individual_trip', id=trip.id) }}">ENTER LOTTERY</a>
+                                href="{{url_for('individual_trip', id=trip.id, taken_spots = taken_spots.get(trip.id), signed_up = signed_up) }}">ENTER LOTTERY</a>
 
                         </td>
 

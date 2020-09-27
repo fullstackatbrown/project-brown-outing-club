@@ -32,7 +32,7 @@
             <div class="collapse navbar-collapse" id="navbarResponsive">
                 <ul class="navbar-nav ml-auto">
                     <li class="nav-item">
-                        <a class="nav-link js-scroll-trigger" href="#upcoming">Upcoming Trips</a>
+                        <a class="nav-link js-scroll-trigger" href="/dashboard">Upcoming Trips</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link js-scroll-trigger" href="#past">Past Trips</a>
@@ -111,7 +111,11 @@
                                                 SPOTS IN LOTTERY
                                             </h6>
                                             <h6 class="content">
+                                                {% if trip['car_cap'] is not none%}
                                                 {{trip.car_cap + trip.noncar_cap}}
+                                                {% else %}
+                                                {{trip.noncar_cap}}
+                                                {% endif %}
                                             </h6>
                                         </td>
                                     </tr>
@@ -121,11 +125,30 @@
                                 <p class="card-text">{{ trip.description }}</p>
                             </li>
                             <li class="list-group-item">
-                                <h5 id="lottery-info">10 SPOTS AVAILABLE / 13 IN LOTTERY</h2>
-                                    <button type="button" class="btn btn-primary btn-lg lottery-button">Enter
-                                        lottery</button>
-                                    <button type="button" class="btn btn-secondary btn-lg lottery-button">Remove from
-                                        lottery</button>
+                                <h5 id="lottery-info">
+                                    {% if trip['car_cap'] is not none%}
+                                        {{trip.car_cap + trip.noncar_cap - taken_spots}} SPOTS AVAILABLE / 
+                                        {{taken_spots}} IN LOTTERY
+                                    {% else %}
+                                        {{trip.noncar_cap - taken_spots}} SPOTS AVAILABLE / 
+                                        {{taken_spots}} IN LOTTERY
+                                    {% endif %} </h2>
+
+                                    {% if signed_up %}
+                                    <form action="{{ url_for('lotterywithdraw', id=trip['id']) }}" method="post" onsubmit="return confirm('Are you sure you want to leave the lottery?');">
+                                        <button type="submit" class="btn btn-secondary btn-lg lottery-button">Remove from
+                                            lottery</button>
+                                    </form>
+                                    {% else %}
+                                    <form action="{{ url_for('lotterysignup', id=trip['id']) }}" method="POST" onsubmit="return confirm('Are you sure you want to enter the lottery?');">
+                                        <label for ="car">Will Bring Car</label>
+                                        <input type="checkbox" name="car">
+                                        <label for ="financial_aid">Needs Financial Aid</label>
+                                        <input type="checkbox" name="financial_aid">
+                                        <button type="submit" class="btn btn-primary btn-lg lottery-button">Enter
+                                            lottery</button>
+                                    </form>
+                                    {% endif %}
                             </li>
                         </ul>
                     </div>

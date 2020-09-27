@@ -41,12 +41,12 @@ from models import *
 from adminviews import *
 
 # refresh database 
-#db.drop_all()
-#db.create_all()
+# db.drop_all()
+# db.create_all()
 
-#db.session.add(AdminClearance(email = "test@brown.edu", can_create=True, can_edit=True, can_delete=True))
-#db.session.add(Trip(name="Adirondack Hiking", description="this is a test", contact="test@brown.edu", destination="NYC, NY", image="https://www.adirondack.net/images/mountainrangefall.jpg", departure_date="2021-08-20", departure_location="Faunce", departure_time="15:00:00", return_date="2021-08-23", signup_deadline="2021-08-13", price=15.75, noncar_cap=15))
-#db.session.commit()
+# db.session.add(AdminClearance(email = "test@brown.edu", can_create=True, can_edit=True, can_delete=True))
+# db.session.add(Trip(name="Adirondack Hiking", description="this is a test", contact="test@brown.edu", destination="NYC, NY", image="https://www.adirondack.net/images/mountainrangefall.jpg", departure_date="2021-08-20", departure_location="Faunce", departure_time="15:00:00", return_date="2021-08-23", signup_deadline="2021-08-13", price=15.75, noncar_cap=15))
+# db.session.commit()
 
 #instantiate flask-admin
 # Check out /admin/{table name}/
@@ -138,9 +138,14 @@ def dashboard():
 
 @app.route('/trip/<int:id>')
 @login_required
-def individual_trip(id):
+def individual_trip(id, taken_spots = None, signed_up = []):
     trip = get_trip(id)
-    return render_template('trip.html', trip = trip)
+    if (taken_spots is None):
+        taken_spots = 0
+    signed = False
+    if ((id,) in signed_up):
+        signed = True
+    return render_template('trip.html', trip = trip, taken_spots = taken_spots, signed_up = signed)
 
 #displays past trips
 @app.route('/pasttrips')
@@ -163,24 +168,26 @@ def get_trip(id):
     return trip
 
 #page linked with "Enter Lottery" from dashboard, should collect information necessary to create Response row in db using a form
-@app.route('/lotterysignup/<int:id>', methods=('GET', 'POST'))
+@app.route('/lotterysignup/<int:id>', methods=['POST'])
 @login_required
 def lotterysignup(id):
     trip = get_trip(id)
 
-    if request.method == 'POST':
-        car = request.form['car']
-        financial_aid = request.form['financial_aid']
+    # car = request.form['car']
+    # financial_aid = request.form['financial_aid']
         
-        if date.today() > trip.get('signup_deadline'):
-            flash("Deadline has passed to sign up for this lottery")
-        else:
-            new_response = Response(trip_id = id, user_email = session.get('profile').get('email'), financial_aid = financial_aid, car = car)
-            db.session.add(new_response)
-            db.session.commit()
-            return redirect(url_for('dashboard'))
+    # if date.today() > trip.get('signup_deadline'):
+    #     flash("Deadline has passed to sign up for this lottery")
+    # else:
+    #     new_response = Response(trip_id = id, user_email = session.get('profile').get('email'), financial_aid = financial_aid, car = car)
+    #     db.session.add(new_response)
+    #     db.session.commit()
+    return redirect(url_for('dashboard'))
 
-    return render_template('lottery.html', id = id)
+@app.route('/lotterywithdraw/<int:id>')
+@login_required
+def lotterywithdraw(id):
+    Response.delete.where(Response.trip_id == id)
 
 @app.route('/adminviewguide')
 @login_required

@@ -35,7 +35,10 @@ class Trip(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(120), unique=True, nullable=False)
     description = db.Column(db.Text())
+    #primary email
     contact = db.Column(db.String(120))
+    #trip leaders' names
+    boc_leaders = db.Column(db.String(120))
     destination = db.Column(db.String(80))
     #for src filepath
     image = db.Column(db.Text())
