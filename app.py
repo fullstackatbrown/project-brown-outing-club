@@ -172,9 +172,13 @@ def get_trip(id):
 @login_required
 def lotterysignup(id):
     trip = get_trip(id)
-    car = request.form['car'] == "True"
-    financial_aid = request.form['financial_aid'] == "True"
-        
+    car = False
+    if (request.form.get('car')):
+        car = True
+    financial_aid = False 
+    if (request.form.get('financial_aid')):
+        financial_aid = True
+
     if (date.today() > trip['signup_deadline']):
         flash("Deadline has passed to sign up for this lottery")
     else:
