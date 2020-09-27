@@ -58,7 +58,7 @@
                 <table class="trip-table">
                     <tr id=>
                         <td class="trip-details">
-                            <a class="trip-title" href="{{ url_for('individual_trip', id=trip.id, taken_spots = taken_spots.get(trip.id), signed_up = signed_up) }}">{{ trip.name }}</a>
+                            <a class="trip-title" href="{{ url_for('individual_trip', id=trip.id, taken_spots = taken_spots.get(trip.id)) }}">{{ trip.name }}</a>
                             <br>
                             <h6 class="same-line content-label">WHERE</h6>
                             <br>
@@ -107,7 +107,7 @@
 
 
                             <a class="btn btn-block lottery-button hover"
-                                href="{{ url_for('individual_trip', id=trip.id, taken_spots = taken_spots.get(trip.id), signed_up = signed_up) }}">ENTER LOTTERY</a>
+                                href="{{ url_for('individual_trip', id=trip.id, taken_spots = taken_spots.get(trip.id)) }}">ENTER LOTTERY</a>
 
                         </td>
 
@@ -128,7 +128,7 @@
                 <table class="trip-table">
                     <tr id=>
                         <td class="trip-details">
-                            <a class="trip-title" href="{{ url_for('individual_trip', id=trip.id, taken_spots = taken_spots.get(trip.id), signed_up = signed_up) }}">{{ trip.name }}</a>
+                            <a class="trip-title" href="{{ url_for('individual_trip', id=trip.id, taken_spots = taken_spots.get(trip.id)) }}">{{ trip.name }}</a>
                             <br>
                             <h6 class="same-line content-label">WHERE</h6>
                             <br>
@@ -176,7 +176,7 @@
 
 
                             <a class="btn btn-block lottery-button hover"
-                                href="{{url_for('individual_trip', id=trip.id, taken_spots = taken_spots.get(trip.id), signed_up = signed_up) }}">ENTER LOTTERY</a>
+                                href="{{url_for('individual_trip', id=trip.id, taken_spots = taken_spots.get(trip.id)) }}">ENTER LOTTERY</a>
 
                         </td>
 

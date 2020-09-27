@@ -126,23 +126,23 @@ def dashboard():
     for trip_id, spot in taken_spots:
         taken[trip_id] = spot
 
-    #list of trips that have lotteries the user has signed up for
-    currentuser_email = session.get('profile').get('email')
-    signed_text = select([Response.trip_id]).where(Response.user_email == currentuser_email)
-    signed_up = db.session.execute(signed_text).fetchall()
-
     #checks if current user email is in adminclearance table
+    currentuser_email = session.get('profile').get('email')
     is_admin = db.session.query(AdminClearance).filter_by(email = currentuser_email).first() is not None
     print(upcoming_trips)
-    return render_template('upcoming.html', past_trips=past_trips, upcoming_trips = upcoming_trips, signed_up = signed_up, taken_spots = taken, is_admin = is_admin)
+    return render_template('upcoming.html', past_trips=past_trips, upcoming_trips = upcoming_trips, taken_spots = taken, is_admin = is_admin)
 
 @app.route('/trip/<int:id>')
 @login_required
-def individual_trip(id, taken_spots = None, signed_up = []):
+def individual_trip(id, taken_spots = None):
     trip = get_trip(id)
     if (taken_spots is None):
         taken_spots = 0
     signed = False
+    #list of trips that have lotteries the user has signed up for
+    currentuser_email = session.get('profile').get('email')
+    signed_text = select([Response.trip_id]).where(Response.user_email == currentuser_email)
+    signed_up = db.session.execute(signed_text).fetchall()
     if ((id,) in signed_up):
         signed = True
     return render_template('trip.html', trip = trip, taken_spots = taken_spots, signed_up = signed)
@@ -172,22 +172,23 @@ def get_trip(id):
 @login_required
 def lotterysignup(id):
     trip = get_trip(id)
-    print(request.form)
-    # car = request.form['car']
-    # financial_aid = request.form['financial_aid']
+    car = request.form['car'] == "True"
+    financial_aid = request.form['financial_aid'] == "True"
         
-    # if date.today() > trip.get('signup_deadline'):
-    #     flash("Deadline has passed to sign up for this lottery")
-    # else:
-    #     new_response = Response(trip_id = id, user_email = session.get('profile').get('email'), financial_aid = financial_aid, car = car)
-    #     db.session.add(new_response)
-    #     db.session.commit()
+    if (date.today() > trip['signup_deadline']):
+        flash("Deadline has passed to sign up for this lottery")
+    else:
+        new_response = Response(trip_id = id, user_email = session.get('profile').get('email'), financial_aid = financial_aid, car = car)
+        db.session.add(new_response)
+        db.session.commit()
     return redirect(url_for('dashboard'))
 
-@app.route('/lotterywithdraw/<int:id>')
+@app.route('/lotterywithdraw/<int:id>', methods=['POST'])
 @login_required
 def lotterywithdraw(id):
-    Response.delete.where(Response.trip_id == id)
+    response = db.session.query(Response).filter(Response.trip_id == id).first()
+    db.session.delete(response)
+    db.session.commit()
     return redirect(url_for('dashboard'))
 
 @app.route('/adminviewguide')

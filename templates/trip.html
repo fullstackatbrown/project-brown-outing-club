@@ -141,10 +141,17 @@
                                     </form>
                                     {% else %}
                                     <form action="{{ url_for('lotterysignup', id=trip['id']) }}" method="POST" onsubmit="return confirm('Are you sure you want to enter the lottery?');">
-                                        <label for ="car">Will Bring Car</label>
-                                        <input type="checkbox" name="car">
-                                        <label for ="financial_aid">Needs Financial Aid</label>
-                                        <input type="checkbox" name="financial_aid">
+                                        <input type="hidden" name="cart" value="true" />
+                                        <label for ="car">Can You Bring A Car</label>
+                                        <select id="car" name="car">
+                                            <option value="True">Yes</option>
+                                            <option value="False">No</option>
+                                        </select>
+                                        <label for ="financial_aid">Do You Need Financial Aid</label>
+                                        <select id="financial_aid" name="financial_aid">
+                                            <option value="True">Yes</option>
+                                            <option value="False">No</option>
+                                        </select>
                                         <button type="submit" class="btn btn-primary btn-lg lottery-button">Enter
                                             lottery</button>
                                     </form>
