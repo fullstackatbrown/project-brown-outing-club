@@ -48,11 +48,11 @@ class UserView(ReqClearance):
 
 class TripView(ReqClearance):
     # renames image column to clarify input should be a filepath
-    column_labels = dict(image='Image Source Filepath')
+    column_labels = dict(image='Image Source Filepath', boc_leaders="Trip Leaders")
 
     # excludes image column from list view
     column_list = (
-        'name', 'contact', 'destination', 'departure_date', 'departure_location', 
+        'name', 'contact', 'boc_leaders', 'destination', 'departure_date', 'departure_location', 
         'departure_time', 'return_date', 'return_time','signup_deadline', 
         'price', 'car_cap', 'noncar_cap', 'Run Lottery'
         )

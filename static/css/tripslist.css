@@ -1,57 +1,11 @@
-/* original
 body {
-    --boc-orange: #D38637;
-    --boc-green: #366E1F;
-    --boc-red: #A42324;
-    --section-gray: #c7c7c7;
-} */
-
-/* template 
-body {
-    --boc-orange:
-    --boc-green:
-    --boc-red:
-}
-*/
-
-/*
-body {
-    --boc-orange: #275361;
-    --boc-green: #00c78b;
-    --boc-red: #ce3e33;
-}
-*/
-
-/*
-body {
-    --boc-orange: #1421C7;
-    --boc-green: #317A0C; 
-    --boc-red: #7A2906;
-} */
-
-/*
-body {
-    --boc-orange: #0C457a;
-    --boc-green: #42c700;
-    --boc-red: #7a480c;
-}
-*/
-/*
-body {
-    --boc-orange: #194c61;
-    --boc-green: #00c793;
-    --boc-red: #fa1945;
-} */
-
-body {
-    --boc-orange: #288230;
-    --boc-green: #1f7303;
-    --boc-red: #b14711;
-}
-
+    --boc-1: #194c61;
+    --boc-2: #00c793;
+    --boc-3: #fa1945;
+} 
 
 .navbar-dark {
-    background-color: var(--boc-green);
+    background-color: var(--boc-1);
 }
 
 .navbar, .nav-link {
@@ -60,13 +14,14 @@ body {
 
 .section-label {
     height: 100px;
-    background-color: var(--boc-orange);
+    background-color: var(--boc-1);
     margin-top: 20px;
+    border-radius: 10px;
 }
 
 .trip-section {
     padding-left: 50px;
-    border: 1px var(--boc-orange) dotted;
+    border: 1px var(--boc-1);
 }
 
 .trip-table {
@@ -79,8 +34,8 @@ body {
 .trip-table-container {
     width: 100%;
     border: 0.5px;
-    border-color: color(--boc-green);
-    border-style :solid;
+    border-color: var(--boc-1);
+    border-style: solid;
     border-collapse: collapse;
     border-radius: 10px;
     overflow: hidden;
@@ -89,20 +44,16 @@ body {
 }
 
 .trip-title {
-    text-decoration: underline;   
+    text-decoration: none;   
     font-family: 'Lato', sans-serif;
-    
+    font-size: 32px !important;
+    color: black !important;
 }
 
 .trip-title:hover, .contact-info:hover {
-    color: var(--boc-orange);
+    color: var(--boc-1);
 }
 
-.trip-img {
-    width: 25%;
-    padding-left: 10px;
-    padding-right: 10px;
-}
 
 .trip-thumb {
     width: 100%;
@@ -118,12 +69,12 @@ body {
 }
 
 .trip-details {
-    width: 35%;
+    width: 50%;
     padding-left: 10px;
     padding-right: 10px;
 }
 .trip-lottery {
-    width: 35%;
+    width: 50%;
     padding-left: 10px;
     padding-right: 10px;
 }
@@ -169,8 +120,8 @@ body {
 }
 
 .lottery-button {
-    background-color: var(--boc-red);
-    border-color: var(--boc-red);
+    background-color: var(--boc-3);
+    border-color: var(--boc-3);
     font-family: 'Lato', sans-serif;
     font-weight: 600;
     font-size: 16px;
@@ -178,8 +129,7 @@ body {
 }
 
 .lottery-button:hover {
-    background-color: var(--boc-orange);
-    border-color: var(--boc-orange);
+    background-color: var(--boc-1);
+    border-color: var(--boc-1);
     color:white;
 }
-

@@ -1,0 +1,174 @@
+<!doctype HTML>
+<html lang="en">
+
+<head>
+    <!-- Stuff not to worry about, for setup -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap imports -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css"
+        integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/single_trip.css') }}">
+
+
+    <!-- Fonts -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&family=Open+Sans:ital,wght@0,300;0,400;0,600;0,700;0,800;1,300;1,400;1,600;1,700;1,800&family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap"
+        rel="stylesheet">
+
+
+
+</head>
+
+<body>
+    <header>
+        <nav class="navbar navbar-expand-lg navbar-dark fixed-top" id="main-nav">
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarResponsive"
+                aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <a class="navbar-brand js-scroll-trigger" href="#">Brown Outing Club</a>
+            <div class="collapse navbar-collapse" id="navbarResponsive">
+                <ul class="navbar-nav ml-auto">
+                    <li class="nav-item">
+                        <a class="nav-link js-scroll-trigger" href="/dashboard">Upcoming Trips</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link js-scroll-trigger" href="#past">Past Trips</a>
+                    </li>
+                    {% if is_admin %}
+                    <li class="nav-item">
+                        <a class="nav-link js-scroll-trigger" href="/admin" id="admin">Admin</a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </nav>
+    </header>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12 col-md-12 col-12 col-sm-12 mx-auto">
+                <br><br><br>
+                <div class="card">
+                    <img class="card-img-top" alt="Image of trip." src={{ trip.image }}>
+                    <div class="card-body" id="trip-card-text">
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item">
+                                <h5 class="card-title">{{  trip.name }}</h5>
+                            </li>
+                            <li class="list-group-item">
+                                <table class="trip-table">
+                                    <tr>
+                                        <td class="trip-details">
+                                            <h6 class="content-label">WHERE</h6>
+                                            <h6 class="content">{{ trip.destination }}</h6>
+                                        </td>
+                                        <td class="trip-details">
+                                            <h6 class="content-label">DEPARTS</h6>
+                                            <h6 class="content">{{ trip['departure_date'].strftime('%b %d, %Y') }}
+                                                {% if trip['departure_time'] is not none %}
+                                                @ {{ trip['departure_time'].strftime("%_I:%M %p") }}
+                                                {% endif %}</h6>
+                                        </td>
+
+                                        <td class="trip-details">
+                                            <h6 class="content-label">RETURNS</h6>
+                                            <h6 class="content">{{ trip['return_date'].strftime('%b %d, %Y') }}
+                                                {% if trip['return_time'] is not none %}
+                                                @ {{ trip['return_time'].strftime("%_I:%M %p") }}
+                                                {% endif %} </h6>
+                                        </td>
+
+
+                                        <td class="trip-details">
+                                            <h6 class="content-label">CONTACT</h6>
+                                            <h6 class="content">
+                                                <a class="contact-info"
+                                                    href="mailto:{{trip['contact']}}subject:{{trip.name}}">{{ trip.contact }}</a>
+                                            </h6>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="trip-lottery">
+                                            <h6 class="content-label">
+                                                LOTTERY CLOSES
+                                            </h6>
+                                            <h6 class="content">{{ trip['signup_deadline'].strftime('%b %d, %Y') }}</h6>
+                                        </td>
+                                        <td class="trip-lottery">
+
+                                            <h6 class="content-label">PRICE</h6>
+                                            <h6 class="content">
+                                                {% if trip['price'] is not none or trip['price']==0 %}
+                                                ${{ trip['price'] }}
+                                                {% else %}
+                                                FREE
+                                                {% endif %}</h6>
+                                        </td>
+                                        <td class="trip-lottery">
+                                            <h6 class="content-label">
+                                                SPOTS IN LOTTERY
+                                            </h6>
+                                            <h6 class="content">
+                                                {% if trip['car_cap'] is not none%}
+                                                {{trip.car_cap + trip.noncar_cap}}
+                                                {% else %}
+                                                {{trip.noncar_cap}}
+                                                {% endif %}
+                                            </h6>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </li>
+                            <li class="list-group-item">
+                                <p class="card-text">{{ trip.description }}</p>
+                            </li>
+                            <li class="list-group-item">
+                                <h5 id="lottery-info">
+                                    {% if trip['car_cap'] is not none%}
+                                        {{trip.car_cap + trip.noncar_cap - taken_spots}} SPOTS AVAILABLE / 
+                                        {{taken_spots}} IN LOTTERY
+                                    {% else %}
+                                        {{trip.noncar_cap - taken_spots}} SPOTS AVAILABLE / 
+                                        {{taken_spots}} IN LOTTERY
+                                    {% endif %} </h2>
+
+                                    {% if signed_up %}
+                                    <form action="{{ url_for('lotterywithdraw', id=trip['id']) }}" method="post" onsubmit="return confirm('Are you sure you want to leave the lottery?');">
+                                        <button type="submit" class="btn btn-secondary btn-lg lottery-button">Remove from
+                                            lottery</button>
+                                    </form>
+                                    {% else %}
+                                    <form action="{{ url_for('lotterysignup', id=trip['id']) }}" method="POST" onsubmit="return confirm('Are you sure you want to enter the lottery?');">
+                                        <label for ="car">Can You Bring A Car</label>
+                                        <input type="checkbox" id="car" name="car" value="True">
+                                        <label for ="financial_aid">Do You Need Financial Aid</label>
+                                        <input type="checkbox" id="financial_aid" name="financial_aid" value="True">
+                                        <button type="submit" class="btn btn-primary btn-lg lottery-button">Enter
+                                            lottery</button>
+                                    </form>
+                                    {% endif %}
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                <br><br><br>
+            </div>
+        </div>
+    </div>
+    <footer></footer>
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
+        integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj"
+        crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
+        integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo"
+        crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"
+        integrity="sha384-OgVRvuATP1z7JjHLkuOU7Xw704+h835Lr+6QL9UvYjZE3Ipu6Tp75j7Bh/kR0JKI"
+        crossorigin="anonymous"></script>
+
+</body>
+
+</html>

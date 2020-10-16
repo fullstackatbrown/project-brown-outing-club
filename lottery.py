@@ -31,18 +31,28 @@ def runlottery(self, id):
         response_ids.append(r_id)
         user_emails.append(email)
         users.append(self.session.query(User).filter(User.email == email).first())
-    
-    #ACTION REQUIRED: 
+
+    #ACTION REQUIRED:
     #replace with the actual lottery mechanism to produce list of users that won a spot
-    winner_ids = response_ids
-    winner_emails = user_emails
+    for i in users:
+        currRank = 0
+        currPerson = users[i]
+        currWeight = users[i].weight
+        currRank = random.randint(0,100) + currWeight #maybe make it out of total number of slots?
+        finalResults[currPerson] = currRank
+    sortedResults = sorted(finalResults.items(), key=lambda x: x[1], reverse=True)
+    winner_ids =[]
+    winner_emails = []
+    for i in sortedResults:
+        winner_ids.append(i.id)
+        winner_emails.append(i.email)
 
     #update lottery_slot field in responses that won a spot
     for index in range(len(winner_ids)):
         self.session.query(Response).filter(Response.id == winner_ids[index]).update({Response.lottery_slot: True})
         user = self.session.query(User).filter(User.email == winner_emails[index]).first()
         gotspot(user)
-    
+
     return winner_emails
 
 #updates user weights based on if they declined or did not show
@@ -68,4 +78,3 @@ def update_userweights(self, behavior, user_email):
         user_weight = userweight_roof
 
     self.session.query(User).update({User.weight: user_weight})
-
