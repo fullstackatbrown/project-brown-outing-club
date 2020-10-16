@@ -8,6 +8,17 @@ class Config(object):
     SECRET_KEY = 'CHANGE THIS SECRET KEY'
     SQLALCHEMY_DATABASE_URI = os.environ['DATABASE_URL']
     SQLALCHEMY_TRACK_MODIFICATIONS = False
+    MAIL_SERVER = 'smtp.gmail.com' # need to change based on server
+    MAIL_PORT = 465 # need to change based on port
+    MAIL_USE_TLS = False
+    MAIL_USE_SSL = True
+    MAIL_DEBUG = False # based on app debug setting
+    MAIL_USERNAME = None # to add boc email
+    MAIL_PASSWORD = None # to add boc email
+    MAIL_DEFAULT_SENDER = ('Brown Outing Club' '') # to add boc email between ''
+    MAIL_MAX_EMAILS = 200 # large limit for now 
+    MAIL_SUPPRESS_SEND = False # same as testing value
+    MAIL_ASCII_ATTACHMENTS = False
 
 class ProductionConfig(Config):
     DEBUG = False
