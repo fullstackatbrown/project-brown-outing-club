@@ -121,15 +121,16 @@ class TripView(ReqClearance):
          #   return "Signup Deadline Hasn't Passed"
         
         emailWinners_button = '''
-            <form action = "{emailWinners_view}" method="POST">
-                <input id="trip_id" name = "trip_id" type="hidden" value="{trip_id}>
+            <form action="{emailwinners}" method="POST">
+                <input id="trip_id" name="trip_id"  type="hidden" value="{trip_id}">
                 <button type='submit'>Run</button>
             </form>
-        '''.format(emailWinners_view=url_for('.emailWinners_view'), trip_id=model.id)
+        '''.format(emailwinners=url_for('.emailWinners_view'), trip_id=model.id)
 
         return Markup(emailWinners_button)
     
     column_formatters = {
+        'Run Lottery': format_runlottery,
         'Email Winners': format_emailWinners
     }
 
