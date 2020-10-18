@@ -9,7 +9,8 @@ body {
 }
 
 .navbar, .nav-link {
-    font-family: 'Roboto', sans-serif;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 500;
 }
 
 .section-label {
@@ -126,6 +127,8 @@ body {
     font-weight: 600;
     font-size: 16px;
     color: white;
+    margin-top: 20px;
+    width: 150px;
 }
 
 .lottery-button:hover {
