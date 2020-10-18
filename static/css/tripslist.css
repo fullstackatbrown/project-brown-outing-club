@@ -9,7 +9,8 @@ body {
 }
 
 .navbar, .nav-link {
-    font-family: 'Roboto', sans-serif;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 500;
 }
 
 .section-label {
@@ -45,7 +46,7 @@ body {
 
 .trip-title {
     text-decoration: none;   
-    font-family: 'Lato', sans-serif;
+    font-family: 'Montserrat', sans-serif;
     font-size: 32px !important;
     color: black !important;
 }
@@ -63,7 +64,7 @@ body {
 .section-title {
     padding-top: 30px;
     padding-left: 30px;
-    font-family: 'Lato', sans-serif;
+    font-family: 'Montserrat', sans-serif;
     color: white;
     padding-bottom: 20px;
 }
@@ -126,6 +127,8 @@ body {
     font-weight: 600;
     font-size: 16px;
     color: white;
+    margin-top: 20px;
+    width: 150px;
 }
 
 .lottery-button:hover {

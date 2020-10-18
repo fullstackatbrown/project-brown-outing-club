@@ -6,3 +6,4 @@ flask-admin
 Requests
 OAuth
 authlib
+flask_mail
