@@ -19,7 +19,6 @@
         <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
         <link rel="stylesheet" href="{{ url_for('static', filename='css/singletrip.css') }}">
-        <script href="{{ url_for('static', filename='js/tooltip.js') }}"></script>
 
 </head>
 
@@ -200,6 +199,10 @@
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"
         integrity="sha384-OgVRvuATP1z7JjHLkuOU7Xw704+h835Lr+6QL9UvYjZE3Ipu6Tp75j7Bh/kR0JKI"
         crossorigin="anonymous"></script>
+        <script>$(function () {
+            $('[data-toggle="tooltip"]').tooltip()
+          })</script>
+
 
 </body>
 

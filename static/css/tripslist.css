@@ -21,7 +21,7 @@ body {
 }
 
 .trip-section {
-    padding-left: 50px;
+    margin-left: 50px;
     border: 1px var(--boc-1);
 }
 
@@ -41,7 +41,7 @@ body {
     border-radius: 10px;
     overflow: hidden;
     margin-top: 20px;
-    padding-right: 40px;
+    margin-right: 40px;
 }
 
 .trip-title {
@@ -63,21 +63,21 @@ body {
 
 .section-title {
     padding-top: 30px;
-    padding-left: 30px;
+    margin-left: 30px;
     font-family: 'Montserrat', sans-serif;
     color: white;
-    padding-bottom: 20px;
+    margin-bottom: 20px;
 }
 
 .trip-details {
     width: 50%;
-    padding-left: 10px;
-    padding-right: 10px;
+    margin-left: 10px;
+    margin-right: 10px;
 }
 .trip-lottery {
     width: 50%;
-    padding-left: 10px;
-    padding-right: 10px;
+    margin-left: 10px;
+    margin-right: 10px;
 }
 
 .trip-date {
