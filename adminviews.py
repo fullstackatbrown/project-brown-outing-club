@@ -3,7 +3,7 @@ from flask import session, url_for, Markup, flash, redirect, abort
 import os, sqlalchemy
 from sqlalchemy import or_
 from sqlalchemy.sql import select, update, insert, func
-from models import AdminClearance
+from models import AdminClearance, Response
 from flask_admin import expose, BaseView
 from flask_admin.helpers import get_form_data
 from flask_mail import Mail, Message
@@ -83,12 +83,6 @@ class TripView(ReqClearance):
         '''.format(lottery_view=url_for('.lottery_view'), trip_id=model.id)
 
         return Markup(runlottery_button)
-    
-    #sets the format of the column Run Lottery
-    #displays a button to run the lottery or message saying lottery is complete depending on Trips column lottery_completed
-    # column_formatters = {
-    #     'Run Lottery': format_runlottery
-    # }
 
     #creates a /trip/runlottery endpoint that runs the runlottery method on the trip id from the form 
     @expose('runlottery', methods=['POST'])
@@ -129,6 +123,8 @@ class TripView(ReqClearance):
 
         return Markup(emailWinners_button)
     
+    #sets the format of the column Run Lottery
+    #displays a button to run the lottery or message saying lottery is complete depending on Trips column lottery_completed
     column_formatters = {
         'Run Lottery': format_runlottery,
         'Email Winners': format_emailWinners
