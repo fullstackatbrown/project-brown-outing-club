@@ -3,7 +3,7 @@ from flask import session, url_for, Markup, flash, redirect, abort
 import os, sqlalchemy
 from sqlalchemy import or_
 from sqlalchemy.sql import select, update, insert, func
-from models import AdminClearance, Response
+from models import AdminClearance, Response, Trip
 from flask_admin import expose, BaseView
 from flask_admin.helpers import get_form_data
 from flask_mail import Mail, Message
@@ -138,13 +138,14 @@ class TripView(ReqClearance):
         trip_id = form['trip_id']
 
         # to change to pull from the database
-        winners = self.session.query(Response).filter_by(id = trip_id, lottery_slot = True)
+        winners = self.session.query(Response).filter_by(id = trip_id, lottery_slot = True).join(Trip, Response.trip_id == Trip.id).all()
     
         with mail.connect() as conn:
             for response in winners:
-                msg = Message('Lottery Selection', recipients = [response['email']])
+                print(response.__dict__)
+                msg = Message('Lottery Selection', recipients = [response.user_email])
                 # to add specific lottery trip based on database pull
-                msg.body = 'Hey! You have been selected for ' + response['trip']['name'] + '! Please confirm your attendance below.'
+                msg.body = 'Hey! You have been selected for ' + response.trip.name + '! Please confirm your attendance below.'
                 conn.send(msg)
         return redirect(trip_index)
         

@@ -13,9 +13,9 @@ class Config(object):
     MAIL_USE_TLS = False
     MAIL_USE_SSL = True
     MAIL_DEBUG = False # based on app debug setting
-    MAIL_USERNAME = ""
-    MAIL_PASSWORD = ""
-    MAIL_DEFAULT_SENDER = ('Brown Outing Club' '@gmail.com')
+    MAIL_USERNAME = "brownuoutingclub"
+    MAIL_PASSWORD = "Brownoutingclub2020"
+    MAIL_DEFAULT_SENDER = ('Brown Outing Club' 'brownuoutingclub@gmail.com')
     MAIL_MAX_EMAILS = 400 # large limit for now 
     MAIL_SUPPRESS_SEND = False # same as testing value
     MAIL_ASCII_ATTACHMENTS = False
