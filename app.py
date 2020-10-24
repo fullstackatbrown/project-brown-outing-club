@@ -45,8 +45,8 @@ from models import *
 from adminviews import *
 
 # refresh database 
-#db.drop_all()
-#db.create_all()
+# db.drop_all()
+# db.create_all()
 
 # db.session.add(AdminClearance(email = "test@brown.edu", can_create=True, can_edit=True, can_delete=True))
 # db.session.add(Trip(name="Adirondack Hiking", description="this is a test", contact="test@brown.edu", boc_leaders="ayo, ayo, and ayo", destination="NYC, NY", image="https://www.adirondack.net/images/mountainrangefall.jpg", departure_date="2021-08-20", departure_location="Faunce", departure_time="15:00:00", return_date="2021-08-23", signup_deadline="2021-08-13", price=15.75, noncar_cap=15))
@@ -56,7 +56,6 @@ db.session.commit()
 # Check out /admin/{table name}/
 admin = Admin(app)
 admin.add_view(ReqClearance(AdminClearance, db.session, name = 'Admin'))
-# admin.add_view(AdminView(AdminClearance, db.session))
 admin.add_view(UserView(User, db.session))
 admin.add_view(TripView(Trip, db.session))
 admin.add_view(ResponseView(Response, db.session))
@@ -89,6 +88,9 @@ def callback_handling():
     if db.session.execute(check_new_user).fetchone() is None:
         new_user = User(auth_id = userinfo['sub'], email = userinfo['email'])             
         db.session.add(new_user)
+        add_default_admin = select([User]).where(User.email == "test@brown.edu")
+        if db.session.execute(add_default_admin).fetchone() is None:
+            db.session.add(AdminClearance(email = "test@brown.edu", can_create=True, can_edit=True, can_delete=True))
         db.session.commit()
 
     return redirect('/dashboard')

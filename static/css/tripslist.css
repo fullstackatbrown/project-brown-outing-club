@@ -21,16 +21,27 @@ body {
 }
 
 .trip-section {
-    padding-left: 50px;
+    margin-left: 50px;
     border: 1px var(--boc-1);
 }
 
 .trip-table {
     margin-top: 10px;
     margin-bottom: 10px;
+    padding-left: 10px;
+    padding-right: 10px;
     width: 100%;
+    display: grid;
+    grid-template-rows: repeat(2, 0.25fr);
+    grid-template-columns: repeat(2, 1fr);
 }
 
+#span-trip-title {
+    grid-column-start: 1;
+    grid-column-end: 3;
+    padding-left: 0px;
+    margin-left: 0px;
+}
 
 .trip-table-container {
     width: 100%;
@@ -41,7 +52,7 @@ body {
     border-radius: 10px;
     overflow: hidden;
     margin-top: 20px;
-    padding-right: 40px;
+    margin-right: 40px;
 }
 
 .trip-title {
@@ -49,6 +60,8 @@ body {
     font-family: 'Montserrat', sans-serif;
     font-size: 32px !important;
     color: black !important;
+    margin-left: 0px;
+    padding-left: 0px;
 }
 
 .trip-title:hover, .contact-info:hover {
@@ -63,21 +76,21 @@ body {
 
 .section-title {
     padding-top: 30px;
-    padding-left: 30px;
+    margin-left: 30px;
     font-family: 'Montserrat', sans-serif;
     color: white;
-    padding-bottom: 20px;
+    margin-bottom: 20px;
 }
 
 .trip-details {
     width: 50%;
-    padding-left: 10px;
-    padding-right: 10px;
+    margin-left: 10px;
+    margin-right: 10px;
 }
 .trip-lottery {
     width: 50%;
-    padding-left: 10px;
-    padding-right: 10px;
+    margin-left: 10px;
+    margin-right: 10px;
 }
 
 .trip-date {

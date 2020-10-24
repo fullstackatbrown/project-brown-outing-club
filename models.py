@@ -5,7 +5,8 @@ class AdminClearance(db.Model):
     __tablename__ = 'adminclearance'
     # Table columns
     id = db.Column(db.Integer, primary_key=True)
-    email = db.Column(db.String(120), unique=True, nullable=False)
+    email = db.Column(db.String(120), db.ForeignKey('user.email', ondelete="CASCADE"), nullable=False)
+    user = db.relationship('User', backref = db.backref('adminclearance'))
 
     #dictates what each admin is able to do with the data
     can_create = db.Column(db.Boolean, nullable=False)
