@@ -3,12 +3,14 @@ from flask import session, url_for, Markup, flash, redirect, abort
 import os, sqlalchemy
 from sqlalchemy import or_
 from sqlalchemy.sql import select, update, insert, func
-from models import AdminClearance
+from models import AdminClearance, Response, Trip
 from flask_admin import expose, BaseView
 from flask_admin.helpers import get_form_data
+from flask_mail import Mail, Message
 from decimal import Decimal
 import datetime
 from lottery import *
+from app import mail
 
 class ReqClearance(ModelView):
     def is_accessible(self):
@@ -54,7 +56,7 @@ class TripView(ReqClearance):
     column_list = (
         'name', 'contact', 'boc_leaders', 'destination', 'departure_date', 'departure_location', 
         'departure_time', 'return_date', 'return_time','signup_deadline', 
-        'price', 'car_cap', 'noncar_cap', 'Run Lottery'
+        'price', 'car_cap', 'noncar_cap', 'Run Lottery', 'Email Winners'
         )
 
     # Enable search functionality - it will search for trips
@@ -67,8 +69,8 @@ class TripView(ReqClearance):
 
     #creates the html form with a button that will call lottery_view method to run for a specific trip
     def format_runlottery(view, context, model, name):
-        if model.signup_deadline > datetime.date.today():
-            return "Signup Deadline Hasn't Passed"
+        #if model.signup_deadline > datetime.date.today():
+         #   return "Signup Deadline Hasn't Passed"
 
         if model.lottery_completed:
             return 'Completed'
@@ -81,12 +83,6 @@ class TripView(ReqClearance):
         '''.format(lottery_view=url_for('.lottery_view'), trip_id=model.id)
 
         return Markup(runlottery_button)
-    
-    #sets the format of the column Run Lottery
-    #displays a button to run the lottery or message saying lottery is complete depending on Trips column lottery_completed
-    column_formatters = {
-        'Run Lottery': format_runlottery
-    }
 
     #creates a /trip/runlottery endpoint that runs the runlottery method on the trip id from the form 
     @expose('runlottery', methods=['POST'])
@@ -113,6 +109,46 @@ class TripView(ReqClearance):
             flash('Failed to run lottery on the trip', 'error')
 
         return redirect(trip_index)
+
+    def format_emailWinners(view, context, model, name):
+        #if model.signup_deadline > datetime.date.today():
+         #   return "Signup Deadline Hasn't Passed"
+        
+        emailWinners_button = '''
+            <form action="{emailwinners}" method="POST">
+                <input id="trip_id" name="trip_id"  type="hidden" value="{trip_id}">
+                <button type='submit'>Run</button>
+            </form>
+        '''.format(emailwinners=url_for('.emailWinners_view'), trip_id=model.id)
+
+        return Markup(emailWinners_button)
+    
+    #sets the format of the column Run Lottery
+    #displays a button to run the lottery or message saying lottery is complete depending on Trips column lottery_completed
+    column_formatters = {
+        'Run Lottery': format_runlottery,
+        'Email Winners': format_emailWinners
+    }
+
+    @expose('emailWinners', methods=['POST'])
+    def emailWinners_view(self):
+        trip_index = self.get_url('.index_view')
+        form = get_form_data()
+
+        trip_id = form['trip_id']
+
+        # to change to pull from the database
+        winners = self.session.query(Response).filter_by(id = trip_id, lottery_slot = True).join(Trip, Response.trip_id == Trip.id).all()
+    
+        with mail.connect() as conn:
+            for response in winners:
+                print(response.__dict__)
+                msg = Message('Lottery Selection', recipients = [response.user_email])
+                # to add specific lottery trip based on database pull
+                msg.body = 'Hey! You have been selected for ' + response.trip.name + '! Please confirm your attendance below.'
+                conn.send(msg)
+        return redirect(trip_index)
+        
 
 class ResponseView(ReqClearance):
     # renames columns for legibility
