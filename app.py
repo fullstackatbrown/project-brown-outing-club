@@ -4,7 +4,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_admin import Admin
 from flask_mail import Mail
 from sqlalchemy.sql import select, func, text, delete
-from sqlalchemy import create_engine, Date, cast
+from sqlalchemy import create_engine, Date, cast, update
 from datetime import date
 
 #for OAuth
@@ -219,22 +219,22 @@ def logout():
     params = {'returnTo': url_for('index', _external=True), 'client_id': 'J28X7Tck3Wh7xrch1Z3OQYN379zanO6Z'}
     return redirect(auth0.api_base_url + '/v2/logout?' + urlencode(params))
 
-# @app.route('/emailWinners')
-# @login_required
-# # need to add parameters (trip id, winners, confirmation)
-# def emailWinners():
-#     check_clearance = select([AdminClearance]).where(AdminClearance.email == session.get('profile').get('email'))
-#     # to change to pull from the database
-#     winners = [{'name' : 'name', 'email' : 'email'}]
+def get_response(id):
+    response_text = select([Response]).where(Response.id == id)
+    response = db.session.execute(response_text).fetchone()
+
+    if response is None:
+        abort(404, "Response doesn't exist.")
     
-#     if check_clearance is not None:
-#         with mail.connect() as conn:
-#             for user in winners:
-#                 msg = Message('Lottery Selection', recipients = [user['email']])
-#                 # to add specific lottery trip based on database pull
-#                 msg.body = 'Hey ' + user['name'] + '! You have been selected for this lottery trip'
-#                 conn.send(msg)
-#         return 'message sent'
+    return response
+
+# confirms user attendance for given trip
+@app.route('/confirmattendance/<int:id>')
+def confirmattendance(id):
+    to_update = update(Response).where(Response.id == id).values(user_behavior = "Confirmed")
+    db.session.execute(to_update)
+    db.session.commit()
+    return redirect(url_for('dashboard'))
 
 if __name__ == '__main__':
     app.run()
