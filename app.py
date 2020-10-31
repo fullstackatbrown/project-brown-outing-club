@@ -236,5 +236,12 @@ def confirmattendance(id):
     db.session.commit()
     return redirect(url_for('dashboard'))
 
+@app.route('/declineattendance/<int:id>')
+def declineattendance(id):
+    to_update = update(Response).where(Response.id == id).values(user_behavior = "Declined")
+    db.session.execute(to_update)
+    db.session.commit()
+    return redirect(url_for('dashboard'))
+
 if __name__ == '__main__':
     app.run()
