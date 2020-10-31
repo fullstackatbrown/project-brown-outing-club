@@ -65,6 +65,12 @@
                 See All Trips</a
               >
             </li>
+            <li class ="nav-item">
+              <a class="nav-link js-scroll-trigger" href="/admin">Admin</a>
+            </li>
+            <li class ="nav-item">
+              <a class="nav-link js-scroll-trigger" href="/logout">Logout</a>
+            </li>
             {% if is_admin %}
             <li class="nav-item">
               <a class="nav-link js-scroll-trigger" href="/admin" id="admin"
@@ -140,25 +146,22 @@
                     </h6>
                   </div >
                   <div class = "info-cont">
-                    <h6 class="content-label first-collumn same-line">LOTTERY CLOSES</h6>
-                    <i
-                    class="fas fa-info-circle icon-small"
-                    data-toggle="tooltip"
+                    <h6 data-toggle="tooltip"
                     data-placement="right"
-                    title="All lotteries close at 11:59 pm ET."
-                  ></i>
+                    title="All lotteries close at 11:59 pm ET." 
+                    class="content-label first-collumn same-line">
+                    LOTTERY CLOSES ⓘ</h6>
+                
                     <h6 class="content first-collumn">
                       {{ trip['signup_deadline'].strftime('%b %d, %Y') }}
                     </h6>
                   </div>
                   <div class = "info-cont">
-                    <h6 class="content-label same-line">PRICE</h6>
-                    <i
-                      class="fas fa-info-circle icon-small"
-                      data-toggle="tooltip"
-                      data-placement="right"
-                      title="The BOC offers financial aid on all trips, no questions asked!"
-                    ></i>
+                    <h6 data-toggle="tooltip"
+                    data-placement="right"
+                    title="The BOC offers financial aid on all trips, no questions asked!"
+                    class="content-label same-line">PRICE ⓘ</h6>
+          
                     <h6 class="content">
                       {% if trip['price'] is not none or trip['price']==0 %} ${{
                       trip['price'] }} {% else %} FREE {% endif %}
@@ -215,15 +218,12 @@
                     onsubmit="return confirm('Are you sure you want to enter the lottery?');"
                   >
                     <input type="checkbox" id="car" name="car" value="True" />
-                    <label class="form-message" for="car"
-                      >Can you can bring a car?</label
-                    >
-                    <i
-                    class="fas fa-info-circle icon-small"
-                    data-toggle="tooltip"
+                    <label class="form-message" for="car"  data-toggle="tooltip"
                     data-placement="right"
                     title="We run separate lotteries, one for those with cars and one for those without cars. We need a certain number of people with cars to drive the group there!"
-                  ></i>
+                      >Can you can bring a car? ⓘ</label
+                    >
+           
 
                     <br />
                     <input
@@ -232,15 +232,11 @@
                       name="financial_aid"
                       value="True"
                     />
-                    <label class="form-message same-line" for="financial_aid"
-                      >Do you need financial aid? </label
-                    >
-                    <i
-                    class="fas fa-info-circle icon-small"
-                    data-toggle="tooltip"
+                    <label  data-toggle="tooltip"
                     data-placement="right"
-                    title="The BOC offers financial aid on all trips, no questions asked!"
-                  ></i>
+                    title="The BOC offers financial aid on all trips, no questions asked!" class="form-message same-line" for="financial_aid"
+                      >Do you need financial aid? ⓘ </label
+                    >
                     <br />
                     <button
                       type="submit"
