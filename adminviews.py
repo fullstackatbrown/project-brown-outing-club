@@ -177,6 +177,7 @@ class ResponseView(ReqClearance):
     #sets options for user_behavior (null, declined, or no show)
     form_choices = {
         'user_behavior': [
+            ("NoResponse", "No Response"),
             ("Confirmed", "Confirmed"),
             ("Declined", "Declined"),
             ("No Show", "No Show")
@@ -188,7 +189,7 @@ class ResponseView(ReqClearance):
         if not model.lottery_slot:
             return 'Not Given a Spot'
 
-        if model.user_behavior is not None:
+        if (model.user_behavior != "NoResponse"):
             return model.user_behavior
 
         select_behavior = '''
@@ -196,9 +197,9 @@ class ResponseView(ReqClearance):
                 <input id="user_email" name="user_email"  type="hidden" value="{user_email}">
                 <input id="response_id" name="response_id"  type="hidden" value="{response_id}">
                 <select id="behavior" name="behavior">
+                    <option value="No Show">No Show</option>
                     <option value="Confirmed">Confirmed</option>
                     <option value="Declined">Declined</option>
-                    <option value="No Show">No Show</option>
                 </select>
                 <button type='submit'>Submit</button>
             </form>

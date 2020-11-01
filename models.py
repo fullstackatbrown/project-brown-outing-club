@@ -76,7 +76,7 @@ class Response(db.Model):
     lottery_slot = db.Column(db.Boolean, default=False)
 
     #update when user responds to their trip spot offer
-    user_behavior = db.Column(db.String(10))
+    user_behavior = db.Column(db.String(20), default = "NoResponse", nullable = False)
 
     def __repr__(self):
         trip = Trip.query.filter_by(id = self.trip_id).first()

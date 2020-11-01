@@ -4,7 +4,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_admin import Admin
 from flask_mail import Mail
 from sqlalchemy.sql import select, func, text, delete
-from sqlalchemy import create_engine, Date, cast, update
+from sqlalchemy import and_, create_engine, Date, cast, update
 from datetime import date
 
 #for OAuth
@@ -238,10 +238,28 @@ def confirmattendance(id):
 
 @app.route('/declineattendance/<int:id>')
 def declineattendance(id):
+    # update response to declined
     to_update = update(Response).where(Response.id == id).values(user_behavior = "Declined")
     db.session.execute(to_update)
+
+    declined_response = get_response(id)
+    # get row of waitlist to update since there is an open spot for trip w/ same trip id as declined response
+    get_waitlist = select([Waitlist]).where(and_(Waitlist.trip_id == declined_response["trip_id"], Waitlist.waitlist_rank == 1, Waitlist.off == False))
+    waitlist = db.session.execute(get_waitlist).fetchone()
+
+    # if there are still people waiting for the trip in the waitlist
+    if waitlist is not None:
+        #remove user from waitlist
+        wait_text = update(Waitlist).where(and_(Waitlist.trip_id == declined_response["trip_id"], Waitlist.waitlist_rank == 1, Waitlist.off == False)).values(off = True)
+        db.session.execute(wait_text)
+        #update response from user to reflect getting a lottery slot
+        wait_update = update(Response).where(Response.id == waitlist["response_id"]).values(lottery_slot = True)
+        db.session.execute(wait_update)
+        #update rest of the waitlist to move their positions up on the waitlist
+        db.session.query(Waitlist).filter_by(trip_id=declined_response["trip_id"]).filter_by(off=False).update({Waitlist.waitlist_rank: Waitlist.waitlist_rank-1})
     db.session.commit()
     return redirect(url_for('dashboard'))
+
 
 if __name__ == '__main__':
     app.run()
