@@ -219,6 +219,15 @@ def logout():
     params = {'returnTo': url_for('index', _external=True), 'client_id': 'J28X7Tck3Wh7xrch1Z3OQYN379zanO6Z'}
     return redirect(auth0.api_base_url + '/v2/logout?' + urlencode(params))
 
+def get_response(id):
+    response_text = select([Response]).where(Response.id == id)
+    response = db.session.execute(response_text).fetchone()
+
+    if response is None:
+        abort(404, "Response doesn't exist.")
+    
+    return response
+
 # confirms user attendance for given trip
 @app.route('/confirmattendance/<int:id>')
 def confirmattendance(id):
