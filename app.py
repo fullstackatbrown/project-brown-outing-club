@@ -270,7 +270,7 @@ def declineattendance(id):
     db.session.commit()
     
     trip = get_trip(declined_response["trip_id"])
-    msg = Message('Lottery Selection', sender="brownuoutingclub@gmail.com", recipients = [declined_response["user_email"]])
+    msg = Message('Lottery Selection', recipients = [declined_response["user_email"]])
     msg.body = 'Hey! You have been selected for ' + trip["name"] + '! Please confirm your attendance by clicking on the link below. \n\n' + "http://127.0.0.1:5000" + url_for('confirmattendance', id = declined_response["id"])
     mail.send(msg)
     return redirect(url_for('dashboard'))
