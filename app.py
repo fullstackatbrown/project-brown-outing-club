@@ -153,6 +153,16 @@ def individual_trip(id, taken_spots = None):
         signed = True
     return render_template('trip.html', trip = trip, taken_spots = taken_spots, signed_up = signed)
 
+@app.route('/confirm/<int:id>')
+@login_required
+def trip_confirm(id):
+    trip = get_trip(id)
+    signed = False
+    #list of trips that have lotteries the user has signed up for
+    return render_template('confirm.html', trip = trip)
+
+
+
 #displays past trips
 @app.route('/pasttrips')
 def pasttrips():
