@@ -2,7 +2,7 @@ import os
 from flask import Flask, render_template, request, jsonify, redirect, session, url_for, flash
 from flask_sqlalchemy import SQLAlchemy
 from flask_admin import Admin
-from flask_mail import Mail
+from flask_mail import Mail, Message
 from sqlalchemy.sql import select, func, text, delete
 from sqlalchemy import and_, create_engine, Date, cast, update
 from datetime import date
@@ -268,6 +268,11 @@ def declineattendance(id):
         #update rest of the waitlist to move their positions up on the waitlist
         db.session.query(Waitlist).filter_by(trip_id=declined_response["trip_id"]).filter_by(off=False).update({Waitlist.waitlist_rank: Waitlist.waitlist_rank-1})
     db.session.commit()
+    
+    trip = get_trip(declined_response["trip_id"])
+    msg = Message('Lottery Selection', sender="brownuoutingclub@gmail.com", recipients = [declined_response["user_email"]])
+    msg.body = 'Hey! You have been selected for ' + trip["name"] + '! Please confirm your attendance by clicking on the link below. \n\n' + "http://127.0.0.1:5000" + url_for('confirmattendance', id = declined_response["id"])
+    mail.send(msg)
     return redirect(url_for('dashboard'))
 
 
