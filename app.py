@@ -6,6 +6,7 @@ from flask_mail import Mail, Message
 from sqlalchemy.sql import select, func, text, delete
 from sqlalchemy import and_, create_engine, Date, cast, update
 from datetime import date
+import pymysql
 
 #for OAuth
 from functools import wraps
@@ -50,7 +51,7 @@ from adminviews import *
 
 # db.session.add(AdminClearance(email = "test@brown.edu", can_create=True, can_edit=True, can_delete=True))
 # db.session.add(Trip(name="Adirondack Hiking", description="this is a test", contact="test@brown.edu", boc_leaders="ayo, ayo, and ayo", destination="NYC, NY", image="https://www.adirondack.net/images/mountainrangefall.jpg", departure_date="2021-08-20", departure_location="Faunce", departure_time="15:00:00", return_date="2021-08-23", signup_deadline="2021-08-13", price=15.75, noncar_cap=15))
-db.session.commit()
+# db.session.commit()
 
 #instantiate flask-admin
 # Check out /admin/{table name}/
@@ -108,13 +109,13 @@ def login_required(f):
     @wraps(f)
     def check_login(*args, **kwargs):
         if 'profile' not in session:
-            return redirect(url_for('index'))
+            return redirect(url_for('login'))
         return f(*args, **kwargs)
     return check_login
 
 #dashboard that is the target of redirect from login page
 @app.route('/dashboard')
-@login_required
+# @login_required
 def dashboard():
     #selects rows where the current date matches or is earlier than the sign up deadline
     #NOTE: current date uses the server clock to fetch the date, so make sure the app is deployed on an Eastern Time Server
@@ -133,8 +134,10 @@ def dashboard():
         taken[trip_id] = spot
 
     #checks if current user email is in adminclearance table
-    currentuser_email = session.get('profile').get('email')
-    is_admin = db.session.query(AdminClearance).filter_by(email = currentuser_email).first() is not None
+    is_admin = False
+    if session.get('profile') is not None:
+        currentuser_email = session.get('profile').get('email')
+        is_admin = db.session.query(AdminClearance).filter_by(email = currentuser_email).first() is not None
     print(upcoming_trips)
     return render_template('upcoming.html', past_trips=past_trips, upcoming_trips = upcoming_trips, taken_spots = taken, is_admin = is_admin)
 
