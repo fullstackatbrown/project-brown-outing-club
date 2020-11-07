@@ -157,7 +157,6 @@ def individual_trip(id, taken_spots = None):
 @login_required
 def trip_confirm(id):
     trip = get_trip(id)
-    signed = False
     #list of trips that have lotteries the user has signed up for
     return render_template('confirm.html', trip = trip)
 
