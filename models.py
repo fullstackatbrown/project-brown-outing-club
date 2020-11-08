@@ -1,5 +1,7 @@
 from app import db
 from sqlalchemy import CheckConstraint
+from sqlalchemy.dialects.postgresql import UUID
+import uuid
 
 class AdminClearance(db.Model):
     __tablename__ = 'adminclearance'
@@ -64,7 +66,7 @@ class Trip(db.Model):
 
 class Response(db.Model):
     __tablename__ = 'responses'
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.String(36), default=lambda: str(uuid.uuid4()), primary_key=True)
     trip_id = db.Column(db.Integer, db.ForeignKey('trips.id', ondelete="CASCADE"), nullable=False)
     trip = db.relationship('Trip', backref = db.backref('responses'))
     user_email = db.Column(db.String(120), db.ForeignKey('user.email', ondelete="CASCADE"), nullable=False)
@@ -89,7 +91,7 @@ class Waitlist(db.Model):
     trip = db.relationship('Trip', backref = db.backref('waitlist'))
     #Yes, as relationship is an ORM concept that helps map the SQL table relationships to the object world, 
     # but it does not define them.
-    response_id = db.Column(db.Integer, db.ForeignKey('responses.id', ondelete="CASCADE"), nullable=False)
+    response_id = db.Column(db.String(36), db.ForeignKey('responses.id', ondelete="CASCADE"), nullable=False)
     response = db.relationship('Response', backref = db.backref('waitlist'))
     waitlist_rank = db.Column(db.Integer, nullable=False)
 
