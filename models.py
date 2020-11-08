@@ -1,6 +1,5 @@
 from app import db
 from sqlalchemy import CheckConstraint
-from sqlalchemy.dialects.postgresql import UUID
 import uuid
 
 class AdminClearance(db.Model):
