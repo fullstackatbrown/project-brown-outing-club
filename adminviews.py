@@ -138,14 +138,16 @@ class TripView(ReqClearance):
         trip_id = form['trip_id']
 
         # to change to pull from the database
-        winners = self.session.query(Response).filter_by(id = trip_id, lottery_slot = True).join(Trip, Response.trip_id == Trip.id).all()
-    
+        winners = self.session.query(Response).filter_by(trip_id = trip_id, lottery_slot = True).join(Trip, Response.trip_id == Trip.id).all()
+        print("hi")
+        print(winners)
         with mail.connect() as conn:
             for response in winners:
                 msg = Message('Lottery Selection', recipients = [response.user_email])
                 # to add specific lottery trip based on database pull
                 msg.body = 'Hey! You have been selected for ' + response.trip.name + '! Please confirm your attendance by clicking on the link below. \n\n' + "http://127.0.0.1:5000" + url_for('confirmattendance', id = response.id)
                 conn.send(msg)
+                print("sent")
         return redirect(trip_index)
         
 
@@ -172,7 +174,7 @@ class ResponseView(ReqClearance):
         'trip.noncar_cap', 'trip.car_cap', 'financial_aid'
     ]
 
-    column_list = ['trip', 'user', 'financial_aid', 'car', 'lottery_slot', 'user_behavior']
+    column_list = ['trip', 'user', 'financial_aid', 'car', 'lottery_slot', 'user_behavior', 'resend_email']
 
     #sets options for user_behavior (null, declined, or no show)
     form_choices = {
@@ -206,12 +208,6 @@ class ResponseView(ReqClearance):
         '''.format(update_behavior=url_for('.update_behavior'), response_id=model.id, user_email=model.user_email)
 
         return Markup(select_behavior)
-    
-    #sets the format of the column User Behavior
-    #displays a selection of options to update user behavior to if necessary (i.e. decline, no show)
-    column_formatters = {
-        'user_behavior': format_userbehavior
-    }
 
     #creates a /response/updatebehavior endpoint that lowers user weights according to their behavior
     @expose('updatebehavior', methods=['POST'])
@@ -239,6 +235,40 @@ class ResponseView(ReqClearance):
         except Exception:
             flash('Failed to update user weights', 'error')
 
+        return redirect(response_index)
+
+    def format_resendEmail(view, context, model, name):
+        #if model.signup_deadline > datetime.date.today():
+         #   return "Signup Deadline Hasn't Passed"
+        
+        resendEmail_button = '''
+            <form action="{resendemail}" method="POST">
+                <input id="response_id" name="response_id"  type="hidden" value="{response_id}">
+                <button type='submit'>Resend Email</button>
+            </form>
+        '''.format(resendemail=url_for('.resend_email'), response_id=model.id)
+
+        return Markup(resendEmail_button)
+    
+   #sets the format of the column User Behavior
+    #displays a selection of options to update user behavior to if necessary (i.e. decline, no show)
+    column_formatters = {
+        'user_behavior': format_userbehavior,
+        'resend_email': format_resendEmail
+    }
+
+    @expose('resendemail', methods=['POST'])
+    def resend_email(self):
+        response_index = self.get_url('.index_view')
+        form = get_form_data()
+
+        response_id = form['response_id']
+        response = self.get_one(response_id)
+        trip = self.session.query(Trip).filter_by(id=response.trip_id).first()
+
+        msg = Message('Lottery Selection', recipients = [response.user_email])
+        msg.body = 'Hey! You have been selected for ' + trip.name + '! Please confirm your attendance by clicking on the link below. \n\n' + "http://127.0.0.1:5000" + url_for('confirmattendance', id = response.id)
+        mail.send(msg)
         return redirect(response_index)
 
 class WaitlistView(ReqClearance):
@@ -311,7 +341,7 @@ class WaitlistView(ReqClearance):
 
         #counts the number of responses to the trip in question that have been awarded a lottery spot and have either accepted, or have not declined
         # taken_spots = self.session.query(Response).filter(Response.id == trip_id, Response.lottery_slot == True, or_(Response.user_behavior == None, Response.user_behavior == "Confirmed")).count()
-        taken_spots = self.session.query(Response).filter_by(id = trip_id, lottery_slot = True).count()
+        taken_spots = self.session.query(Response).filter_by(trip_id = trip_id, lottery_slot = True).count()
         #calculate total spots taken for the trip
         total_spots = trip.noncar_cap
         if trip.car_cap is not None:
@@ -327,9 +357,10 @@ class WaitlistView(ReqClearance):
             user = self.session.query(User).filter(User.email == response.user_email).first()
             gotspot(user)
 
-            #ACTION REQUIRED: 
-            #send email updating user about their spot in the trip
-            #send_email(user)
+            #emails person moved off of the waitlist
+            msg = Message('Lottery Selection', recipients = [response.user_email])
+            msg.body = 'Hey! You have been selected for ' + trip.name + '! Please confirm your attendance by clicking on the link below. \n\n' + "http://127.0.0.1:5000" + url_for('confirmattendance', id = response.id)
+            mail.send(msg)
         else :
             flash('Not enough spots available to move someone off the waitlist', 'error')
 
