@@ -205,7 +205,7 @@ def lotterysignup(id):
         db.session.commit()
     return redirect(url_for('dashboard'))
 
-@app.route('/lotterywithdraw/<int:id>', methods=['POST'])
+@app.route('/lotterywithdraw/<id>', methods=['POST'])
 @login_required
 def lotterywithdraw(id):
     response = db.session.query(Response).filter(Response.trip_id == id).first()
@@ -241,14 +241,14 @@ def get_response(id):
     return response
 
 # confirms user attendance for given trip
-@app.route('/confirmattendance/<int:id>')
+@app.route('/confirmattendance/<id>')
 def confirmattendance(id):
     to_update = update(Response).where(Response.id == id).values(user_behavior = "Confirmed")
     db.session.execute(to_update)
     db.session.commit()
     return redirect(url_for('dashboard'))
 
-@app.route('/declineattendance/<int:id>')
+@app.route('/declineattendance/<id>')
 def declineattendance(id):
     # update response to declined
     to_update = update(Response).where(Response.id == id).values(user_behavior = "Declined")
