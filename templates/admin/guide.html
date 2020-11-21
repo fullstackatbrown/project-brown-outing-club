@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+
+<head>
+    <link rel ="stylesheet" href="{{ url_for('static', filename='css/guide.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@200;300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+</head>
+
+<body>
+    <div class="guide">
+        <div class = "header">
+            <h1>Guide to Admin View</h1>
+            <div class="back">
+                <a href="/admin" id ="admin"><i class="fa fa-home"></i></a>
+            </div>
+        </div>
+        <div class = "general">
+            <h3>General Structure</h3>
+            <ul>
+                <li>list view: displays the data and allows edits and 
+                    deletions using the pencil and trash can icon on 
+                    the leftmost part of the table</li>
+                <li>create view: shows a form with the necessary fields 
+                    to fill in to create a new entry into the table the tab 
+                    is dedicated to</li>
+            </ul>
+        </div>
+        <div class = "features">
+            <h3>Features</h3>
+            <div class="sections">
+                <div class = "section">
+                    <h4>Admin</h4>
+                    <p><b> Overview of functionality:</b><br><br>You can grant more people access to admin view by adding their email to the table using the create tab. 
+                        You can also decide their clearance (e.g. if they can only view, or if they can also edit and delete, etc.)
+                    </p>
+                </div>
+                <div class = "section">
+                    <h4>Users</h4>
+                    <p><b> Overview of functionality:</b><br><br>Clicking the reset weights button <button type='submit'>Reset All Weights</button> will reset all users' weights to the default value 
+                        of 1.0. Use this button at the end of each semester, or whenver you want to reset the weights for the lottery. <br><br>When creating a new 
+                        user, the Auth ID field is the ID associated with the user used by the third party verification service Auth0; you do not have to fill 
+                        it out if you wish to manually create a new user. Keep in mind, all users who register through Auth0 (clicking sign up when logging in) 
+                        will be logged in the table automatically.
+                    </p>
+                </div>
+                <div class = "section">
+                    <h4>Trips</h4>
+                    <p><b> Overview of functionality:</b><br><br>The run lottery column will display a button <strong>only after</strong> the signup deadline has passed for the trip. 
+                        Click the button <button type='submit'>Run</button> to run the lottery and automatically send emails to those who won a spot.
+                        After lottery is run, the lottery field in the response table will be 
+                        updated to true or false depending on if the user was awarded a spot. 
+                        The waitlist table will also be updated with the order for who is next in line for trip spots</p>
+                        Troubleshooting:
+                        <ul>
+                        <li>When creating a trip, input dates by clicking the input field and then using the calendar pop up 
+                            instead of manually typing. If the calendar is filled with NaN, type a number and it should go 
+                            back to valid dates.</li>
+                        <li>When inputting trip leaders, input names separated by commas.</li>
+                        <li>Input images by getting the image url and pasting it in.</li>
+                    </ul>
+                </div>
+                <div class = "section">
+                    <h4>Responses</h4>
+                    <p><b> Overview of functionality:</b><br><br>When a user is awarded a spot, as indicated by the lottery_spot field, you can 
+                        update the user behavior field to match how the user responds to the offer (e.g. <select id="behavior" name="behavior">
+                            <option value="Confirmed">Confirmed</option>
+                            <option value="Declined">Declined</option>
+                            <option value="No Show">No Show</option>
+                        </select>). 
+                        This updates the user weights accordingly.</p>
+                </div>
+                <div class = "section">
+                    <h4>Waitlist</h4>
+                    <p><b> Overview of functionality:</b><br><br>Allows you to give the user up next on the waitlist a spot on the trip by clicking 
+                        the button  <button type='submit'>Move Off Waitlist</button> found under Award Trip Spot. This updates the user’s lottery status in the response table and moves 
+                        the rest of the waitlist up one in standing. If you seek to move someone who isn't the first up on the waitlist, 
+                        you would need to edit the waitlist rank fields of two rows (edit the one you want to move off the waitlist to 
+                        have a rank of 1, and edit the row you want to swap rankings with to have this row's old rank) in order to not 
+                        break the code. If the number of people who have been awarded spots (who have confirmed or have yet to respond) 
+                        is max capacity, you will not be able to move someone off the waitlist.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>

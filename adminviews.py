@@ -1,13 +1,16 @@
 from flask_admin.contrib.sqla import ModelView, filters
 from flask import session, url_for, Markup, flash, redirect, abort
 import os, sqlalchemy
+from sqlalchemy import or_
 from sqlalchemy.sql import select, update, insert, func
-from models import AdminClearance
+from models import AdminClearance, Response, Trip
 from flask_admin import expose, BaseView
 from flask_admin.helpers import get_form_data
+from flask_mail import Mail, Message
 from decimal import Decimal
 import datetime
 from lottery import *
+from app import mail
 
 class ReqClearance(ModelView):
     def is_accessible(self):
@@ -21,6 +24,9 @@ class ReqClearance(ModelView):
                     can_delete = admin['can_delete']
                     return True
         return False
+
+# class AdminView(ReqClearance):
+#     list_template = 'admin/guide.html'
 
 class UserView(ReqClearance):
     # Show only weight and email columns in list view
@@ -44,13 +50,13 @@ class UserView(ReqClearance):
 
 class TripView(ReqClearance):
     # renames image column to clarify input should be a filepath
-    column_labels = dict(image='Image Source Filepath')
+    column_labels = dict(image='Image Source Filepath', boc_leaders="Trip Leaders")
 
     # excludes image column from list view
     column_list = (
-        'name', 'contact', 'destination', 'departure_date', 'departure_location', 
+        'name', 'contact', 'boc_leaders', 'destination', 'departure_date', 'departure_location', 
         'departure_time', 'return_date', 'return_time','signup_deadline', 
-        'price', 'car_cap', 'noncar_cap', 'Run Lottery'
+        'price', 'car_cap', 'noncar_cap', 'Run Lottery', 'Email Winners'
         )
 
     # Enable search functionality - it will search for trips
@@ -63,8 +69,8 @@ class TripView(ReqClearance):
 
     #creates the html form with a button that will call lottery_view method to run for a specific trip
     def format_runlottery(view, context, model, name):
-        if model.signup_deadline > datetime.date.today():
-            return "Signup Deadline Hasn't Passed"
+        #if model.signup_deadline > datetime.date.today():
+         #   return "Signup Deadline Hasn't Passed"
 
         if model.lottery_completed:
             return 'Completed'
@@ -77,12 +83,6 @@ class TripView(ReqClearance):
         '''.format(lottery_view=url_for('.lottery_view'), trip_id=model.id)
 
         return Markup(runlottery_button)
-    
-    #sets the format of the column Run Lottery
-    #displays a button to run the lottery or message saying lottery is complete depending on Trips column lottery_completed
-    column_formatters = {
-        'Run Lottery': format_runlottery
-    }
 
     #creates a /trip/runlottery endpoint that runs the runlottery method on the trip id from the form 
     @expose('runlottery', methods=['POST'])
@@ -109,6 +109,46 @@ class TripView(ReqClearance):
             flash('Failed to run lottery on the trip', 'error')
 
         return redirect(trip_index)
+
+    def format_emailWinners(view, context, model, name):
+        #if model.signup_deadline > datetime.date.today():
+         #   return "Signup Deadline Hasn't Passed"
+        
+        emailWinners_button = '''
+            <form action="{emailwinners}" method="POST">
+                <input id="trip_id" name="trip_id"  type="hidden" value="{trip_id}">
+                <button type='submit'>Run</button>
+            </form>
+        '''.format(emailwinners=url_for('.emailWinners_view'), trip_id=model.id)
+
+        return Markup(emailWinners_button)
+    
+    #sets the format of the column Run Lottery
+    #displays a button to run the lottery or message saying lottery is complete depending on Trips column lottery_completed
+    column_formatters = {
+        'Run Lottery': format_runlottery,
+        'Email Winners': format_emailWinners
+    }
+
+    @expose('emailWinners', methods=['POST'])
+    def emailWinners_view(self):
+        trip_index = self.get_url('.index_view')
+        form = get_form_data()
+
+        trip_id = form['trip_id']
+
+        # to change to pull from the database
+        winners = self.session.query(Response).filter_by(id = trip_id, lottery_slot = True).join(Trip, Response.trip_id == Trip.id).all()
+    
+        with mail.connect() as conn:
+            for response in winners:
+                print(response.__dict__)
+                msg = Message('Lottery Selection', recipients = [response.user_email])
+                # to add specific lottery trip based on database pull
+                msg.body = 'Hey! You have been selected for ' + response.trip.name + '! Please confirm your attendance below.'
+                conn.send(msg)
+        return redirect(trip_index)
+        
 
 class ResponseView(ReqClearance):
     # renames columns for legibility
@@ -267,19 +307,31 @@ class WaitlistView(ReqClearance):
 
         response = self.session.query(Response).filter_by(id=response_id).first()
         waitlist = self.get_one(waitlist_id)
+        trip = self.session.query(Trip).filter_by(id=trip_id).first()
 
-        #set lottery_slot and off fields to true
-        response.lottery_slot=True
-        waitlist.off=True
+        #counts the number of responses to the trip in question that have been awarded a lottery spot and have either accepted, or have not declined
+        # taken_spots = self.session.query(Response).filter(Response.id == trip_id, Response.lottery_slot == True, or_(Response.user_behavior == None, Response.user_behavior == "Confirmed")).count()
+        taken_spots = self.session.query(Response).filter_by(id = trip_id, lottery_slot = True).count()
+        #calculate total spots taken for the trip
+        total_spots = trip.noncar_cap
+        if trip.car_cap is not None:
+            total_spots += trip.car_cap
 
-        #supdate ranking for remaining waitlist rows on waitlist
-        self.session.query(Waitlist).filter_by(trip_id=trip_id).filter_by(off=False).update({Waitlist.waitlist_rank: Waitlist.waitlist_rank-1})
-        user = self.session.query(User).filter(User.email == response.user_email).first()
-        gotspot(user)
+        if (total_spots - taken_spots > 0):
+            #set lottery_slot and off fields to true
+            response.lottery_slot=True
+            waitlist.off=True
 
-        #ACTION REQUIRED: 
-        #send email updating user about their spot in the trip
-        #send_email(user)
+            #supdate ranking for remaining waitlist rows on waitlist
+            self.session.query(Waitlist).filter_by(trip_id=trip_id).filter_by(off=False).update({Waitlist.waitlist_rank: Waitlist.waitlist_rank-1})
+            user = self.session.query(User).filter(User.email == response.user_email).first()
+            gotspot(user)
+
+            #ACTION REQUIRED: 
+            #send email updating user about their spot in the trip
+            #send_email(user)
+        else :
+            flash('Not enough spots available to move someone off the waitlist', 'error')
 
         try:
             self.session.commit()
@@ -292,3 +344,8 @@ class BackToDashboard(BaseView):
     @expose('/')
     def back_to_dashboard(self):
         return redirect(url_for('dashboard'))
+
+class UserGuide(BaseView):
+    @expose('/')
+    def user_guide(self):
+        return redirect(url_for('guide'))

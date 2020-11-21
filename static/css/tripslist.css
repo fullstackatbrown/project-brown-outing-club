@@ -1,0 +1,151 @@
+body {
+    --boc-1: #194c61;
+    --boc-2: #00c793;
+    --boc-3: #fa1945;
+} 
+
+.navbar-dark {
+    background-color: var(--boc-1);
+}
+
+.navbar, .nav-link {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 500;
+}
+
+.section-label {
+    height: 100px;
+    background-color: var(--boc-1);
+    margin-top: 20px;
+    border-radius: 10px;
+}
+
+.trip-section {
+    margin-left: 50px;
+    border: 1px var(--boc-1);
+}
+
+.trip-table {
+    margin-top: 10px;
+    margin-bottom: 10px;
+    padding-left: 10px;
+    padding-right: 10px;
+    width: 100%;
+    display: grid;
+    grid-template-rows: repeat(2, 0.25fr);
+    grid-template-columns: repeat(2, 1fr);
+}
+
+#span-trip-title {
+    grid-column-start: 1;
+    grid-column-end: 3;
+    padding-left: 0px;
+    margin-left: 0px;
+}
+
+.trip-table-container {
+    width: 100%;
+    border: 0.5px;
+    border-color: var(--boc-1);
+    border-style: solid;
+    border-collapse: collapse;
+    border-radius: 10px;
+    overflow: hidden;
+    margin-top: 20px;
+    margin-right: 40px;
+}
+
+.trip-title {
+    text-decoration: none;   
+    font-family: 'Montserrat', sans-serif;
+    font-size: 32px !important;
+    color: black !important;
+    margin-left: 0px;
+    padding-left: 0px;
+}
+
+.trip-title:hover, .contact-info:hover {
+    color: var(--boc-1);
+}
+
+
+.trip-thumb {
+    width: 100%;
+    height: 100%;
+}
+
+.section-title {
+    padding-top: 30px;
+    margin-left: 30px;
+    font-family: 'Montserrat', sans-serif;
+    color: white;
+    margin-bottom: 20px;
+}
+
+.trip-details {
+    width: 50%;
+    margin-left: 10px;
+    margin-right: 10px;
+}
+.trip-lottery {
+    width: 50%;
+    margin-left: 10px;
+    margin-right: 10px;
+}
+
+.trip-date {
+    display: inline-block;
+}
+.same-line {
+    display: inline-block;
+}
+
+.content-label {
+    font-family: 'Open Sans', sans-serif;
+    font-weight: 700;
+    font-size: 10px;
+}
+
+.content {
+    font-family: 'Roboto', sans-serif;
+    font-weight: 250;
+    font-size: 16px;
+    color: black;
+
+}
+
+.contact-info:hover {
+    text-decoration: none;
+}
+
+.in-lottery {
+    font-family: 'Lato', sans-serif;
+    font-weight: 550;
+}
+
+.lottery-spots {
+    font-family: 'Lato', sans-serif;
+    font-weight: 300;
+}
+
+
+.contact-info {
+    color: black;
+}
+
+.lottery-button {
+    background-color: var(--boc-3);
+    border-color: var(--boc-3);
+    font-family: 'Lato', sans-serif;
+    font-weight: 600;
+    font-size: 16px;
+    color: white;
+    margin-top: 20px;
+    width: 150px;
+}
+
+.lottery-button:hover {
+    background-color: var(--boc-1);
+    border-color: var(--boc-1);
+    color:white;
+}
