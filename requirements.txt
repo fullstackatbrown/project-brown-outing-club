@@ -7,3 +7,5 @@ Requests
 OAuth
 authlib
 flask_mail
+guid
+uuid

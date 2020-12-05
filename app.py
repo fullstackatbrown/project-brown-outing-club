@@ -7,6 +7,10 @@ from sqlalchemy.sql import select, func, text, delete
 from sqlalchemy import and_, create_engine, Date, cast, update
 from datetime import date
 import pymysql
+import random
+from guid import GUID
+from sqlalchemy.dialects.postgresql import UUID
+import uuid
 
 #for OAuth
 from functools import wraps
@@ -46,12 +50,14 @@ from models import *
 from adminviews import *
 
 # refresh database 
-# db.drop_all()
 # db.create_all()
+# db.drop_all()
 
 # db.session.add(AdminClearance(email = "test@brown.edu", can_create=True, can_edit=True, can_delete=True))
 # db.session.add(Trip(name="Adirondack Hiking", description="this is a test", contact="test@brown.edu", boc_leaders="ayo, ayo, and ayo", destination="NYC, NY", image="https://www.adirondack.net/images/mountainrangefall.jpg", departure_date="2021-08-20", departure_location="Faunce", departure_time="15:00:00", return_date="2021-08-23", signup_deadline="2021-08-13", price=15.75, noncar_cap=15))
 # db.session.commit()
+
+    
 
 #instantiate flask-admin
 # Check out /admin/{table name}/
@@ -63,6 +69,14 @@ admin.add_view(ResponseView(Response, db.session))
 admin.add_view(WaitlistView(Waitlist, db.session))
 admin.add_view(UserGuide(name="Admin User Guide"))
 admin.add_view(BackToDashboard(name="Back to Main Site"))
+
+def dummy_users(): # put into a test file 
+    for i in range(50):
+        db.session.add(User(email = str(uuid.uuid4())+"@brown.edu", auth_id = int(uuid.uuid4()), weight = random.randint(-2,2)))
+
+    db.session.commit()
+
+dummy_users()
 
 # Serve a template from index
 @app.route('/')
