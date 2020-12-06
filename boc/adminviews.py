@@ -3,12 +3,13 @@ from flask import session, url_for, Markup, flash, redirect, abort
 import os, sqlalchemy
 from sqlalchemy import or_
 from sqlalchemy.sql import select, update, insert, func
-from models import AdminClearance
+from .models import AdminClearance, Response, Trip
 from flask_admin import expose, BaseView
 from flask_admin.helpers import get_form_data
 from decimal import Decimal
 import datetime
-from lottery import *
+from .lottery import *
+# from  import mail
 
 class ReqClearance(ModelView):
     def is_accessible(self):
@@ -307,9 +308,9 @@ class WaitlistView(ReqClearance):
 class BackToDashboard(BaseView):
     @expose('/')
     def back_to_dashboard(self):
-        return redirect(url_for('dashboard'))
+        return redirect(url_for('trips.dashboard'))
 
 class UserGuide(BaseView):
     @expose('/')
     def user_guide(self):
-        return redirect(url_for('guide'))
+        return redirect(url_for('trips.guide'))

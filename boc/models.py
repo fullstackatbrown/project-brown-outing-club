@@ -1,5 +1,8 @@
-from app import db
 from sqlalchemy import CheckConstraint
+import uuid
+from flask_sqlalchemy import SQLAlchemy
+
+db = SQLAlchemy()
 
 class AdminClearance(db.Model):
     __tablename__ = 'adminclearance'
