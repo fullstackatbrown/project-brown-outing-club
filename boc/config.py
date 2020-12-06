@@ -6,7 +6,7 @@ class Config(object):
     TESTING = False
     CSRF_ENABLED = True
     SECRET_KEY = 'CHANGE THIS SECRET KEY'
-    SQLALCHEMY_DATABASE_URI = os.environ['DATABASE_URL']
+    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL')
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     MAIL_SERVER = 'smtp.gmail.com' # need to change based on server
     MAIL_PORT = 465 # need to change based on port
@@ -19,6 +19,14 @@ class Config(object):
     MAIL_MAX_EMAILS = 400 # large limit for now 
     MAIL_SUPPRESS_SEND = False # same as testing value
     MAIL_ASCII_ATTACHMENTS = False
+
+class TestConfig(object):
+    DEBUG = False
+    TESTING = True
+    CSRF_ENABLED = True
+    SECRET_KEY = 'CHANGE THIS SECRET KEY'
+    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL')
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
 
 class ProductionConfig(Config):
     DEBUG = False

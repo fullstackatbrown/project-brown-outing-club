@@ -1,6 +1,6 @@
 from sqlalchemy.sql import select, update, insert
 from decimal import Decimal
-from models import *
+from .models import *
 
 userweight_floor = Decimal(0.5)
 userweight_roof = Decimal(5.0)

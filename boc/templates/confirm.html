@@ -33,7 +33,7 @@
 
     <link
       rel="stylesheet"
-      href="{{ url_for('static', filename='css/singletrip.css') }}"
+      href="{{ url_for('static', filename='css/tripconfirm.css') }}"
     />
   </head>
 
@@ -52,7 +52,7 @@
         </button>
         <a
           class="navbar-brand js-scroll-trigger"
-          href="{{ url_for('trips.dashboard') }}"
+          href="{{ url_for('dashboard') }}"
           >Brown Outing Club</a
         >
         <div class="collapse navbar-collapse" id="navbarResponsive">
@@ -60,7 +60,7 @@
             <li class="nav-item">
               <a
                 class="nav-link js-scroll-trigger"
-                href="{{ url_for('trips.dashboard') }}"
+                href="{{ url_for('dashboard') }}"
               >
                 See All Trips</a
               >
@@ -90,15 +90,8 @@
             <ul class="list-group list-group-flush">
               <li class="list-group-item trip-title-boxe">
                 <h5 class="card-title">{{ trip.name }}</h5>
-                <a class="trip-title"
-                  href="{{ url_for('trip_confirm', id=trip.id) }}">Confirm Test Page</a>
               </li>
             </ul>
-            <img
-              class="card-img-top"
-              alt="Image of trip."
-              src="{{ trip.image }}"
-            />
             <div class="card-body" id="trip-card-text">
               <ul class="list-group list-group-flush">
                 <li id="trip-info" class="list-group-item">
@@ -170,18 +163,6 @@
                     </h6>
                   </div>
                   <div class = "info-cont">
-                    <h6 class="content-label">TAKEN SPOTS</h6>
-                    <h6 class="content">{{taken_spots}}</h6>
-                  </div>
-                  <div class = "info-cont">
-                    <h6 class="content-label">SPOTS IN LOTTERY</h6>
-                    <h6 class="content">
-                      {% if trip['car_cap'] is not none%} {{trip.car_cap +
-                      trip.noncar_cap}} {% else %} {{trip.noncar_cap}} {% endif
-                      %}
-                    </h6>
-                  </div>
-                  <div class = "info-cont">
                     <h6 class="content-label">DEPARTS FROM</h6>
                     <h6 class="content">{{ trip.departure_location }}</h6>
                   </div>
@@ -190,62 +171,32 @@
                   <p class="card-text">{{ trip.description }}</p>
                 </li>
                 <li class="list-group-item">
-                  <!--
-                                <h5 class="lottery-info">
-                                    {% if trip['car_cap'] is not none%}
-                                        {{trip.car_cap + trip.noncar_cap - taken_spots}} SPOTS AVAILABLE / 
-                                        {{taken_spots}} IN LOTTERY
-                                    {% else %}
-                                        {{trip.noncar_cap - taken_spots}} SPOTS AVAILABLE / 
-                                        {{taken_spots}} IN LOTTERY
-                                    {% endif %} </h2>
-                                -->
                   {% if signed_up %}
                   <form
                     action="{{ url_for('lotterywithdraw', id=trip['id']) }}"
                     method="post"
-                    onsubmit="return confirm('Are you sure you want to leave the lottery?');"
                   >
-                    <button
-                      type="submit"
-                      class="btn btn-secondary btn-lg lottery-button"
-                    >
-                      Remove from lottery
                     </button>
                   </form>
                   {% else %}
                   <form
                     action="{{ url_for('lotterysignup', id=trip['id']) }}"
-                    method="POST"
-                    onsubmit="return confirm('Are you sure you want to enter the lottery?');"
-                  >
-                    <input type="checkbox" id="car" name="car" value="True" />
-                    <label class="form-message" for="car"  data-toggle="tooltip"
-                    data-placement="right"
-                    title="We run separate lotteries, one for those with cars and one for those without cars. We need a certain number of people with cars to drive the group there!"
-                      >Can you can bring a car? ⓘ</label
-                    >
-           
+                    method="POST">
 
                     <br />
-                    <input
-                      type="checkbox"
-                      id="financial_aid"
-                      name="financial_aid"
-                      value="True"
-                    />
-                    <label  data-toggle="tooltip"
-                    data-placement="right"
-                    title="The BOC offers financial aid on all trips, no questions asked!" class="form-message same-line" for="financial_aid"
-                      >Do you need financial aid? ⓘ </label
-                    >
-                    <br />
-                    <button
+                    <button class="btn btn-primary btn-lg lottery-button"
                       type="submit"
-                      class="btn btn-primary btn-lg lottery-button"
-                    >
-                      ENTER LOTTERY
-                    </button>
+                      onclick="return confirm('Are you sure you want to confirm your trip?');"
+                      id="confirm_trip_button"
+                      name="confirm_trip_button"
+                      value="True">Confirm trip enrollment</button>
+                      <button class="btn btn-primary btn-lg lottery-button"
+                      onclick="return confirm('Are you sure you want to decline your trip spot? This action cannot be undone.');"
+                      type="submit" 
+                      id="deny_trip_button"
+                      name="deny_trip_button"
+                      value="False">Decline trip enrollment</button>
+                
                   </form>
                   {% endif %}
                 </li>
@@ -277,6 +228,13 @@
       $(function () {
         $('[data-toggle="tooltip"]').tooltip();
       });
+    </script>
+    <script>
+        function confirmTrip() {
+            confirm("Are you sure you want to confirm your trip?");
+        }
+        function declineTrip() {
+        }
     </script>
   </body>
 </html>
