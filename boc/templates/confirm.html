@@ -52,7 +52,7 @@
         </button>
         <a
           class="navbar-brand js-scroll-trigger"
-          href="{{ url_for('dashboard') }}"
+          href="{{ url_for('trips.dashboard') }}"
           >Brown Outing Club</a
         >
         <div class="collapse navbar-collapse" id="navbarResponsive">
@@ -60,7 +60,7 @@
             <li class="nav-item">
               <a
                 class="nav-link js-scroll-trigger"
-                href="{{ url_for('dashboard') }}"
+                href="{{ url_for('trips.dashboard') }}"
               >
                 See All Trips</a
               >
@@ -173,14 +173,14 @@
                 <li class="list-group-item">
                   {% if signed_up %}
                   <form
-                    action="{{ url_for('lotterywithdraw', id=trip['id']) }}"
+                    action="{{ url_for('trips.lotterywithdraw', id=trip['id']) }}"
                     method="post"
                   >
                     </button>
                   </form>
                   {% else %}
                   <form
-                    action="{{ url_for('lotterysignup', id=trip['id']) }}"
+                    action="{{ url_for('trips.lotterysignup', id=trip['id']) }}"
                     method="POST">
 
                     <br />
