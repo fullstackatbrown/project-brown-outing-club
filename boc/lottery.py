@@ -36,27 +36,72 @@ def runlottery(self, id):
     #replace with the actual lottery mechanism to produce list of users that won a spot
     finalResults = {}
     for i in users:
-        currRank = 0
-        currPerson = users[i]
-        currWeight = users[i].weight
-        currRank = random.randint(0,100) + currWeight #maybe make it out of total number of slots?
-        finalResults[currPerson] = currRank
-    sortedResults = sorted(finalResults.items(), key=lambda x: x[1], reverse=True)
+        if not Response.car:
+            currRank = 0
+            currPerson = users[i]
+            currWeight = users[i].weight
+            currRank = random.randint(0,100) + currWeight #maybe make it out of total number of slots?
+            nonCarFinalResults[currPerson] = currRank
+        else: 
+            currRank = 0
+            currPerson = users[i]
+            currWeight = users[i].weight
+            currRank = random.randint(0,100) + currWeight #maybe make it out of total number of slots?
+            carFinalResults[currPerson] = currRank
+    nonCarSortedResults = sorted(nonCarFinalResults.items(), key=lambda x: x[1], reverse=True)
+    CarSortedResults = sorted(carFinalResults.items(), key=lamvda x: x[1], reverse=True)
     winner_ids =[]
     winner_emails = []
-
-    for i in sortedResults:
-        winner_ids.append(i.id)
-        winner_emails.append(i.email)
-        db.session.add(Response(id))
+    noncar_winner_ids = []
+    winner_emails = []
+    car_winner_emails = []
+    noncar_winner_emails = []
+    waitlist_ids = []
+    car_waitlist_ids = []
+    noncar_waitlist_ids =[]
+    waitlist_emails = []
+    car_waitlist_emails = []
+    noncar_waitlist_emails = []
+    nc = Trip.noncar_cap
+    n = Trip.car_cap
+    for i in range(len(nonCarSortedResults)):
+        if i < nc
+            winner_ids.append(i.id)
+            winner_emails.append(i.email)
+            noncar_winner_ids.append(i.id)
+            noncar_winner_emails.append(i.email)
+        else:
+            waitlist_ids.append(i.id)
+            noncar_waitlist_ids.append(i.id)
+            waitlist_emails.append(i.email)
+            noncar_waitlist_emails.append(i.email)
+    for i in range(len(CarSortedResults)):
+        if i < n
+            winner_ids.append(i.id)
+            car_winner_ids.append(i.id)
+            winner_emails.append(i.email)
+            car_winner_emails.append(i.email)
+        else:
+            waitlist_ids.append(i.id)
+            car_waitlist_ids.append(i.id)
+            waitlist_emails.append(i.email)
+            car_waitlist_emails.append(i.email)
 
     #update lottery_slot field in responses that won a spot
     for index in range(len(winner_ids)):
         self.session.query(Response).filter(Response.id == winner_ids[index]).update({Response.lottery_slot: True})
         user = self.session.query(User).filter(User.email == winner_emails[index]).first()
         gotspot(user)
-
     return winner_emails
+
+    for i in range(len(car_winner_ids)):
+        self.session.query(Response).filter(Response.id == car_waitlist_ids[index]).update({Response.lottery_slot: True})
+        user = self.session.query(User).filter(User.email == winner_emails[index]).first()
+        gotspot(user)
+    return car_winner_emails
+    
+
+
 
 #updates user weights based on if they declined or did not show
 def update_userweights(self, behavior, user_email):
