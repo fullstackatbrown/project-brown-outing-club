@@ -139,15 +139,13 @@ class TripView(ReqClearance):
 
         # to change to pull from the database
         winners = self.session.query(Response).filter_by(trip_id = trip_id, lottery_slot = True).join(Trip, Response.trip_id == Trip.id).all()
-        print("hi")
-        print(winners)
-        with mail.connect() as conn:
-            for response in winners:
-                msg = Message('Lottery Selection', recipients = [response.user_email])
-                # to add specific lottery trip based on database pull
-                msg.body = 'Hey! You have been selected for ' + response.trip.name + '! Please confirm your attendance by clicking on the link below. \n\n' + "http://127.0.0.1:5000" + url_for('confirmattendance', id = response.id)
-                conn.send(msg)
-                print("sent")
+        if winners is not None:
+            with mail.connect() as conn:
+                for response in winners:
+                    msg = Message('Lottery Selection', recipients = [response.user_email])
+                    # to add specific lottery trip based on database pull
+                    msg.body = 'Hey! You have been selected for ' + response.trip.name + '! Please confirm your attendance by clicking on the link below. \n\n' + "http://127.0.0.1:5000" + url_for('confirmattendance', id = response.id)
+                    conn.send(msg)
         return redirect(trip_index)
         
 

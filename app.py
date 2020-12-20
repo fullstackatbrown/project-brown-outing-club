@@ -269,12 +269,15 @@ def declineattendance(id):
         db.session.execute(wait_update)
         #update rest of the waitlist to move their positions up on the waitlist
         db.session.query(Waitlist).filter_by(trip_id=declined_response["trip_id"]).filter_by(off=False).update({Waitlist.waitlist_rank: Waitlist.waitlist_rank-1})
+        # email new winner
+        trip = get_trip(declined_response["trip_id"])
+        waitlist_recipient_response = waitlist["response_id"]
+        waitlist_recipient = get_response(waitlist_recipient_response)
+        msg = Message('Lottery Selection', recipients = [waitlist_recipient["user_email"]])
+        msg.body = 'Hey! You have been selected for ' + trip["name"] + '! Please confirm your attendance by clicking on the link below. \n\n' + "http://127.0.0.1:5000" + url_for('confirmattendance', id = waitlist_recipient["id"])
+        mail.send(msg)
     db.session.commit()
-    
-    trip = get_trip(declined_response["trip_id"])
-    msg = Message('Lottery Selection', recipients = [declined_response["user_email"]])
-    msg.body = 'Hey! You have been selected for ' + trip["name"] + '! Please confirm your attendance by clicking on the link below. \n\n' + "http://127.0.0.1:5000" + url_for('confirmattendance', id = declined_response["id"])
-    mail.send(msg)
+
     return redirect(url_for('dashboard'))
 
 
