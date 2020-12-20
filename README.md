@@ -23,6 +23,7 @@ Find the demo .env file [here](https://drive.google.com/file/d/1k8gmwnB7f437M31O
 your toplevel project directory
 
 #### Running the app
+`export FLASK_APP=boc/__init__.py`
 `flask run`
 
 ## Additional Resources

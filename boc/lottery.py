@@ -65,7 +65,7 @@ def runlottery(self, id):
     nc = Trip.noncar_cap
     n = Trip.car_cap
     for i in range(len(nonCarSortedResults)):
-        if i < n:
+        if i < nc:
             winner_ids.append(i.id)
             winner_emails.append(i.email)
             noncar_winner_ids.append(i.id)

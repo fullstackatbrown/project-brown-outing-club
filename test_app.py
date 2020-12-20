@@ -2,7 +2,6 @@ import os
 import tempfile
 import pytest
 from flask_sqlalchemy import SQLAlchemy
-from flask import Flask
 from boc import *
 
 @pytest.fixture

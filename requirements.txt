@@ -11,6 +11,7 @@ Flask==1.1.2
 Flask-Admin==1.5.6
 Flask-Mail==0.9.1
 Flask-SQLAlchemy==2.4.4
+guid==0.2.1
 idna==2.10
 iniconfig==1.1.1
 itsdangerous==1.1.0
