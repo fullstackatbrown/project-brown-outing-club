@@ -73,5 +73,5 @@ def login_required(f):
 @bp.route('/logout')
 def logout():
     session.clear()
-    params = {'returnTo': url_for('index', _external=True), 'client_id': 'J28X7Tck3Wh7xrch1Z3OQYN379zanO6Z'}
+    params = {'returnTo': url_for('trips.index', _external=True), 'client_id': 'J28X7Tck3Wh7xrch1Z3OQYN379zanO6Z'}
     return redirect(auth0.api_base_url + '/v2/logout?' + urlencode(params))
