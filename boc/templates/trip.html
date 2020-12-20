@@ -91,7 +91,7 @@
               <li class="list-group-item trip-title-boxe">
                 <h5 class="card-title">{{ trip.name }}</h5>
                 <a class="trip-title"
-                  href="{{ url_for('trip_confirm', id=trip.id) }}">Confirm Test Page</a>
+                  href="{{ url_for('trips.trip_confirm', id=trip.id) }}">Confirm Test Page</a>
               </li>
             </ul>
             <img
@@ -202,7 +202,7 @@
                                 -->
                   {% if signed_up %}
                   <form
-                    action="{{ url_for('lotterywithdraw', id=trip['id']) }}"
+                    action="{{ url_for('trips.lotterywithdraw', id=trip['id']) }}"
                     method="post"
                     onsubmit="return confirm('Are you sure you want to leave the lottery?');"
                   >
@@ -215,7 +215,7 @@
                   </form>
                   {% else %}
                   <form
-                    action="{{ url_for('lotterysignup', id=trip['id']) }}"
+                    action="{{ url_for('trips.lotterysignup', id=trip['id']) }}"
                     method="POST"
                     onsubmit="return confirm('Are you sure you want to enter the lottery?');"
                   >

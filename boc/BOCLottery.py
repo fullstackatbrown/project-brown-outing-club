@@ -6,7 +6,7 @@ import random
 
 initList = ['Lucas', 'Ana', 'Ethan', 'Johnny', 'Aidan', 'Clara']
 initWeight = [0, 2, -1, 1, 3, 1] #get these values from SQL db
-finalResults = {}
+finalResults = []
 # these two lists should always be the same length
 for i in range(len(initList)):
     currRank = 0

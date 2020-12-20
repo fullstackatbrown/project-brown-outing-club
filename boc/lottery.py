@@ -1,6 +1,6 @@
 from sqlalchemy.sql import select, update, insert
 from decimal import Decimal
-from models import *
+from .models import *
 
 userweight_floor = Decimal(0.5)
 userweight_roof = Decimal(5.0)
@@ -34,6 +34,7 @@ def runlottery(self, id):
 
     #ACTION REQUIRED:
     #replace with the actual lottery mechanism to produce list of users that won a spot
+    finalResults = {}
     for i in users:
         currRank = 0
         currPerson = users[i]
@@ -43,9 +44,11 @@ def runlottery(self, id):
     sortedResults = sorted(finalResults.items(), key=lambda x: x[1], reverse=True)
     winner_ids =[]
     winner_emails = []
+
     for i in sortedResults:
         winner_ids.append(i.id)
         winner_emails.append(i.email)
+        db.session.add(Response(id))
 
     #update lottery_slot field in responses that won a spot
     for index in range(len(winner_ids)):

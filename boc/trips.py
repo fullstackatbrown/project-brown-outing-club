@@ -1,129 +1,51 @@
 import os
-from flask import Flask, render_template, request, jsonify, redirect, session, url_for, flash
+from flask import Blueprint, Flask, render_template, request, jsonify, redirect, session, url_for, flash
 from flask_sqlalchemy import SQLAlchemy
 from flask_admin import Admin
-from flask_mail import Mail, Message
-from sqlalchemy.sql import select, func, text, delete
-from sqlalchemy import and_, create_engine, Date, cast, update
+from sqlalchemy.sql import select, func, text
+from sqlalchemy import create_engine, Date, cast
 from datetime import date
 import pymysql
-
-#for OAuth
-from functools import wraps
-import json
-from werkzeug.exceptions import HTTPException
-from dotenv import load_dotenv, find_dotenv
-from authlib.integrations.flask_client import OAuth
-from six.moves.urllib.parse import urlencode
-
-#instantiate Flask app
-app = Flask(__name__)
-app.config.from_object(os.environ['APP_SETTINGS'])
-
-#instantiate 0auth authentication
-oauth = OAuth(app)
-
-# auth0 = oauth.register('auth0', os.environ['AUTH_SETTINGS'])
-auth0 = oauth.register(
-    'auth0',
-    client_id='J28X7Tck3Wh7xrch1Z3OQYN379zanO6Z',
-    client_secret='S1PAZdX5lAm3eGIv5tnmJfycfIW9W4Msv8Bi5_5N3uhjVmOVONCUbjaI0Ht6fp_k',
-    api_base_url='https://dev-h395rto6.us.auth0.com',
-    access_token_url='https://dev-h395rto6.us.auth0.com/oauth/token',
-    authorize_url='https://dev-h395rto6.us.auth0.com/authorize',
-    client_kwargs={
-        'scope': 'openid profile email',
-    },
-)
-
-# instantiate mail app
-mail = Mail(app)
-
-# Sync SQLAlchemy with database
-db = SQLAlchemy(app)
-
-from models import *
-from adminviews import *
-
+import random
+from guid import GUID
+from sqlalchemy.dialects.postgresql import UUID
+import uuid
+from .models import *
+from .auth import login_required
 # refresh database 
-# db.drop_all()
-# db.create_all()
+#db.drop_all()
+#db.create_all()
 
-# db.session.add(AdminClearance(email = "test@brown.edu", can_create=True, can_edit=True, can_delete=True))
-# db.session.add(Trip(name="Adirondack Hiking", description="this is a test", contact="test@brown.edu", boc_leaders="ayo, ayo, and ayo", destination="NYC, NY", image="https://www.adirondack.net/images/mountainrangefall.jpg", departure_date="2021-08-20", departure_location="Faunce", departure_time="15:00:00", return_date="2021-08-23", signup_deadline="2021-08-13", price=15.75, noncar_cap=15))
-# db.session.commit()
+bp = Blueprint('trips', __name__)
 
-#instantiate flask-admin
-# Check out /admin/{table name}/
-admin = Admin(app)
-admin.add_view(ReqClearance(AdminClearance, db.session, name = 'Admin'))
-admin.add_view(UserView(User, db.session))
-admin.add_view(TripView(Trip, db.session))
-admin.add_view(ResponseView(Response, db.session))
-admin.add_view(WaitlistView(Waitlist, db.session))
-admin.add_view(UserGuide(name="Admin User Guide"))
-admin.add_view(BackToDashboard(name="Back to Main Site"))
+def dummy_users(): # put into a test file 
+    for i in range(50):
+        db.session.add(User(email = str(uuid.uuid4())+"@brown.edu", auth_id = int(uuid.uuid4()), weight = random.randint(-2,2)))
+
+    db.session.commit()
+
+# dummy_users()
 
 # Serve a template from index
-@app.route('/')
+@bp.route('/')
 def index():
     #create a landing page w welcome, explanation of purpose, login button
     return render_template('test.html', name="name")
 
-#called after authentication
-#stores new users in database if email is not in User Table already
-@app.route('/callback')
-def callback_handling():
-    print("callback")
-    auth0.authorize_access_token()
-    resp = auth0.get('userinfo')
-    userinfo = resp.json()
-
-    session['jwt_payload'] = userinfo
-    session['profile'] = {
-        'user_id': userinfo['sub'],
-        'email': userinfo['email']
-    }
-
-    check_new_user = select([User]).where(User.email == userinfo['email'])
-    if db.session.execute(check_new_user).fetchone() is None:
-        new_user = User(auth_id = userinfo['sub'], email = userinfo['email'])             
-        db.session.add(new_user)
-        add_default_admin = select([User]).where(User.email == "test@brown.edu")
-        if db.session.execute(add_default_admin).fetchone() is None:
-            db.session.add(AdminClearance(email = "test@brown.edu", can_create=True, can_edit=True, can_delete=True))
-        db.session.commit()
-
-    return redirect('/dashboard')
 
 #redirects user to auth0 login
 #User: test@brown.edu
 #Password: #xzAeGCrTenjR9jt
 
-@app.route('/login')
-def login():
-    return auth0.authorize_redirect(redirect_uri='http://127.0.0.1:5000/callback')
-
-#tag that restricts access to only those logged in
-def login_required(f):
-    @wraps(f)
-    def check_login(*args, **kwargs):
-        if 'profile' not in session:
-            return redirect(url_for('login'))
-        return f(*args, **kwargs)
-    return check_login
 
 #dashboard that is the target of redirect from login page
-@app.route('/dashboard')
+@bp.route('/dashboard')
 # @login_required
 def dashboard():
     #selects rows where the current date matches or is earlier than the sign up deadline
     #NOTE: current date uses the server clock to fetch the date, so make sure the app is deployed on an Eastern Time Server
     upcoming_text = select([Trip]).where(Trip.signup_deadline >= func.current_date()).order_by(Trip.signup_deadline)
     upcoming_trips = db.session.execute(upcoming_text).fetchall()
-
-    past_text = upcoming_text = select([Trip]).where(Trip.signup_deadline < func.current_date()).order_by(Trip.signup_deadline)
-    past_trips = db.session.execute(past_text).fetchall()
 
     #number of responses to each trip, in the same order as the upcoming trips list
     taken_text = select([Response.trip_id, func.count(Response.user_email)]).group_by(Response.trip_id)
@@ -139,9 +61,9 @@ def dashboard():
         currentuser_email = session.get('profile').get('email')
         is_admin = db.session.query(AdminClearance).filter_by(email = currentuser_email).first() is not None
     print(upcoming_trips)
-    return render_template('upcoming.html', past_trips=past_trips, upcoming_trips = upcoming_trips, taken_spots = taken, is_admin = is_admin)
+    return render_template('upcoming.html', upcoming_trips = upcoming_trips, taken_spots = taken, is_admin = is_admin)
 
-@app.route('/trip/<int:id>')
+@bp.route('/trip/<int:id>')
 @login_required
 def individual_trip(id, taken_spots = None):
     trip = get_trip(id)
@@ -156,17 +78,16 @@ def individual_trip(id, taken_spots = None):
         signed = True
     return render_template('trip.html', trip = trip, taken_spots = taken_spots, signed_up = signed)
 
-@app.route('/confirm/<int:id>')
+
+@bp.route('/confirm/<int:id>')
 @login_required
 def trip_confirm(id):
     trip = get_trip(id)
     #list of trips that have lotteries the user has signed up for
     return render_template('confirm.html', trip = trip)
 
-
-
 #displays past trips
-@app.route('/pasttrips')
+@bp.route('/pasttrips')
 def pasttrips():
     #selects rows where the current date is after the sign up deadline
     #NOTE: current date uses the server clock to fetch the date, so make sure the app is deployed on an Eastern Time Server
@@ -186,26 +107,12 @@ def get_trip(id):
     return trip
 
 #page linked with "Enter Lottery" from dashboard, should collect information necessary to create Response row in db using a form
-@app.route('/lotterysignup/<int:id>', methods=['POST'])
+@bp.route('/lotterysignup/<int:id>', methods=['POST'])
 @login_required
 def lotterysignup(id):
     trip = get_trip(id)
-    car = False
-    if (request.form.get('car')):
-        car = True
-    financial_aid = False 
-    if (request.form.get('financial_aid')):
-        financial_aid = True
 
-    if (date.today() > trip['signup_deadline']):
-        flash("Deadline has passed to sign up for this lottery")
-    else:
-        new_response = Response(trip_id = id, user_email = session.get('profile').get('email'), financial_aid = financial_aid, car = car)
-        db.session.add(new_response)
-        db.session.commit()
-    return redirect(url_for('dashboard'))
-
-@app.route('/lotterywithdraw/<id>', methods=['POST'])
+@bp.route('/lotterywithdraw/<id>', methods=['POST'])
 @login_required
 def lotterywithdraw(id):
     response = db.session.query(Response).filter(Response.trip_id == id).first()
@@ -213,7 +120,7 @@ def lotterywithdraw(id):
     db.session.commit()
     return redirect(url_for('dashboard'))
 
-@app.route('/adminviewguide')
+@bp.route('/adminviewguide')
 @login_required
 def guide(): 
     # flash("Could not process lottery request", 'error')
@@ -223,13 +130,6 @@ def guide():
     else:
         flash("Only authorized users can view", 'error')
         return render_template('upcoming.html')
-
-#logout function
-@app.route('/logout')
-def logout():
-    session.clear()
-    params = {'returnTo': url_for('index', _external=True), 'client_id': 'J28X7Tck3Wh7xrch1Z3OQYN379zanO6Z'}
-    return redirect(auth0.api_base_url + '/v2/logout?' + urlencode(params))
 
 def get_response(id):
     response_text = select([Response]).where(Response.id == id)
@@ -241,14 +141,14 @@ def get_response(id):
     return response
 
 # confirms user attendance for given trip
-@app.route('/confirmattendance/<id>')
+@bp.route('/confirmattendance/<id>')
 def confirmattendance(id):
     to_update = update(Response).where(Response.id == id).values(user_behavior = "Confirmed")
     db.session.execute(to_update)
     db.session.commit()
     return redirect(url_for('dashboard'))
 
-@app.route('/declineattendance/<id>')
+@bp.route('/declineattendance/<id>')
 def declineattendance(id):
     # update response to declined
     to_update = update(Response).where(Response.id == id).values(user_behavior = "Declined")
@@ -281,5 +181,5 @@ def declineattendance(id):
     return redirect(url_for('dashboard'))
 
 
-if __name__ == '__main__':
-    app.run()
+# if __name__ == '__main__':
+#     app.run()

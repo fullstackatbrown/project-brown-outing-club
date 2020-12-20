@@ -1,0 +1,89 @@
+body {
+    --boc-1: #194c61;
+    --boc-2: #00c793;
+    --boc-3: #fa1945;
+  }
+  
+  .navbar-dark {
+    background-color: var(--boc-1);
+  }
+  
+  .navbar,
+  .nav-link {
+    font-family: "Montserrat", sans-serif;
+    font-weight: 500;
+  }
+  
+  .form-message {
+    font-family: "Montserrat", sans-serif;
+    font-weight: 400;
+  }
+  
+  .same-line {
+    display: inline;
+  }
+  .icon-small {
+    display: inline;
+    position: absolute;
+  }
+  
+  .card-title {
+    text-align: center;
+    font-family: "Montserrat", serif;
+    font-size: 24px;
+    font-weight: 900;
+    padding-top: 20px;
+    padding-bottom: 10px;
+    color: var(--boc-1);
+  }
+  
+  .card-text {
+    font-family: "Montserrat", sans-serif;
+    font-weight: 400;
+  }
+  
+  .lottery-button {
+    background-color: var(--boc-3);
+    border: none;
+    font-family: "Montserrat", sans-serif;
+  }
+  
+  .lottery-button:hover {
+    background-color: var(--boc-2);
+  }
+  
+  .content-label {
+    text-decoration: none;
+    font-weight: 700 !important;
+    font-family: "Montserrat", sans-serif;
+    font-size: 12px;
+    color: black;
+
+  }
+  
+  .content {
+    text-decoration: none;
+    font-family: "Roboto", sans-serif;
+    font-size: 16px;
+    font-weight: 200;
+    color: black;
+
+  }
+  
+  .first-collumn {
+    padding-left: 0px;
+  }
+  
+  .lottery-info {
+    font-family: "Montserrat", sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+  }
+  
+  #trip-info {
+    display: grid;
+    grid-template-rows: repeat(2, 0.4fr);
+    grid-template-columns: repeat(4, 1fr);
+    align-items: start;
+  }
+  
