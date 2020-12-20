@@ -49,7 +49,7 @@ def runlottery(self, id):
             currRank = random.randint(0,100) + currWeight #maybe make it out of total number of slots?
             carFinalResults[currPerson] = currRank
     nonCarSortedResults = sorted(nonCarFinalResults.items(), key=lambda x: x[1], reverse=True)
-    CarSortedResults = sorted(carFinalResults.items(), key=lamvda x: x[1], reverse=True)
+    CarSortedResults = sorted(carFinalResults.items(), key=lambda x: x[1], reverse=True)
     winner_ids =[]
     winner_emails = []
     noncar_winner_ids = []
@@ -65,7 +65,7 @@ def runlottery(self, id):
     nc = Trip.noncar_cap
     n = Trip.car_cap
     for i in range(len(nonCarSortedResults)):
-        if i < nc
+        if i < n:
             winner_ids.append(i.id)
             winner_emails.append(i.email)
             noncar_winner_ids.append(i.id)
@@ -76,7 +76,7 @@ def runlottery(self, id):
             waitlist_emails.append(i.email)
             noncar_waitlist_emails.append(i.email)
     for i in range(len(CarSortedResults)):
-        if i < n
+        if i < n:
             winner_ids.append(i.id)
             car_winner_ids.append(i.id)
             winner_emails.append(i.email)
