@@ -25,7 +25,7 @@ class TestConfig(object):
     TESTING = True
     CSRF_ENABLED = True
     SECRET_KEY = 'CHANGE THIS SECRET KEY'
-    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL')
+    SQLALCHEMY_DATABASE_URI = os.environ.get('TEST_DATABASE_URL')
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
 class ProductionConfig(Config):

@@ -64,8 +64,7 @@ def login_required(f):
     @wraps(f)
     def check_login(*args, **kwargs):
         if 'profile' not in session:
-            # MAYBE CHANGE URL FOR
-            return redirect(url_for('login'))
+            return redirect(url_for('auth.login'))
         return f(*args, **kwargs)
     return check_login
 
