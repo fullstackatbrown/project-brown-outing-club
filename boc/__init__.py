@@ -27,6 +27,10 @@ def create_app(test_config=None):
 
     # from .adminviews import ReqClearance
 
+    if (os.getenv('TESTING')):
+        db.drop_all()
+        db.create_all()
+
     #instantiate flask-admin
     # Check out /admin/{table name}/
     admin = Admin(app)
