@@ -1,5 +1,5 @@
 import os
-from flask import Blueprint, Flask, render_template, request, jsonify, redirect, session, url_for, flash
+from flask import Blueprint, Flask, render_template, request, jsonify, redirect, session, url_for, flash, current_app
 from flask_sqlalchemy import SQLAlchemy
 from flask_admin import Admin
 from sqlalchemy.sql import select, func, text
@@ -44,12 +44,17 @@ def index():
 def dashboard():
     #selects rows where the current date matches or is earlier than the sign up deadline
     #NOTE: current date uses the server clock to fetch the date, so make sure the app is deployed on an Eastern Time Server
+    print(current_app.config)
     upcoming_text = select([Trip]).where(Trip.signup_deadline >= func.current_date()).order_by(Trip.signup_deadline)
+    print(upcoming_text)
     upcoming_trips = db.session.execute(upcoming_text).fetchall()
+    print(upcoming_trips)
 
     #number of responses to each trip, in the same order as the upcoming trips list
     taken_text = select([Response.trip_id, func.count(Response.user_email)]).group_by(Response.trip_id)
+    print(taken_text)
     taken_spots = db.session.execute(taken_text).fetchall()
+    print(taken_spots)
 
     taken = {}
     for trip_id, spot in taken_spots:
@@ -60,7 +65,6 @@ def dashboard():
     if session.get('profile') is not None:
         currentuser_email = session.get('profile').get('email')
         is_admin = db.session.query(AdminClearance).filter_by(email = currentuser_email).first() is not None
-    print(upcoming_trips)
     return render_template('upcoming.html', upcoming_trips = upcoming_trips, taken_spots = taken, is_admin = is_admin)
 
 @bp.route('/trip/<int:id>')

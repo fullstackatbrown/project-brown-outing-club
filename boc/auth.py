@@ -11,6 +11,7 @@ from werkzeug.exceptions import HTTPException
 from dotenv import load_dotenv, find_dotenv
 from authlib.integrations.flask_client import OAuth
 from six.moves.urllib.parse import urlencode
+from flask import current_app
 
 bp = Blueprint('auth', __name__, url_prefix='/auth')
 
@@ -31,6 +32,7 @@ auth0 = oauth.register(
 
 @bp.route('/login')
 def login():
+    print(current_app.config['TESTING'])
     return auth0.authorize_redirect(redirect_uri='http://127.0.0.1:5000/auth/callback')
 
 #called after authentication
@@ -58,6 +60,7 @@ def callback_handling():
         db.session.commit()
 
     return redirect('/dashboard')
+
 
 #tag that restricts access to only those logged in
 def login_required(f):
