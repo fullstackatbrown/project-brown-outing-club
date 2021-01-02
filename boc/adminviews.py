@@ -10,6 +10,7 @@ from flask_mail import Mail, Message
 from decimal import Decimal
 import datetime
 from .lottery import *
+from . import mail
 # from  import mail
 
 class ReqClearance(ModelView):
@@ -144,7 +145,7 @@ class TripView(ReqClearance):
                 for response in winners:
                     msg = Message('Lottery Selection', recipients = [response.user_email])
                     # to add specific lottery trip based on database pull
-                    msg.body = 'Hey! You have been selected for ' + response.trip.name + '! Please confirm your attendance by clicking on the link below. \n\n' + "http://127.0.0.1:5000" + url_for('confirmattendance', id = response.id)
+                    msg.body = 'Hey! You have been selected for ' + response.trip.name + '! Please confirm your attendance by clicking on the link below. \n\n' + "http://127.0.0.1:5000" + url_for('trips.confirmattendance', id = response.id)
                     conn.send(msg)
         return redirect(trip_index)
         
@@ -265,7 +266,7 @@ class ResponseView(ReqClearance):
         trip = self.session.query(Trip).filter_by(id=response.trip_id).first()
 
         msg = Message('Lottery Selection', recipients = [response.user_email])
-        msg.body = 'Hey! You have been selected for ' + trip.name + '! Please confirm your attendance by clicking on the link below. \n\n' + "http://127.0.0.1:5000" + url_for('confirmattendance', id = response.id)
+        msg.body = 'Hey! You have been selected for ' + trip.name + '! Please confirm your attendance by clicking on the link below. \n\n' + "http://127.0.0.1:5000" + url_for('trips.confirmattendance', id = response.id)
         mail.send(msg)
         return redirect(response_index)
 
@@ -357,7 +358,7 @@ class WaitlistView(ReqClearance):
 
             #emails person moved off of the waitlist
             msg = Message('Lottery Selection', recipients = [response.user_email])
-            msg.body = 'Hey! You have been selected for ' + trip.name + '! Please confirm your attendance by clicking on the link below. \n\n' + "http://127.0.0.1:5000" + url_for('confirmattendance', id = response.id)
+            msg.body = 'Hey! You have been selected for ' + trip.name + '! Please confirm your attendance by clicking on the link below. \n\n' + "http://127.0.0.1:5000" + url_for('trips.confirmattendance', id = response.id)
             mail.send(msg)
         else :
             flash('Not enough spots available to move someone off the waitlist', 'error')

@@ -2,6 +2,7 @@ import os
 from flask import Blueprint, Flask, render_template, request, jsonify, redirect, session, url_for, flash
 from flask_sqlalchemy import SQLAlchemy
 from flask_admin import Admin
+from flask_mail import Mail, Message
 from sqlalchemy.sql import select, func, text
 from sqlalchemy import create_engine, Date, cast
 from datetime import date
@@ -12,9 +13,7 @@ from sqlalchemy.dialects.postgresql import UUID
 import uuid
 from .models import *
 from .auth import login_required
-# refresh database 
-#db.drop_all()
-#db.create_all()
+from . import mail
 
 bp = Blueprint('trips', __name__)
 
@@ -24,7 +23,7 @@ def dummy_users(): # put into a test file
 
     db.session.commit()
 
-# dummy_users()
+dummy_users()
 
 # Serve a template from index
 @bp.route('/')
