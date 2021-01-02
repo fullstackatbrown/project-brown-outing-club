@@ -11,6 +11,7 @@ from werkzeug.exceptions import HTTPException
 from dotenv import load_dotenv, find_dotenv
 from authlib.integrations.flask_client import OAuth
 from six.moves.urllib.parse import urlencode
+from flask import current_app
 
 bp = Blueprint('auth', __name__, url_prefix='/auth')
 
@@ -31,6 +32,7 @@ auth0 = oauth.register(
 
 @bp.route('/login')
 def login():
+    print(current_app.config['TESTING'])
     return auth0.authorize_redirect(redirect_uri='http://127.0.0.1:5000/auth/callback')
 
 #called after authentication
@@ -59,13 +61,13 @@ def callback_handling():
 
     return redirect('/dashboard')
 
+
 #tag that restricts access to only those logged in
 def login_required(f):
     @wraps(f)
     def check_login(*args, **kwargs):
         if 'profile' not in session:
-            # MAYBE CHANGE URL FOR
-            return redirect(url_for('login'))
+            return redirect(url_for('auth.login'))
         return f(*args, **kwargs)
     return check_login
 
@@ -73,5 +75,5 @@ def login_required(f):
 @bp.route('/logout')
 def logout():
     session.clear()
-    params = {'returnTo': url_for('index', _external=True), 'client_id': 'J28X7Tck3Wh7xrch1Z3OQYN379zanO6Z'}
+    params = {'returnTo': url_for('trips.index', _external=True), 'client_id': 'J28X7Tck3Wh7xrch1Z3OQYN379zanO6Z'}
     return redirect(auth0.api_base_url + '/v2/logout?' + urlencode(params))

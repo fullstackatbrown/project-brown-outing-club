@@ -1,13 +1,13 @@
 import os
-basedir = os.path.abspath(os.path.dirname(__file__))
 
 class Config(object):
     DEBUG = False
     TESTING = False
     CSRF_ENABLED = True
     SECRET_KEY = 'CHANGE THIS SECRET KEY'
-    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL')
-    SQLALCHEMY_TRACK_MODIFICATIONS = False
+    #correctly: comment 9 and leave 10 uncommented
+    SQLALCHEMY_DATABASE_URI = os.environ['DATABASE_URL']
+   SQLALCHEMY_TRACK_MODIFICATIONS = False
     MAIL_SERVER = 'smtp.gmail.com' # need to change based on server
     MAIL_PORT = 465 # need to change based on port
     MAIL_USE_TLS = False
@@ -20,13 +20,11 @@ class Config(object):
     MAIL_SUPPRESS_SEND = False # same as testing value
     MAIL_ASCII_ATTACHMENTS = False
 
-class TestConfig(object):
-    DEBUG = False
-    TESTING = True
-    CSRF_ENABLED = True
-    SECRET_KEY = 'CHANGE THIS SECRET KEY'
-    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL')
-    SQLALCHEMY_TRACK_MODIFICATIONS = False
+class TestConfig(Config):
+    TESTING = False
+    #jury rigged fix: comment 27, uncomment 26
+    #SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://admin:EOKg9ICKKiC98wyW4Rmx@dev-mariadb.catkywuq5bap.us-east-1.rds.amazonaws.com:3306/test'
+    SQLALCHEMY_DATABASE_URI = os.environ['TEST_DATABASE_URL']
 
 class ProductionConfig(Config):
     DEBUG = False

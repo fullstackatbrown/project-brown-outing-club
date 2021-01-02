@@ -4,3 +4,5 @@ def f():
 
 def test_function():
     assert f() == 3
+
+
