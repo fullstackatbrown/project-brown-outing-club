@@ -52,3 +52,35 @@ def test_login_logout(client):
 
     # rv = login(client, 'test@brown.edu', '#xzAeGCrTenjR9jt' + 'x')
     # assert b'Invalid password' in rv.data
+
+### TRIP.PY TESTING OUTLINE ###
+
+# def test_confirmattendance(client):
+    # first check: 
+    #   response w client's response id = "NoResponse"
+    #   client user row
+
+    # post w data from client's response id, check if response user behavior = "Confirmed" and user weight is lowered
+
+# def test_declineattendance(client):
+    # first check: 
+    #   response w client's response id is "NoResponse"
+    #   client user row
+    #   get waitlist and response row of 1st and 2nd in line for waitlist
+
+    # post w data from client's response id, check if response user behavior = "Declined" and user weight is lowered
+    # check waitlist row of 1st in line now has off = True & response now has lottery_slot = True
+    # check waitlist row of 2nd in line now has waitlist_rank = 1
+
+### ADMINVIEWS.PY TESTING OUTLINE ###
+
+# (/admin/user/)
+# def test_resetweights(client):
+    # modify weights of users
+    # query the count of all users and query the count of all users with weight 1 and check if matching
+
+# def test_runlottery(client):
+
+# def test_updatebehavior(client):
+
+# def test_awardspot(client):

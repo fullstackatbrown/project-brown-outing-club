@@ -12,9 +12,7 @@ from sqlalchemy.dialects.postgresql import UUID
 import uuid
 from .models import *
 from .auth import login_required
-# refresh database 
-#db.drop_all()
-#db.create_all()
+from .lottery import update_userweights
 
 bp = Blueprint('trips', __name__)
 
@@ -145,14 +143,22 @@ def get_response(id):
     return response
 
 # confirms user attendance for given trip
-@bp.route('/confirmattendance/<id>')
+@bp.route('/confirmattendance/<id>', methods=['POST'])
+@login_required
 def confirmattendance(id):
     to_update = update(Response).where(Response.id == id).values(user_behavior = "Confirmed")
     db.session.execute(to_update)
+
+    # update user weight for declining
+    get_confirmed_email = select([Response.user_email]).where(Response.id == id)
+    confirmed_email = db.session.execute(get_confirmed_email).fetchone()[0]
+    update_userweights(db, "Confirmed", confirmed_email)
+
     db.session.commit()
     return redirect(url_for('dashboard'))
 
-@bp.route('/declineattendance/<id>')
+@bp.route('/declineattendance/<id>', methods=['POST'])
+@login_required
 def declineattendance(id):
     # update response to declined
     to_update = update(Response).where(Response.id == id).values(user_behavior = "Declined")
@@ -162,6 +168,11 @@ def declineattendance(id):
     # get row of waitlist to update since there is an open spot for trip w/ same trip id as declined response
     get_waitlist = select([Waitlist]).where(and_(Waitlist.trip_id == declined_response["trip_id"], Waitlist.waitlist_rank == 1, Waitlist.off == False))
     waitlist = db.session.execute(get_waitlist).fetchone()
+
+    # update user weight for declining
+    get_declined_email = select([Response.user_email]).where(Response.id == id)
+    declined_email = db.session.execute(get_declined_email).fetchone()[0]
+    update_userweights(db, "Declined", declined_email)
 
     # if there are still people waiting for the trip in the waitlist
     if waitlist is not None:
