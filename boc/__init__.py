@@ -27,9 +27,9 @@ def create_app(test_config=None):
 
     # from .adminviews import ReqClearance
 
-    with app.app_context():
-        db.drop_all()
-        db.create_all()
+    # with app.app_context():
+    #     db.drop_all()
+    #     db.create_all()
 
     #instantiate flask-admin
     # Check out /admin/{table name}/
