@@ -60,10 +60,12 @@ def dashboard():
 
     #checks if current user email is in adminclearance table
     is_admin = False
+    logged_in = False
     if session.get('profile') is not None:
         currentuser_email = session.get('profile').get('email')
         is_admin = db.session.query(AdminClearance).filter_by(email = currentuser_email).first() is not None
-    return render_template('upcoming.html', upcoming_trips = upcoming_trips, taken_spots = taken, is_admin = is_admin)
+        logged_in = True
+    return render_template('upcoming.html', upcoming_trips = upcoming_trips, taken_spots = taken, is_admin = is_admin, logged_in = logged_in)
 
 @bp.route('/trip/<int:id>')
 @login_required
