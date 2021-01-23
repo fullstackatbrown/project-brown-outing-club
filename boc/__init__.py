@@ -2,11 +2,10 @@ import os
 from flask import Flask, render_template, request, jsonify, redirect, session, url_for, flash
 from flask_sqlalchemy import SQLAlchemy
 from flask_admin import Admin
-from flask_mail import Mail, Message
 from sqlalchemy.sql import select, func, text, delete
 from sqlalchemy import and_, create_engine, Date, cast, update
 from .adminviews import *
-from . import config
+from . import config, emails
 
 def create_app(test_config=None):
     
@@ -21,14 +20,14 @@ def create_app(test_config=None):
     db.app = app
     db.init_app(app)
     # refresh database
-    # with app.app_context():
-    #     db.drop_all()
-    #     db.create_all()
+    with app.app_context():
+        db.drop_all()
+        db.create_all()
 
     from .auth import oauth
     oauth.init_app(app)
 
-    mail = Mail(app)
+    emails.init_mail(app)
 
     # from .adminviews import ReqClearance
 

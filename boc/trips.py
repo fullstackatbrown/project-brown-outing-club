@@ -2,7 +2,6 @@ import os
 from flask import Blueprint, Flask, render_template, request, jsonify, redirect, session, url_for, flash, current_app
 from flask_sqlalchemy import SQLAlchemy
 from flask_admin import Admin
-from flask_mail import Mail, Message
 from sqlalchemy.sql import select, func, text
 from sqlalchemy import create_engine, Date, cast
 from datetime import date
@@ -13,7 +12,7 @@ from sqlalchemy.dialects.postgresql import UUID
 import uuid
 from .models import *
 from .auth import login_required
-from . import mail
+from . import emails
 
 bp = Blueprint('trips', __name__)
 
@@ -23,7 +22,7 @@ def dummy_users(): # put into a test file
 
     db.session.commit()
 
-dummy_users()
+# dummy_users()
 
 # Serve a template from index
 @bp.route('/')
@@ -176,9 +175,7 @@ def declineattendance(id):
         trip = get_trip(declined_response["trip_id"])
         waitlist_recipient_response = waitlist["response_id"]
         waitlist_recipient = get_response(waitlist_recipient_response)
-        msg = Message('Lottery Selection', recipients = [waitlist_recipient["user_email"]])
-        msg.body = 'Hey! You have been selected for ' + trip["name"] + '! Please confirm your attendance by clicking on the link below. \n\n' + "http://127.0.0.1:5000" + url_for('confirmattendance', id = waitlist_recipient["id"])
-        mail.send(msg)
+        emails.mail_individual(waitlist_recipient["user_email"], trip["name"], waitlist_recipient["id"], trip)
     db.session.commit()
 
     return redirect(url_for('dashboard'))
