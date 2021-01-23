@@ -66,18 +66,8 @@
               >
             </li>
             <li class ="nav-item">
-              <a class="nav-link js-scroll-trigger" href="/admin">Admin</a>
+              <a class="nav-link js-scroll-trigger" href="/auth/login">Login</a>
             </li>
-            <li class ="nav-item">
-              <a class="nav-link js-scroll-trigger" href="/auth/logout">Logout</a>
-            </li>
-            {% if is_admin %}
-            <li class="nav-item">
-              <a class="nav-link js-scroll-trigger" href="/admin" id="admin"
-                >Admin</a
-              >
-            </li>
-            {% endif %}
           </ul>
         </div>
       </nav>
@@ -173,14 +163,14 @@
                 <li class="list-group-item">
                   {% if signed_up %}
                   <form
-                    action="{{ url_for('trips.lotterywithdraw', id=trip['id']) }}"
+                    action="{{ url_for('trips.confirmattendance', id=id) }}"
                     method="post"
                   >
                     </button>
                   </form>
                   {% else %}
                   <form
-                    action="{{ url_for('trips.lotterysignup', id=trip['id']) }}"
+                    action="{{ url_for('trips.declineattendance', id=id) }}"
                     method="POST">
 
                     <br />

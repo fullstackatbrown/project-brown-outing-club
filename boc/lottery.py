@@ -112,11 +112,11 @@ def update_userweights(self, behavior, user_email):
 
     #adjust weight according to behavior
     if behavior == "Declined":
-        user_weight *= Decimal(0.95)
+        user_weight *= Decimal(0.9)
     elif behavior == "No Show":
-        user_weight *= Decimal(0.7)
+        user_weight *= Decimal(0.8)
     elif behavior == "Confirmed":
-        user_weight *= Decimal (0.7)
+        user_weight *= Decimal (0.95)
     #add did not get result
 
     #ensure weight doesn't drop to below 0.25

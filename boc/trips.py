@@ -12,7 +12,11 @@ from sqlalchemy.dialects.postgresql import UUID
 import uuid
 from .models import *
 from .auth import login_required
+<<<<<<< HEAD
 from . import emails
+=======
+from .lottery import update_userweights
+>>>>>>> 08a8a9bbb945ea7d8284dc24e2ced1ec6c856164
 
 bp = Blueprint('trips', __name__)
 
@@ -60,10 +64,12 @@ def dashboard():
 
     #checks if current user email is in adminclearance table
     is_admin = False
+    logged_in = False
     if session.get('profile') is not None:
         currentuser_email = session.get('profile').get('email')
         is_admin = db.session.query(AdminClearance).filter_by(email = currentuser_email).first() is not None
-    return render_template('upcoming.html', upcoming_trips = upcoming_trips, taken_spots = taken, is_admin = is_admin)
+        logged_in = True
+    return render_template('upcoming.html', upcoming_trips = upcoming_trips, taken_spots = taken, is_admin = is_admin, logged_in = logged_in)
 
 @bp.route('/trip/<int:id>')
 @login_required
@@ -143,14 +149,22 @@ def get_response(id):
     return response
 
 # confirms user attendance for given trip
-@bp.route('/confirmattendance/<id>')
+@bp.route('/confirmattendance/<id>', methods=['POST'])
+@login_required
 def confirmattendance(id):
     to_update = update(Response).where(Response.id == id).values(user_behavior = "Confirmed")
     db.session.execute(to_update)
+
+    # update user weight for declining
+    get_confirmed_email = select([Response.user_email]).where(Response.id == id)
+    confirmed_email = db.session.execute(get_confirmed_email).fetchone()[0]
+    update_userweights(db, "Confirmed", confirmed_email)
+
     db.session.commit()
     return redirect(url_for('dashboard'))
 
-@bp.route('/declineattendance/<id>')
+@bp.route('/declineattendance/<id>', methods=['POST'])
+@login_required
 def declineattendance(id):
     # update response to declined
     to_update = update(Response).where(Response.id == id).values(user_behavior = "Declined")
@@ -160,6 +174,11 @@ def declineattendance(id):
     # get row of waitlist to update since there is an open spot for trip w/ same trip id as declined response
     get_waitlist = select([Waitlist]).where(and_(Waitlist.trip_id == declined_response["trip_id"], Waitlist.waitlist_rank == 1, Waitlist.off == False))
     waitlist = db.session.execute(get_waitlist).fetchone()
+
+    # update user weight for declining
+    get_declined_email = select([Response.user_email]).where(Response.id == id)
+    declined_email = db.session.execute(get_declined_email).fetchone()[0]
+    update_userweights(db, "Declined", declined_email)
 
     # if there are still people waiting for the trip in the waitlist
     if waitlist is not None:

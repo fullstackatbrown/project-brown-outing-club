@@ -18,6 +18,18 @@ bp = Blueprint('auth', __name__, url_prefix='/auth')
 #instantiate 0auth authentication
 oauth = OAuth()
 
+# auth0 = oauth.register(
+#     'auth0',
+#     client_id=os.environ['AUTH_CLIENTID'],
+#     client_secret=os.environ['AUTH_CLIENTSECRET'],
+#     api_base_url='https://dev-h395rto6.us.auth0.com',
+#     access_token_url='https://dev-h395rto6.us.auth0.com/oauth/token',
+#     authorize_url='https://dev-h395rto6.us.auth0.com/authorize',
+#     client_kwargs={
+#         'scope': os.environ['AUTH_SCOPE'],
+#     },
+# )
+
 auth0 = oauth.register(
     'auth0',
     client_id='J28X7Tck3Wh7xrch1Z3OQYN379zanO6Z',
@@ -75,5 +87,5 @@ def login_required(f):
 @bp.route('/logout')
 def logout():
     session.clear()
-    params = {'returnTo': url_for('trips.index', _external=True), 'client_id': 'J28X7Tck3Wh7xrch1Z3OQYN379zanO6Z'}
+    params = {'returnTo': url_for('trips.index', _external=True), 'client_id': os.environ['AUTH_CLIENTID']}
     return redirect(auth0.api_base_url + '/v2/logout?' + urlencode(params))
