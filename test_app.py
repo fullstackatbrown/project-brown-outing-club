@@ -4,7 +4,7 @@ import pytest
 from flask import session
 from flask_sqlalchemy import SQLAlchemy
 from boc import *
-
+from boc import trips
 
 @pytest.fixture
 def client():
@@ -16,42 +16,37 @@ def client():
         with test_app.app_context():
             yield client 
 
-
-def test_landing(client):
-    print(load_dotenv)
-    print(find_dotenv)
-    response = client.get('/dashboard')
-    
-    print(response.data)
-
-    assert b'Log In' in response.data
-
-
 def login(client):
     with client.session_transaction() as session:
         session['profile'] = {
             'user_id': 'auth0|5f3489a68f18aa00689d5333',
             'email': 'test@brown.edu'
         }
-    # return client.get('/dashboard')
+
+def login_admin(client):
+    with client.session_transaction() as session:
+        session['profile'] = {
+            'user_id': 'auth0|5f3489a68f18aa00689d5333',
+            'email': 'test@brown.edu'
+        }
+    new_user = User(auth_id = 'auth0|5f3489a68f18aa00689d5333', email = 'test@brown.edu')             
+    db.session.add(new_user)
+    db.session.add(AdminClearance(email = "test@brown.edu", can_create=True, can_edit=True, can_delete=True))
+    db.session.commit()
 
 def logout(client):
     return client.get('/auth/logout')
 
-def test_login_logout(client):
-    """Make sure login and logout works."""
+def test_landing(client):
+    response = client.get('/dashboard')
 
-    rv = login(client)
-    # assert b'Brown Outing Club' in rv.data
+    assert b'Login' in response.data
 
-    # rv = logout(client)
-    # assert b'Log In' in rv.data
+    login(client)
+    response = client.get('/dashboard')
 
-    # rv = login(client, 'test@brown.edu' + 'x', '#xzAeGCrTenjR9jt')
-    # assert b'Invalid username' in rv.data
+    assert b'Logout' in response.data
 
-    # rv = login(client, 'test@brown.edu', '#xzAeGCrTenjR9jt' + 'x')
-    # assert b'Invalid password' in rv.data
 
 ### TRIP.PY TESTING OUTLINE ###
 
@@ -75,12 +70,24 @@ def test_login_logout(client):
 ### ADMINVIEWS.PY TESTING OUTLINE ###
 
 # (/admin/user/)
-# def test_resetweights(client):
+def test_resetweights(client):
     # modify weights of users
     # query the count of all users and query the count of all users with weight 1 and check if matching
+    trips.dummy_users()
+    assert db.session.query(User).filter_by(weight = 1.0).count() < 51
+
+    login_admin(client)
+
+    response = client.post('/admin/user/reset')
+    
+    assert db.session.query(User).filter_by(weight = 1.0).count() == 51
+    logout(client)
 
 # def test_runlottery(client):
 
 # def test_updatebehavior(client):
+#     trips.dummy_users()
+#     login_admin(client)
+#     response = client.post('/admin/response/updatebehavior', {'user_email': 'test@brown.edu'})
 
 # def test_awardspot(client):

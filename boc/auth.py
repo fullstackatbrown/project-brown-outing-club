@@ -18,15 +18,27 @@ bp = Blueprint('auth', __name__, url_prefix='/auth')
 #instantiate 0auth authentication
 oauth = OAuth()
 
+# auth0 = oauth.register(
+#     'auth0',
+#     client_id=os.environ['AUTH_CLIENTID'],
+#     client_secret=os.environ['AUTH_CLIENTSECRET'],
+#     api_base_url='https://dev-h395rto6.us.auth0.com',
+#     access_token_url='https://dev-h395rto6.us.auth0.com/oauth/token',
+#     authorize_url='https://dev-h395rto6.us.auth0.com/authorize',
+#     client_kwargs={
+#         'scope': os.environ['AUTH_SCOPE'],
+#     },
+# )
+
 auth0 = oauth.register(
     'auth0',
-    client_id=os.environ['AUTH_CLIENTID'],
-    client_secret=os.environ['AUTH_CLIENTSECRET'],
+    client_id='J28X7Tck3Wh7xrch1Z3OQYN379zanO6Z',
+    client_secret='S1PAZdX5lAm3eGIv5tnmJfycfIW9W4Msv8Bi5_5N3uhjVmOVONCUbjaI0Ht6fp_k',
     api_base_url='https://dev-h395rto6.us.auth0.com',
     access_token_url='https://dev-h395rto6.us.auth0.com/oauth/token',
     authorize_url='https://dev-h395rto6.us.auth0.com/authorize',
     client_kwargs={
-        'scope': os.environ['AUTH_SCOPE'],
+        'scope': 'openid profile email',
     },
 )
 
