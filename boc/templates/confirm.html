@@ -107,7 +107,8 @@
                   <div class = "info-cont">
                     <h6 class="content-label">RETURNS</h6>
                     <h6 class="content">
-                      {{ trip['return_date'].strftime('%b %d, %Y') }}
+                      {% if trip['return_date'] is not none %}
+                      trip['return_date'].strftime('%b %d, %Y')}} {% endif %}
                     </h6>
                     <h6 class="content">
                       {% if trip['return_time'] is not none %} @ {{

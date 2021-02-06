@@ -23,6 +23,17 @@ def login(client):
             'email': 'test@brown.edu'
         }
 
+def login_admin(client):
+    with client.session_transaction() as session:
+        session['profile'] = {
+            'user_id': 'auth0|5f3489a68f18aa00689d5333',
+            'email': 'test@brown.edu'
+        }
+    new_user = User(auth_id = 'auth0|5f3489a68f18aa00689d5333', email = 'test@brown.edu')             
+    db.session.add(new_user)
+    db.session.add(AdminClearance(email = "test@brown.edu", can_create=True, can_edit=True, can_delete=True))
+    db.session.commit()
+
 def logout(client):
     return client.get('/auth/logout')
 
@@ -63,14 +74,20 @@ def test_resetweights(client):
     # modify weights of users
     # query the count of all users and query the count of all users with weight 1 and check if matching
     trips.dummy_users()
-    login(client)
-    # print(db.session.query(AdminClearance).filter_by(email = session['profile']['email']).first() is not None)
+    assert db.session.query(User).filter_by(weight = 1.0).count() < 51
+
+    login_admin(client)
+
     response = client.post('/admin/user/reset')
     
-    assert db.session.query(User).filter_by(weight = 1.0).count() == 50
+    assert db.session.query(User).filter_by(weight = 1.0).count() == 51
+    logout(client)
 
 # def test_runlottery(client):
 
 # def test_updatebehavior(client):
+#     trips.dummy_users()
+#     login_admin(client)
+#     response = client.post('/admin/response/updatebehavior', {'user_email': 'test@brown.edu'})
 
 # def test_awardspot(client):
