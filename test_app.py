@@ -105,6 +105,25 @@ def test_landing(client):
 
     assert b'Logout' in response.data
 
+### TEMPLATE TESTING OUTLINE ###
+
+def test_sampletrip(client):
+    login(client)
+    new_trip = Trip(
+        id=1, name = "Adirondack Hiking", description="people literally are going hiking", 
+        departure_date = func.current_date(), boc_leaders="Anna, Clara, Ethan, & Lucas",
+        departure_location = "Adirondacks", departure_time = func.current_time(), 
+        return_date= func.current_date(), return_time = func.current_time(),
+        car_cap = 10, 
+        signup_deadline = func.current_date(), price = 9.99, noncar_cap = 10)     
+    db.session.add(new_trip)
+    db.session.commit()
+
+    #https://stackoverflow.com/questions/22559720/flask-response-object-is-not-iterable-with-response-producing-exceptions
+
+    trip_page = client.get('/trip/1').data
+    assert b"Adirondack Hiking" in trip_page
+    assert b"people literally are going hiking" in trip_page
 
 ### TRIP.PY TESTING OUTLINE ###
 
