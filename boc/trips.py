@@ -16,12 +16,6 @@ from .lottery import update_userweights
 
 bp = Blueprint('trips', __name__)
 
-def dummy_users(): # put into a test file 
-    for i in range(50):
-        db.session.add(User(email = str(uuid.uuid4())+"@brown.edu", auth_id = int(uuid.uuid4()), weight = random.randint(-2,2)))
-
-    db.session.commit()
-
 # dummy_users()
 
 # Serve a template from index

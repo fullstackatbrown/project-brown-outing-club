@@ -6,6 +6,7 @@ from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.sql import func
 from boc import *
 from boc import trips
+from boc import helpers
 
 @pytest.fixture
 def client():
