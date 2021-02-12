@@ -2,8 +2,8 @@ import os
 from flask import Blueprint, Flask, render_template, request, jsonify, redirect, session, url_for, flash, current_app
 from flask_sqlalchemy import SQLAlchemy
 from flask_admin import Admin
-from sqlalchemy.sql import select, func, text
-from sqlalchemy import create_engine, Date, cast
+from sqlalchemy.sql import select, func, text, update
+from sqlalchemy import create_engine, Date, cast, and_
 from datetime import date
 import pymysql
 import random
@@ -122,7 +122,7 @@ def lotterywithdraw(id):
     response = db.session.query(Response).filter(Response.trip_id == id).first()
     db.session.delete(response)
     db.session.commit()
-    return redirect(url_for('dashboard'))
+    return redirect(url_for('trips.dashboard'))
 
 @bp.route('/adminviewguide')
 @login_required
@@ -150,14 +150,13 @@ def get_response(id):
 def confirmattendance(id):
     to_update = update(Response).where(Response.id == id).values(user_behavior = "Confirmed")
     db.session.execute(to_update)
-
     # update user weight for declining
     get_confirmed_email = select([Response.user_email]).where(Response.id == id)
     confirmed_email = db.session.execute(get_confirmed_email).fetchone()[0]
     update_userweights(db, "Confirmed", confirmed_email)
 
     db.session.commit()
-    return redirect(url_for('dashboard'))
+    return redirect(url_for('trips.dashboard'))
 
 @bp.route('/declineattendance/<id>', methods=['POST'])
 @login_required
@@ -192,7 +191,7 @@ def declineattendance(id):
     msg = Message('Lottery Selection', recipients = [declined_response["user_email"]])
     msg.body = 'Hey! You have been selected for ' + trip["name"] + '! Please confirm your attendance by clicking on the link below. \n\n' + "http://127.0.0.1:5000" + url_for('confirmattendance', id = declined_response["id"])
     mail.send(msg)
-    return redirect(url_for('dashboard'))
+    return redirect(url_for('trips.dashboard'))
 
 
 # if __name__ == '__main__':

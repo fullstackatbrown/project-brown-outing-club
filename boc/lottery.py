@@ -101,8 +101,6 @@ def runlottery(self, id):
     # return car_winner_emails
     
 
-
-
 #updates user weights based on if they declined or did not show
 def update_userweights(self, behavior, user_email):
     #get user weight from user email
