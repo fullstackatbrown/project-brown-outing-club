@@ -12,11 +12,8 @@ from sqlalchemy.dialects.postgresql import UUID
 import uuid
 from .models import *
 from .auth import login_required
-<<<<<<< HEAD
 from . import emails
-=======
 from .lottery import update_userweights
->>>>>>> 08a8a9bbb945ea7d8284dc24e2ced1ec6c856164
 
 bp = Blueprint('trips', __name__)
 
@@ -26,7 +23,7 @@ def dummy_users(): # put into a test file
 
     db.session.commit()
 
-# dummy_users()
+#dummy_users()
 
 # Serve a template from index
 @bp.route('/')
@@ -87,12 +84,10 @@ def individual_trip(id, taken_spots = None):
     return render_template('trip.html', trip = trip, taken_spots = taken_spots, signed_up = signed)
 
 
-@bp.route('/confirm/<int:id>')
-@login_required
+@bp.route('/confirm/<id>')
 def trip_confirm(id):
-    trip = get_trip(id)
-    #list of trips that have lotteries the user has signed up for
-    return render_template('confirm.html', trip = trip)
+    response = get_response(id)
+    return render_template('confirm.html', id = id, trip = get_trip(response["trip_id"]))
 
 #displays past trips
 @bp.route('/pasttrips')
@@ -150,7 +145,6 @@ def get_response(id):
 
 # confirms user attendance for given trip
 @bp.route('/confirmattendance/<id>', methods=['POST'])
-@login_required
 def confirmattendance(id):
     to_update = update(Response).where(Response.id == id).values(user_behavior = "Confirmed")
     db.session.execute(to_update)
@@ -164,7 +158,6 @@ def confirmattendance(id):
     return redirect(url_for('dashboard'))
 
 @bp.route('/declineattendance/<id>', methods=['POST'])
-@login_required
 def declineattendance(id):
     # update response to declined
     to_update = update(Response).where(Response.id == id).values(user_behavior = "Declined")
