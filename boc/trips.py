@@ -81,6 +81,8 @@ def individual_trip(id, taken_spots = None):
 @bp.route('/confirm/<id>')
 def trip_confirm(id):
     response = get_response(id)
+    if (response["user_behavior"] != "NoResponse"):
+        return redirect(url_for('trips.dashboard'))
     return render_template('confirm.html', id = id, trip = get_trip(response["trip_id"]))
 
 #displays past trips
@@ -182,7 +184,6 @@ def declineattendance(id):
         waitlist_recipient = get_response(waitlist_recipient_response)
         emails.mail_individual(waitlist_recipient["user_email"], trip["name"], waitlist_recipient["id"], trip)
     db.session.commit()
-    emails.mail_individual(declined_response["user_email"], trip["name"], trip)
     return redirect(url_for('trips.dashboard'))
 
 
