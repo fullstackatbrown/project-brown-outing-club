@@ -6,7 +6,7 @@ class Config(object):
     CSRF_ENABLED = True
     SECRET_KEY = 'CHANGE THIS SECRET KEY'
     #correctly: comment 9 and leave 10 uncommented
-    # SQLALCHEMY_DATABASE_URI = os.environ['DATABASE_URL']
+    #SQLALCHEMY_DATABASE_URI = os.environ['DATABASE_URL']
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     MAIL_SERVER = 'smtp.gmail.com' # need to change based on server
     MAIL_PORT = 465 # need to change based on port

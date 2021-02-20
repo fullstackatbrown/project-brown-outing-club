@@ -6,11 +6,10 @@ from sqlalchemy.sql import select, update, insert, func
 from .models import AdminClearance, Response, Trip
 from flask_admin import expose, BaseView
 from flask_admin.helpers import get_form_data
-from flask_mail import Mail, Message
 from decimal import Decimal
 import datetime
 from .lottery import *
-# from  import mail
+from . import emails, trips
 
 class ReqClearance(ModelView):
     def is_accessible(self):
@@ -139,15 +138,8 @@ class TripView(ReqClearance):
 
         # to change to pull from the database
         winners = self.session.query(Response).filter_by(trip_id = trip_id, lottery_slot = True).join(Trip, Response.trip_id == Trip.id).all()
-        print("hi")
-        print(winners)
-        with mail.connect() as conn:
-            for response in winners:
-                msg = Message('Lottery Selection', recipients = [response.user_email])
-                # to add specific lottery trip based on database pull
-                msg.body = 'Hey! You have been selected for ' + response.trip.name + '! Please confirm your attendance by clicking on the link below. \n\n' + "http://127.0.0.1:5000" + url_for('confirmattendance', id = response.id)
-                conn.send(msg)
-                print("sent")
+        if winners is not None:
+            emails.mail_group(winners, trips.get_trip(trip_id))
         return redirect(trip_index)
         
 
@@ -266,9 +258,7 @@ class ResponseView(ReqClearance):
         response = self.get_one(response_id)
         trip = self.session.query(Trip).filter_by(id=response.trip_id).first()
 
-        msg = Message('Lottery Selection', recipients = [response.user_email])
-        msg.body = 'Hey! You have been selected for ' + trip.name + '! Please confirm your attendance by clicking on the link below. \n\n' + "http://127.0.0.1:5000" + url_for('confirmattendance', id = response.id)
-        mail.send(msg)
+        emails.mail_individual(response.user_email, trip.name, response.id, trip)
         return redirect(response_index)
 
 class WaitlistView(ReqClearance):
@@ -358,9 +348,7 @@ class WaitlistView(ReqClearance):
             gotspot(user)
 
             #emails person moved off of the waitlist
-            msg = Message('Lottery Selection', recipients = [response.user_email])
-            msg.body = 'Hey! You have been selected for ' + trip.name + '! Please confirm your attendance by clicking on the link below. \n\n' + "http://127.0.0.1:5000" + url_for('confirmattendance', id = response.id)
-            mail.send(msg)
+            emails.mail_individual(response.user_email, trip.name, response.id, trip)
         else :
             flash('Not enough spots available to move someone off the waitlist', 'error')
 

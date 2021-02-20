@@ -12,6 +12,7 @@ from sqlalchemy.dialects.postgresql import UUID
 import uuid
 from .models import *
 from .auth import login_required
+from . import emails
 from .lottery import update_userweights
 
 bp = Blueprint('trips', __name__)
@@ -77,12 +78,12 @@ def individual_trip(id, taken_spots = None):
     return render_template('trip.html', trip = trip, taken_spots = taken_spots, signed_up = signed)
 
 
-@bp.route('/confirm/<int:id>')
-@login_required
+@bp.route('/confirm/<id>')
 def trip_confirm(id):
-    trip = get_trip(id)
-    #list of trips that have lotteries the user has signed up for
-    return render_template('confirm.html', trip = trip)
+    response = get_response(id)
+    if (response["user_behavior"] != "NoResponse"):
+        return redirect(url_for('trips.dashboard'))
+    return render_template('confirm.html', id = id, trip = get_trip(response["trip_id"]))
 
 #displays past trips
 @bp.route('/pasttrips')
@@ -140,7 +141,6 @@ def get_response(id):
 
 # confirms user attendance for given trip
 @bp.route('/confirmattendance/<id>', methods=['POST'])
-@login_required
 def confirmattendance(id):
     to_update = update(Response).where(Response.id == id).values(user_behavior = "Confirmed")
     db.session.execute(to_update)
@@ -153,7 +153,6 @@ def confirmattendance(id):
     return redirect(url_for('trips.dashboard'))
 
 @bp.route('/declineattendance/<id>', methods=['POST'])
-@login_required
 def declineattendance(id):
     # update response to declined
     to_update = update(Response).where(Response.id == id).values(user_behavior = "Declined")
@@ -179,12 +178,12 @@ def declineattendance(id):
         db.session.execute(wait_update)
         #update rest of the waitlist to move their positions up on the waitlist
         db.session.query(Waitlist).filter_by(trip_id=declined_response["trip_id"]).filter_by(off=False).update({Waitlist.waitlist_rank: Waitlist.waitlist_rank-1})
+        # email new winner
+        trip = get_trip(declined_response["trip_id"])
+        waitlist_recipient_response = waitlist["response_id"]
+        waitlist_recipient = get_response(waitlist_recipient_response)
+        emails.mail_individual(waitlist_recipient["user_email"], trip["name"], waitlist_recipient["id"], trip)
     db.session.commit()
-    
-    trip = get_trip(declined_response["trip_id"])
-    msg = Message('Lottery Selection', recipients = [declined_response["user_email"]])
-    msg.body = 'Hey! You have been selected for ' + trip["name"] + '! Please confirm your attendance by clicking on the link below. \n\n' + "http://127.0.0.1:5000" + url_for('confirmattendance', id = declined_response["id"])
-    mail.send(msg)
     return redirect(url_for('trips.dashboard'))
 
 
