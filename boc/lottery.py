@@ -92,16 +92,14 @@ def runlottery(self, id):
         self.session.query(Response).filter(Response.id == winner_ids[index]).update({Response.lottery_slot: True})
         user = self.session.query(User).filter(User.email == winner_emails[index]).first()
         gotspot(user)
-    return winner_emails
+    # return winner_emails
 
     for i in range(len(car_winner_ids)):
         self.session.query(Response).filter(Response.id == car_waitlist_ids[index]).update({Response.lottery_slot: True})
         user = self.session.query(User).filter(User.email == winner_emails[index]).first()
         gotspot(user)
-    return car_winner_emails
+    # return car_winner_emails
     
-
-
 
 #updates user weights based on if they declined or did not show
 def update_userweights(self, behavior, user_email):

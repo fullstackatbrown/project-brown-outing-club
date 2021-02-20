@@ -2,8 +2,8 @@ import os
 from flask import Blueprint, Flask, render_template, request, jsonify, redirect, session, url_for, flash, current_app
 from flask_sqlalchemy import SQLAlchemy
 from flask_admin import Admin
-from sqlalchemy.sql import select, func, text
-from sqlalchemy import create_engine, Date, cast
+from sqlalchemy.sql import select, func, text, update
+from sqlalchemy import create_engine, Date, cast, and_
 from datetime import date
 import pymysql
 import random
@@ -17,13 +17,7 @@ from .lottery import update_userweights
 
 bp = Blueprint('trips', __name__)
 
-def dummy_users(): # put into a test file 
-    for i in range(50):
-        db.session.add(User(email = str(uuid.uuid4())+"@brown.edu", auth_id = int(uuid.uuid4()), weight = random.randint(-2,2)))
-
-    db.session.commit()
-
-#dummy_users()
+# dummy_users()
 
 # Serve a template from index
 @bp.route('/')
@@ -121,7 +115,7 @@ def lotterywithdraw(id):
     response = db.session.query(Response).filter(Response.trip_id == id).first()
     db.session.delete(response)
     db.session.commit()
-    return redirect(url_for('dashboard'))
+    return redirect(url_for('trips.dashboard'))
 
 @bp.route('/adminviewguide')
 @login_required
@@ -148,14 +142,13 @@ def get_response(id):
 def confirmattendance(id):
     to_update = update(Response).where(Response.id == id).values(user_behavior = "Confirmed")
     db.session.execute(to_update)
-
     # update user weight for declining
     get_confirmed_email = select([Response.user_email]).where(Response.id == id)
     confirmed_email = db.session.execute(get_confirmed_email).fetchone()[0]
     update_userweights(db, "Confirmed", confirmed_email)
 
     db.session.commit()
-    return redirect(url_for('dashboard'))
+    return redirect(url_for('trips.dashboard'))
 
 @bp.route('/declineattendance/<id>', methods=['POST'])
 def declineattendance(id):
@@ -189,8 +182,8 @@ def declineattendance(id):
         waitlist_recipient = get_response(waitlist_recipient_response)
         emails.mail_individual(waitlist_recipient["user_email"], trip["name"], waitlist_recipient["id"], trip)
     db.session.commit()
-
-    return redirect(url_for('dashboard'))
+    emails.mail_individual(declined_response["user_email"], trip["name"], trip)
+    return redirect(url_for('trips.dashboard'))
 
 
 # if __name__ == '__main__':
