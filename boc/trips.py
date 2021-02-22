@@ -1,5 +1,5 @@
 import os
-from flask import Blueprint, Flask, render_template, request, jsonify, redirect, session, url_for, flash, current_app
+from flask import abort, Blueprint, Flask, render_template, request, jsonify, redirect, session, url_for, flash, current_app
 from flask_sqlalchemy import SQLAlchemy
 from flask_admin import Admin
 from sqlalchemy.sql import select, func, text, update
@@ -17,7 +17,11 @@ from .lottery import update_userweights
 
 bp = Blueprint('trips', __name__)
 
-# dummy_users()
+def dummy_users(): # put into a test file 
+    for i in range(50):
+        db.session.add(User(email = str(uuid.uuid4())+"@brown.edu", auth_id = int(uuid.uuid4()), weight = random.randint(-2,2)))
+
+    db.session.commit()
 
 # Serve a template from index
 @bp.route('/')
@@ -109,12 +113,18 @@ def get_trip(id):
 @bp.route('/lotterysignup/<int:id>', methods=['POST'])
 @login_required
 def lotterysignup(id):
-    trip = get_trip(id)
+    new_response = Response(
+        trip_id=id, user_email=session.get('profile').get('email'),
+        financial_aid=(request.form.get("financial_aid") is not None), car=(request.form.get("car") is not None)
+    )  
+    db.session.add(new_response)
+    db.session.commit() 
+    return redirect(url_for('trips.dashboard'))
 
 @bp.route('/lotterywithdraw/<id>', methods=['POST'])
 @login_required
 def lotterywithdraw(id):
-    response = db.session.query(Response).filter(Response.trip_id == id).first()
+    response = db.session.query(Response).filter(Response.trip_id == id).filter(Response.user_email == session.get('profile').get('email')).first()
     db.session.delete(response)
     db.session.commit()
     return redirect(url_for('trips.dashboard'))

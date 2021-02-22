@@ -39,15 +39,19 @@ def login_admin(client):
 def logout(client):
     return client.get('/auth/logout')
 
-def create_response():
+def create_trip():
     new_trip = Trip(
         name = "test name", departure_date = func.current_date(), 
         departure_location = "test location", departure_time = func.current_time(), 
-        signup_deadline = func.current_date(), price = 9.99, noncar_cap = 10) 
+        signup_deadline = func.current_date(), price = 9.99, noncar_cap = 10)
+    db.session.add(new_trip)
+    db.session.commit() 
+
+def create_response():
+    create_trip()
     new_response = Response(
         trip_id=1, user_email = 'test@brown.edu', lottery_slot = True
     )            
-    db.session.add(new_trip)
     db.session.add(new_response)
     db.session.commit()
 
@@ -184,7 +188,6 @@ def test_resetweights(client):
     response = client.post('/admin/user/reset')
     
     assert db.session.query(User).filter_by(weight = 1.0).count() == 51
-    logout(client)
 
 # def test_runlottery(client):
 
@@ -211,4 +214,26 @@ def test_awardspot(client):
     assert db.session.query(Waitlist).filter_by(off = True).count() == 1
     assert db.session.query(Waitlist).filter_by(off = False).count() == 0
 
-    
+def test_lotterysignup(client):
+    login_admin(client)
+    create_trip()
+    trips.dummy_users()
+
+    assert db.session.query(Response).filter_by(user_email = 'test@brown.edu').count() == 0
+    assert db.session.query(Trip).filter_by(id = 1).count() == 1
+    response = client.post("/lotterysignup/1", data = {'financial_aid': 'True'})
+    assert db.session.query(Response).filter_by(user_email = 'test@brown.edu').count() == 1
+
+def test_lotterywithdraw(client):
+    login_admin(client)
+    create_trip()
+    trips.dummy_users()
+
+    assert db.session.query(Response).filter_by(user_email = 'test@brown.edu').count() == 0
+    assert db.session.query(Trip).filter_by(id = 1).count() == 1
+    response = client.post("/lotterysignup/1", data = {'financial_aid': 'True'})
+    assert db.session.query(Response).filter_by(user_email = 'test@brown.edu').count() == 1
+
+    response = client.post("/lotterywithdraw/1")
+    print(response)
+    assert db.session.query(Response).filter_by(user_email = 'test@brown.edu').count() == 0
