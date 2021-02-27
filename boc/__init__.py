@@ -29,8 +29,6 @@ def create_app(test_config=None):
 
     emails.init_mail(app)
 
-    # from .adminviews import ReqClearance
-
     #instantiate flask-admin
     # Check out /admin/{table name}/
     admin = Admin(app)
@@ -45,7 +43,5 @@ def create_app(test_config=None):
     from . import auth, trips
     app.register_blueprint(auth.bp)
     app.register_blueprint(trips.bp)
-
-    # app.add_url_rule('/', endpoint = 'index')
 
     return app

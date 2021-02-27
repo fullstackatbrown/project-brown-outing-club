@@ -24,9 +24,6 @@ class ReqClearance(ModelView):
                     return True
         return False
 
-# class AdminView(ReqClearance):
-#     list_template = 'admin/guide.html'
-
 class UserView(ReqClearance):
     # Show only weight and email columns in list view
     column_list = ('email', 'weight')

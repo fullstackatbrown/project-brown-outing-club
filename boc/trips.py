@@ -48,7 +48,7 @@ def dashboard():
     print(upcoming_trips)
 
     #number of responses to each trip, in the same order as the upcoming trips list
-    taken_text = select([Response.trip_id, func.count(Response.user_email)]).group_by(Response.trip_id)
+    taken_text = select([Response.trip_id, func.count(Response.user_email)]).where(Response.lottery_slot == True).group_by(Response.trip_id)
     print(taken_text)
     taken_spots = db.session.execute(taken_text).fetchall()
     print(taken_spots)
@@ -66,12 +66,10 @@ def dashboard():
         logged_in = True
     return render_template('upcoming.html', upcoming_trips = upcoming_trips, taken_spots = taken, is_admin = is_admin, logged_in = logged_in)
 
-@bp.route('/trip/<int:id>')
+@bp.route('/trip/<int:id>/<int:taken_spots>')
 @login_required
-def individual_trip(id, taken_spots = None):
+def individual_trip(id, taken_spots):
     trip = get_trip(id)
-    if (taken_spots is None):
-        taken_spots = 0
     signed = False
     #list of trips that have lotteries the user has signed up for
     currentuser_email = session.get('profile').get('email')
@@ -150,6 +148,7 @@ def get_response(id):
     return response
 
 # confirms user attendance for given trip
+# called within confirm.html
 @bp.route('/confirmattendance/<id>', methods=['POST'])
 def confirmattendance(id):
     to_update = update(Response).where(Response.id == id).values(user_behavior = "Confirmed")

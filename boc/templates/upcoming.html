@@ -66,7 +66,7 @@
                 <div class="trip-table">
                     <div class="trip-details info-pair" id="span-trip-title">
                         <a class="trip-title"
-                            href="{{ url_for('trips.individual_trip', id=trip.id, taken_spots = taken_spots.get(trip.id)) }}">{{ trip.name }}</a>
+                            href="{{ url_for('trips.individual_trip', id = trip.id, taken_spots=taken_spots.get(trip.id, 0)) }}">{{ trip.name }}</a>
                     </div>
                     <div class="info-pair">
                         <h6 class="content-label">WHERE</h6>
@@ -121,7 +121,7 @@
                 <div class = "info-pair">
 
                 <a class="btn btn-block lottery-button hover"
-                    href="{{ url_for('trips.individual_trip', id=trip.id, taken_spots = taken_spots.get(trip.id)) }}">
+                    href="{{ url_for('trips.individual_trip', id = trip.id, taken_spots = taken_spots.get(trip.id, 0)) }}">
                     MORE DETAILS</a>
                 </div>
 
