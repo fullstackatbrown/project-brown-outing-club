@@ -48,7 +48,7 @@ def dashboard():
     print(upcoming_trips)
 
     #number of responses to each trip, in the same order as the upcoming trips list
-    taken_text = select([Response.trip_id, func.count(Response.user_email)]).where(Response.lottery_slot == True).group_by(Response.trip_id)
+    taken_text = select([Response.trip_id, func.count(Response.user_email)]).group_by(Response.trip_id)
     print(taken_text)
     taken_spots = db.session.execute(taken_text).fetchall()
     print(taken_spots)
