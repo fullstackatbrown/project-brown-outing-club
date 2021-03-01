@@ -1,0 +1,223 @@
+<!doctype HTML>
+<html lang="en">
+
+<head>
+    <!-- Stuff not to worry about, for setup -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+
+    <!-- Bootstrap imports -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+        integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/tripslist.css') }}">
+
+
+
+    <!-- Fonts -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&family=Open+Sans:ital,wght@0,300;0,400;0,600;0,700;0,800;1,300;1,400;1,600;1,700;1,800&family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap"
+        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet">
+
+
+</head>
+
+<body>
+    <header>
+        <nav class="navbar navbar-expand-lg navbar-dark fixed-top" id="main-nav">
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarResponsive"
+                aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <a class="navbar-brand js-scroll-trigger" href="{{ url_for('trips.dashboard') }}">Brown Outing Club</a>
+            <div class="collapse navbar-collapse" id="navbarResponsive">
+                <ul class="navbar-nav ml-auto">
+                    <li class="nav-item">
+                        <a class="nav-link js-scroll-trigger" href="{{ url_for('trips.dashboard') }}">See All Trips</a>
+                    </li>
+                      <li class ="nav-item">
+                        <a class="nav-link js-scroll-trigger" href="/auth/logout">Logout</a>
+                      </li>
+                    {% if is_admin %}
+                    <li class="nav-item">
+                        <a class="nav-link js-scroll-trigger" href="{{ url_for('trips.dashboard') }}" id="admin">Admin</a>
+                    </li>
+                    {% endif %}
+                    
+                </ul>
+            </div>
+        </nav>
+    </header>
+
+    <div class="container">
+        <br><br><br><br>
+        <div class="row section-label">
+            <h2 class="section-title">Upcoming Trips</h2>
+        </div>
+        <div class="row" id="trip-section">
+            {% for trip in upcoming_trips %}
+            <div class="trip-table-container">
+                <div class="trip-table">
+                    <div class="trip-details info-pair" id="span-trip-title">
+                        <a class="trip-title"
+                            href="{{ url_for('trips.individual_trip', id=trip.id, taken_spots = taken_spots.get(trip.id)) }}">{{ trip.name }}</a>
+                    </div>
+                    <div class="info-pair">
+                        <h6 class="content-label">WHERE</h6>
+                        <h6 class="content">{{ trip.destination }}</h6>
+                    </div>
+
+                    <div class="info-pair">
+                        <h6 class="content-label">DEPART</h6>
+                        <h6 class="content"> {{ trip['departure_date'].strftime('%b %d, %Y') }}
+                            {% if trip['departure_time'] is not none %}
+                            @ {{ trip['departure_time'].strftime("%_I:%M %p") }}
+                            {% endif %} </h6>
+                    </div>
+
+                    <div class="info-pair">
+                        <h6 class="content-label">RETURN</h6>
+                        <h6 class="content">
+                            {% if trip['return_date'] is not none %}
+                            {{ trip['return_date'].strftime('%b %d, %Y') }}
+                            {% endif %}
+                            {% if trip['return_time'] is not none %}
+                            @ {{ trip['return_time'].strftime("%_I:%M %p") }}
+                            {% endif %} </h6>
+                    </div>
+
+                <div class="info-pair">
+                    <h6 class="content-label">CONTACT</h6>
+                    <h6 class="content">
+                        <a class="contact-info"
+                            href="mailto:{{trip['contact']}}subject:{{trip.name}}">{{trip['contact']}}</a></h6>
+                </div>
+
+                <div class="info-pair">
+                    <h6 class="content-label">
+                        LOTTERY CLOSES
+                    </h6>
+                    <h6 class="content">{{ trip['signup_deadline'].strftime('%b %d, %Y') }}</h6>
+                </div>
+
+                <div class="info-pair">
+
+                    <h6 class="content-label">PRICE</h6>
+                    <h6 class="content">
+                        {% if trip['price'] is not none or trip['price']==0 %}
+                        ${{ trip['price'] }}
+                        {% else %}
+                        FREE
+                        {% endif %}
+
+                    </h6>
+                </div>
+                <div class = "info-pair">
+
+                <a class="btn btn-block lottery-button hover"
+                    href="{{ url_for('trips.individual_trip', id=trip.id, taken_spots = taken_spots.get(trip.id)) }}">ENTER
+                    LOTTERY</a>
+                </div>
+
+
+            </div>
+        </div>
+        {% endfor %}
+
+
+
+    </div>
+    <div class="row section-label">
+        <h2 class="section-title">Past Trips</h2>
+    </div>
+    <div class="row" id="trip-section">
+        {% for trip in past_trips %}
+        <div class="trip-table-container">
+            <table class="trip-table">
+                <tr id=>
+                    <td class="trip-details">
+                        <a class="trip-title"
+                            href="{{ url_for('trips.individual_trip', id=trip.id, taken_spots = taken_spots.get(trip.id)) }}">{{ trip.name }}</a>
+                        <br>
+                        <h6 class="same-line content-label">WHERE</h6>
+                        <br>
+                        <h6 class="same-line content">{{ trip.destination }}</h6>
+                        <br>
+
+                        <h6 class="same-line content-label">DEPART</h6>
+                        <br>
+                        <h6 class="same-line content"> {{ trip['departure_date'].strftime('%b %d, %Y') }}
+                            {% if trip['departure_time'] is not none %}
+                            @ {{ trip['departure_time'].strftime("%_I:%M %p") }}
+                            {% endif %} </h6>
+                        <br>
+                        <h6 class="same-lin content-label">RETURN</h6>
+                        <h6 class="same-line content">
+                            {% if trip['return_date'] is not none %}
+                            {{ trip['return_date'].strftime('%b %d, %Y') }}
+                            {% endif %}
+                            {% if trip['return_time'] is not none %}
+                            @ {{ trip['return_time'].strftime("%_I:%M %p") }}
+                            {% endif %} </h6>
+                        <br>
+
+                    </td>
+                    <td class="trip-lottery">
+                        <h6 class="same-line content-label">CONTACT</h6>
+                        <h6 class="same-line content">
+                            <a class="contact-info"
+                                href="mailto:{{trip['contact']}}subject:{{trip.name}}">{{trip['contact']}}</a></h6>
+                        <br>
+                        <h6 class="content-label same-line">
+                            LOTTERY CLOSES
+                        </h6>
+                        <h6 class="content same-line">{{ trip['signup_deadline'].strftime('%b %d, %Y') }}</h6>
+                        <br>
+
+                        <h6 class="content-label same-line">PRICE</h6>
+                        <h6 class="content same-line">
+                            {% if trip['price'] is not none or trip['price']==0 %}
+                            ${{ trip['price'] }}
+                            {% else %}
+                            FREE
+                            {% endif %}
+                        </h6>
+
+
+                        <!-- <a class="btn btn-block lottery-button hover"
+                            href="{{url_for('individual_trip', id=trip.id, taken_spots = taken_spots.get(trip.id)) }}">ENTER
+                            LOTTERY</a> -->
+
+                    </td>
+
+                </tr>
+            </table>
+        </div>
+        {% endfor %}
+
+
+        <div class="col-12 col-sm-12 col-md-12 col-lg-12 mx-auto">
+            <br><br><br>
+        </div>
+    </div>
+
+
+    </div>
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
+        integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj"
+        crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
+        integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo"
+        crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"
+        integrity="sha384-OgVRvuATP1z7JjHLkuOU7Xw704+h835Lr+6QL9UvYjZE3Ipu6Tp75j7Bh/kR0JKI"
+        crossorigin="anonymous"></script>
+
+</body>
+
+
+
+</html>
