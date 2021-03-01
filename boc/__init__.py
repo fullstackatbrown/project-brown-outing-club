@@ -19,10 +19,10 @@ def create_app(test_config=None):
     from .models import db
     db.app = app
     db.init_app(app)
-    # refresh database
-    with app.app_context():
-        db.drop_all()
-        db.create_all()
+    # refresh database - keeping this out temporarily
+    #with app.app_context():
+     #   db.drop_all()
+      #  db.create_all()
 
     from .auth import oauth
     oauth.init_app(app)
