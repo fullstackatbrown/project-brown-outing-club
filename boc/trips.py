@@ -23,20 +23,13 @@ def dummy_users(): # put into a test file
 
     db.session.commit()
 
-# Serve a template from index
-@bp.route('/')
-def index():
-    #create a landing page w welcome, explanation of purpose, login button
-    return render_template('test.html', name="name")
-
-
 #redirects user to auth0 login
 #User: test@brown.edu
 #Password: #xzAeGCrTenjR9jt
 
 
 #dashboard that is the target of redirect from login page
-@bp.route('/dashboard')
+@bp.route('/')
 # @login_required
 def dashboard():
     #selects rows where the current date matches or is earlier than the sign up deadline

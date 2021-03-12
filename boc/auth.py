@@ -67,11 +67,11 @@ def callback_handling():
         new_user = User(auth_id = userinfo['sub'], email = userinfo['email'])             
         db.session.add(new_user)
         add_default_admin = select([User]).where(User.email == "test@brown.edu")
-        if db.session.execute(add_default_admin).fetchone() is None:
-            db.session.add(AdminClearance(email = "test@brown.edu", can_create=True, can_edit=True, can_delete=True))
+        # if db.session.execute(add_default_admin).fetchone() is None:
+        #     db.session.add(AdminClearance(email = "test@brown.edu", can_create=True, can_edit=True, can_delete=True))
         db.session.commit()
 
-    return redirect('/dashboard')
+    return redirect('/')
 
 
 #tag that restricts access to only those logged in
@@ -87,5 +87,5 @@ def login_required(f):
 @bp.route('/logout')
 def logout():
     session.clear()
-    params = {'returnTo': url_for('trips.index', _external=True), 'client_id': os.environ['AUTH_CLIENTID']}
+    params = {'returnTo': url_for('trips.dashboard', _external=True), 'client_id': os.environ['AUTH_CLIENTID']}
     return redirect(auth0.api_base_url + '/v2/logout?' + urlencode(params))

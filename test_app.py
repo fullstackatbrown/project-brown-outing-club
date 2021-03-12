@@ -101,12 +101,12 @@ def create_waitlist():
     return response1_id, response2_id, response3_id
 
 def test_landing(client):
-    response = client.get('/dashboard')
+    response = client.get('/')
 
     assert b'Login' in response.data
 
     login(client)
-    response = client.get('/dashboard')
+    response = client.get('/')
 
     assert b'Logout' in response.data
 
