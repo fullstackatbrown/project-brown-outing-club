@@ -33,3 +33,9 @@ https://flask-sqlalchemy.palletsprojects.com/en/2.x/quickstart/
 
 TODO: If creating and destroying the database is not a suitable substitution for true migration, implement [alembic](https://alembic.sqlalchemy.org/en/latest/tutorial.html) 
 ([alternative resource](https://www.compose.com/articles/schema-migrations-with-alembic-python-and-postgresql/)).
+
+## TODO
+
+* Fetch RSVP list in .csv
+* Repair run_lottery
+* 

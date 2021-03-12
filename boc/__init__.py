@@ -4,7 +4,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_admin import Admin
 from sqlalchemy.sql import select, func, text, delete
 from sqlalchemy import and_, create_engine, Date, cast, update
-from .adminviews import *
+from .admin_views import *
 from . import config, emails
 
 
