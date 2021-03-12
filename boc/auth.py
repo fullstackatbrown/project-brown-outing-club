@@ -4,7 +4,7 @@ from sqlalchemy.sql import select, func, text, delete
 
 from .models import *
 
-#for OAuth
+# for OAuth
 from functools import wraps
 import json
 from werkzeug.exceptions import HTTPException
@@ -15,7 +15,7 @@ from flask import current_app
 
 bp = Blueprint('auth', __name__, url_prefix='/auth')
 
-#instantiate 0auth authentication
+# instantiate 0auth authentication
 oauth = OAuth()
 
 # auth0 = oauth.register(
@@ -42,13 +42,15 @@ auth0 = oauth.register(
     },
 )
 
+
 @bp.route('/login')
 def login():
     print(current_app.config['TESTING'])
     return auth0.authorize_redirect(redirect_uri='http://127.0.0.1:5000/auth/callback')
 
-#called after authentication
-#stores new users in database if email is not in User Table already
+
+# called after authentication
+# stores new users in database if email is not in User Table already
 @bp.route('/callback')
 def callback_handling():
     print("callback")
@@ -64,7 +66,7 @@ def callback_handling():
 
     check_new_user = select([User]).where(User.email == userinfo['email'])
     if db.session.execute(check_new_user).fetchone() is None:
-        new_user = User(auth_id = userinfo['sub'], email = userinfo['email'])             
+        new_user = User(auth_id=userinfo['sub'], email=userinfo['email'])
         db.session.add(new_user)
         add_default_admin = select([User]).where(User.email == "test@brown.edu")
         # if db.session.execute(add_default_admin).fetchone() is None:
@@ -74,16 +76,18 @@ def callback_handling():
     return redirect('/')
 
 
-#tag that restricts access to only those logged in
+# tag that restricts access to only those logged in
 def login_required(f):
     @wraps(f)
     def check_login(*args, **kwargs):
         if 'profile' not in session:
             return redirect(url_for('auth.login'))
         return f(*args, **kwargs)
+
     return check_login
 
-#logout function
+
+# logout function
 @bp.route('/logout')
 def logout():
     session.clear()
