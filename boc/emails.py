@@ -10,7 +10,7 @@ def init_mail(app):
     mail = Mail(app)
 
 
-def mail_individual(email, trip_name, response_id, trip):
+def mail_individual(email, trip_name, response_id):
     msg = Message('Lottery Selection', recipients=[email])
     msg.body = (
                 'Hey! You have been selected for ' + trip_name + '! Please confirm your attendance by clicking on the link below. \n\n' +

@@ -1,15 +1,11 @@
-from flask_admin.contrib.sqla import ModelView, filters
-from flask import session, url_for, Markup, flash, redirect, abort
-import os, sqlalchemy
-from sqlalchemy import or_
-from sqlalchemy.sql import select, update, insert, func
-from .models import AdminClearance, Response, Trip
+from flask import session, url_for, Markup, flash, redirect
 from flask_admin import expose, BaseView
+from flask_admin.contrib.sqla import ModelView
 from flask_admin.helpers import get_form_data
-from decimal import Decimal
-import datetime
-from .lottery import *
+from sqlalchemy.sql import func
+
 from . import emails, trips
+from .lottery import *
 
 
 class ReqClearance(ModelView):
@@ -18,7 +14,7 @@ class ReqClearance(ModelView):
             if (session.get('profile').get('email') is not None):
                 check_clearance = select([AdminClearance]).where(
                     AdminClearance.email == session.get('profile').get('email'))
-                admin = self.session.execute(check_clearance).fetchone()
+                admin = db.session.execute(check_clearance).fetchone()
                 if admin is not None:
                     can_create = admin['can_create']
                     can_edit = admin['can_edit']
@@ -42,10 +38,10 @@ class UserView(ReqClearance):
     # resets all user weights to default value of 1
     @expose('reset', methods=['POST'])
     def reset_weights(self):
-        reset_text = self.session.query(User).update({User.weight: 1})
-        self.session.commit()
+        reset_weights = db.session.query(User).update({User.weight: 1})
+        db.session.commit(reset_weights)
 
-        return redirect(self.get_url('.index_view'))
+        return redirect(db.get_url('.index_view'))
 
 
 class TripView(ReqClearance):
@@ -68,24 +64,24 @@ class TripView(ReqClearance):
     form_excluded_columns = ('lottery_completed')
 
     # creates the html form with a button that will call lottery_view method to run for a specific trip
-    def format_runlottery(view, context, model, name):
+    def format_run_lottery(view, context, model, name):
         # if model.signup_deadline > datetime.date.today():
         #   return "Signup Deadline Hasn't Passed"
 
         if model.lottery_completed:
             return 'Completed'
 
-        runlottery_button = '''
+        run_lottery_button = '''
             <form action="{lottery_view}" method="POST">
                 <input id="trip_id" name="trip_id"  type="hidden" value="{trip_id}">
                 <button type='submit'>Run</button>
             </form>
         '''.format(lottery_view=url_for('.lottery_view'), trip_id=model.id)
 
-        return Markup(runlottery_button)
+        return Markup(run_lottery_button)
 
-    # creates a /trip/runlottery endpoint that runs the runlottery method on the trip id from the form
-    @expose('runlottery', methods=['POST'])
+    # creates a /trip/run_lottery endpoint that runs the run_lottery method on the trip id from the form
+    @expose('run_lottery', methods=['POST'])
     def lottery_view(self):
         trip_index = self.get_url('.index_view')
         form = get_form_data()
@@ -102,9 +98,9 @@ class TripView(ReqClearance):
         trip.lottery_completed = True
 
         # updates the values in the db
-        runlottery(self, trip_id)
+        run_lottery(trip_id)
         try:
-            self.session.commit()
+            db.session.commit()
         except Exception:
             flash('Failed to run lottery on the trip', 'error')
 
@@ -126,7 +122,7 @@ class TripView(ReqClearance):
     # sets the format of the column Run Lottery
     # displays a button to run the lottery or message saying lottery is complete depending on Trips column lottery_completed
     column_formatters = {
-        'Run Lottery': format_runlottery,
+        'Run Lottery': format_run_lottery,
         'Email Winners': format_emailWinners
     }
 
@@ -138,7 +134,7 @@ class TripView(ReqClearance):
         trip_id = form['trip_id']
 
         # to change to pull from the database
-        winners = self.session.query(Response).filter_by(trip_id=trip_id, lottery_slot=True).join(Trip,
+        winners = db.session.query(Response).filter_by(trip_id=trip_id, lottery_slot=True).join(Trip,
                                                                                                   Response.trip_id == Trip.id).all()
         if winners is not None:
             emails.mail_group(winners, trips.get_trip(trip_id))
@@ -150,7 +146,7 @@ class ResponseView(ReqClearance):
     column_labels = {
         'financial_aid': 'Needs Financial Aid',
         'car': 'Has a Car',
-        'user_behavior': 'User Behavior (Declined Offer, No Show)',
+        'user_behavior': 'User Behavior (Declined Offer, No Response)',
         'trip.name': 'trip name',
         'user_email': 'user email',
         'trip.departure_date': 'Departure Date',
@@ -170,13 +166,13 @@ class ResponseView(ReqClearance):
 
     column_list = ['trip', 'user', 'financial_aid', 'car', 'lottery_slot', 'user_behavior', 'resend_email']
 
-    # sets options for user_behavior (null, declined, or no show)
+    # sets options for user_behavior (null, declined, or No Response)
     form_choices = {
         'user_behavior': [
             ("NoResponse", "No Response"),
             ("Confirmed", "Confirmed"),
             ("Declined", "Declined"),
-            ("No Show", "No Show")
+            ("No Response", "No Response")
         ]
     }
 
@@ -193,7 +189,7 @@ class ResponseView(ReqClearance):
                 <input id="user_email" name="user_email"  type="hidden" value="{user_email}">
                 <input id="response_id" name="response_id"  type="hidden" value="{response_id}">
                 <select id="behavior" name="behavior">
-                    <option value="No Show">No Show</option>
+                    <option value="No Response">No Response</option>
                     <option value="Confirmed">Confirmed</option>
                     <option value="Declined">Declined</option>
                 </select>
@@ -223,9 +219,9 @@ class ResponseView(ReqClearance):
         response.user_behavior = behavior
 
         # updates the values in the db
-        update_userweights(self, behavior, user_email)
+        update_user_weights(self, behavior, user_email)
         try:
-            self.session.commit()
+            db.session.commit()
         except Exception:
             flash('Failed to update user weights', 'error')
 
@@ -245,7 +241,7 @@ class ResponseView(ReqClearance):
         return Markup(resendEmail_button)
 
     # sets the format of the column User Behavior
-    # displays a selection of options to update user behavior to if necessary (i.e. decline, no show)
+    # displays a selection of options to update user behavior to if necessary (i.e. decline, No Response)
     column_formatters = {
         'user_behavior': format_userbehavior,
         'resend_email': format_resendEmail
@@ -258,9 +254,9 @@ class ResponseView(ReqClearance):
 
         response_id = form['response_id']
         response = self.get_one(response_id)
-        trip = self.session.query(Trip).filter_by(id=response.trip_id).first()
+        trip = db.session.query(Trip).filter_by(id=response.trip_id).first()
 
-        emails.mail_individual(response.user_email, trip.name, response.id, trip)
+        emails.mail_individual(response.user_email, trip.name, response.id)
         return redirect(response_index)
 
 
@@ -285,10 +281,10 @@ class WaitlistView(ReqClearance):
 
     # displays only waitlist rows that are not off the waitlist yet by default
     def get_query(self):
-        return self.session.query(self.model).filter(self.model.off == False)
+        return db.session.query(self.model).filter(self.model.off == False)
 
     def get_count_query(self):
-        return self.session.query(func.count('*')).filter(self.model.off == False)
+        return db.session.query(func.count('*')).filter(self.model.off == False)
 
     # creates the html form with a button that will call move user off waitlist (updating their response)
     def format_awardspot(view, context, model, name):
@@ -329,13 +325,13 @@ class WaitlistView(ReqClearance):
         response_id = form['response_id']
         trip_id = form['trip_id']
 
-        response = self.session.query(Response).filter_by(id=response_id).first()
+        response = db.session.query(Response).filter_by(id=response_id).first()
         waitlist = self.get_one(waitlist_id)
-        trip = self.session.query(Trip).filter_by(id=trip_id).first()
+        trip = db.session.query(Trip).filter_by(id=trip_id).first()
 
         # counts the number of responses to the trip in question that have been awarded a lottery spot and have either accepted, or have not declined
-        # taken_spots = self.session.query(Response).filter(Response.id == trip_id, Response.lottery_slot == True, or_(Response.user_behavior == None, Response.user_behavior == "Confirmed")).count()
-        taken_spots = self.session.query(Response).filter_by(trip_id=trip_id, lottery_slot=True).count()
+        # taken_spots = db.session.query(Response).filter(Response.id == trip_id, Response.lottery_slot == True, or_(Response.user_behavior == None, Response.user_behavior == "Confirmed")).count()
+        taken_spots = db.session.query(Response).filter_by(trip_id=trip_id, lottery_slot=True).count()
         # calculate total spots taken for the trip
         total_spots = trip.noncar_cap
         if trip.car_cap is not None:
@@ -347,18 +343,18 @@ class WaitlistView(ReqClearance):
             waitlist.off = True
 
             # supdate ranking for remaining waitlist rows on waitlist
-            self.session.query(Waitlist).filter_by(trip_id=trip_id).filter_by(off=False).update(
+            db.session.query(Waitlist).filter_by(trip_id=trip_id).filter_by(off=False).update(
                 {Waitlist.waitlist_rank: Waitlist.waitlist_rank - 1})
-            user = self.session.query(User).filter(User.email == response.user_email).first()
+            user = db.session.query(User).filter(User.email == response.user_email).first()
             gotspot(user)
 
             # emails person moved off of the waitlist
-            emails.mail_individual(response.user_email, trip.name, response.id, trip)
+            emails.mail_individual(response.user_email, trip.name, response.id)
         else:
             flash('Not enough spots available to move someone off the waitlist', 'error')
 
         try:
-            self.session.commit()
+            db.session.commit()
         except Exception:
             flash('Failed to move response off waitlist', 'error')
 

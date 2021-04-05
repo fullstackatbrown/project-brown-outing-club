@@ -36,6 +36,6 @@ TODO: If creating and destroying the database is not a suitable substitution for
 
 ## TODO
 
-* Fetch RSVP list in .csv
+* Fetch RSVP list in .csv (RSVP count / cap for admin dashboard)
 * Repair run_lottery
-* 
+* Remove image from trip

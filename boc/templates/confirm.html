@@ -163,14 +163,14 @@
                 <li class="list-group-item">
                   {% if signed_up %}
                   <form
-                    action="{{ url_for('trips.confirmattendance', id=id) }}"
+                    action="{{ url_for('trips.confirm_attendance', id=id) }}"
                     method="post"
                   >
                     </button>
                   </form>
                   {% else %}
                   <form
-                    action="{{ url_for('trips.declineattendance', id=id) }}"
+                    action="{{ url_for('trips.decline_attendance', id=id) }}"
                     method="POST">
 
                     <br />

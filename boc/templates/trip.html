@@ -94,11 +94,6 @@
                   href="{{ url_for('trips.trip_confirm', id=trip.id) }}">Confirm Test Page</a>
               </li>
             </ul>
-            <img
-              class="card-img-top"
-              alt="Image of trip."
-              src="{{ trip.image }}"
-            />
             <div class="card-body" id="trip-card-text">
               <ul class="list-group list-group-flush">
                 <li id="trip-info" class="list-group-item">
@@ -204,7 +199,7 @@
                                 -->
                   {% if signed_up %}
                   <form
-                    action="{{ url_for('trips.lotterywithdraw', id=trip['id']) }}"
+                    action="{{ url_for('trips.lottery_withdraw', id=trip['id']) }}"
                     method="post"
                     onsubmit="return confirm('Are you sure you want to leave the lottery?');"
                   >
@@ -217,7 +212,7 @@
                   </form>
                   {% else %}
                   <form
-                    action="{{ url_for('trips.lotterysignup', id=trip['id']) }}"
+                    action="{{ url_for('trips.lottery_signup', id=trip['id']) }}"
                     method="POST"
                     onsubmit="return confirm('Are you sure you want to enter the lottery?');"
                   >

@@ -132,7 +132,7 @@ def test_sampletrip(client):
 
 ### TRIP.PY TESTING OUTLINE ###
 
-def test_confirmattendance(client):
+def test_confirm_attendance(client):
     login_admin(client)
     response_id = create_response()
     assert db.session.query(Response).filter_by(user_behavior = 'NoResponse').count() == 1
@@ -141,13 +141,13 @@ def test_confirmattendance(client):
     email = db.session.execute(response_text).fetchone()[0]
     assert Decimal.compare(db.session.query(User).filter_by(email = email).one().weight, Decimal('1.0')) == 0
 
-    response = client.post('/confirmattendance/'+response_id)
+    response = client.post('/confirm_attendance/'+response_id)
 
     #check that user behavior changed from NoResponse to Confirmed, and that the weight has lowered
     assert db.session.query(Response).filter_by(user_behavior = 'Confirmed').count() == 1
     assert Decimal.compare(db.session.query(User).filter_by(email = email).one().weight, Decimal('0.95')) == 0
 
-def test_declineattendance(client):
+def test_decline_attendance(client):
     login_admin(client)
     response1_id, waitlist_rank1, waitlist_rank2 = create_waitlist()
     assert db.session.query(Response).filter_by(user_behavior = 'NoResponse').count() == 3
@@ -160,7 +160,7 @@ def test_declineattendance(client):
     assert db.session.query(Waitlist).filter_by(response_id = waitlist_rank2).one().off == False
 
     # have user test@brown.edu decline their spot
-    response = client.post('/declineattendance/'+response1_id)
+    response = client.post('/decline_attendance/'+response1_id)
     #check that user behavior changed from NoResponse to Declined, and that the weight has lowered accordingly
     assert db.session.query(Response).filter_by(user_behavior = 'Declined').filter_by(user_email = 'test@brown.edu').count() == 1
     assert db.session.query(Response).filter_by(user_behavior = 'NoResponse').count() == 2
@@ -189,15 +189,15 @@ def test_resetweights(client):
     
     assert db.session.query(User).filter_by(weight = 1.0).count() == 51
 
-# def test_runlottery(client):
+# def test_run_lottery(client):
 
 def test_updatebehavior(client):
     login_admin(client)
     response_id = create_response()
 
     assert db.session.query(Response).filter_by(user_behavior = 'NoResponse').count() == 1
-    response = client.post('/admin/response/updatebehavior', data = {'user_email': 'test@brown.edu', 'response_id': response_id, 'behavior': 'No Show'})
-    assert db.session.query(Response).filter_by(user_behavior = 'No Show').count() == 1
+    response = client.post('/admin/response/updatebehavior', data = {'user_email': 'test@brown.edu', 'response_id': response_id, 'behavior': 'No Response'})
+    assert db.session.query(Response).filter_by(user_behavior = 'No Response').count() == 1
     assert db.session.query(Response).filter_by(user_behavior = 'NoResponse').count() == 0
 
 def test_awardspot(client):
@@ -214,26 +214,26 @@ def test_awardspot(client):
     assert db.session.query(Waitlist).filter_by(off = True).count() == 1
     assert db.session.query(Waitlist).filter_by(off = False).count() == 0
 
-def test_lotterysignup(client):
+def test_lottery_signup(client):
     login_admin(client)
     create_trip()
     trips.dummy_users()
 
     assert db.session.query(Response).filter_by(user_email = 'test@brown.edu').count() == 0
     assert db.session.query(Trip).filter_by(id = 1).count() == 1
-    response = client.post("/lotterysignup/1", data = {'financial_aid': 'True'})
+    response = client.post("/lottery_signup/1", data = {'financial_aid': 'True'})
     assert db.session.query(Response).filter_by(user_email = 'test@brown.edu').count() == 1
 
-def test_lotterywithdraw(client):
+def test_lottery_withdraw(client):
     login_admin(client)
     create_trip()
     trips.dummy_users()
 
     assert db.session.query(Response).filter_by(user_email = 'test@brown.edu').count() == 0
     assert db.session.query(Trip).filter_by(id = 1).count() == 1
-    response = client.post("/lotterysignup/1", data = {'financial_aid': 'True'})
+    response = client.post("/lottery_signup/1", data = {'financial_aid': 'True'})
     assert db.session.query(Response).filter_by(user_email = 'test@brown.edu').count() == 1
 
-    response = client.post("/lotterywithdraw/1")
+    response = client.post("/lottery_withdraw/1")
     print(response)
     assert db.session.query(Response).filter_by(user_email = 'test@brown.edu').count() == 0

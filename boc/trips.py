@@ -1,29 +1,23 @@
-import os
-from flask import abort, Blueprint, Flask, render_template, request, jsonify, redirect, session, url_for, flash, \
-    current_app
-from flask_sqlalchemy import SQLAlchemy
-from flask_admin import Admin
-from sqlalchemy.sql import select, func, text, update
-from sqlalchemy import create_engine, Date, cast, and_
-from datetime import date
-import pymysql
 import random
-from guid import GUID
-from sqlalchemy.dialects.postgresql import UUID
-import uuid
-from .models import *
-from .auth import login_required
+
+from flask import abort, Blueprint, render_template, request, redirect, session, url_for, flash, \
+	current_app
+from sqlalchemy import and_, desc, false, true
+from sqlalchemy.sql import select, func, update
+
 from . import emails
-from .lottery import update_userweights
+from .auth import login_required
+from .lottery import update_user_weights
+from .models import *
 
 bp = Blueprint('trips', __name__)
 
 
 def dummy_users():  # put into a test file
-    for i in range(50):
-        db.session.add(
-            User(email=str(uuid.uuid4()) + "@brown.edu", auth_id=int(uuid.uuid4()), weight=random.randint(-2, 2)))
-    db.session.commit()
+	for i in range(50):
+		db.session.add(
+			User(email=str(uuid.uuid4()) + "@brown.edu", auth_id=int(uuid.uuid4()), weight=random.randint(-2, 2)))
+	db.session.commit()
 
 
 # redirects user to auth0 login
@@ -35,176 +29,176 @@ def dummy_users():  # put into a test file
 @bp.route('/')
 # @login_required
 def dashboard():
-    # selects rows where the current date matches or is earlier than the sign up deadline
-    # NOTE: current date uses the server clock to fetch the date, so make sure the app is deployed on an Eastern Time Server
-    print(current_app.config)
-    upcoming_text = select([Trip]).where(Trip.signup_deadline >= func.current_date()).order_by(Trip.signup_deadline)
-    print(upcoming_text)
-    upcoming_trips = db.session.execute(upcoming_text).fetchall()
-    print(upcoming_trips)
+	# selects rows where the current date matches or is earlier than the sign up deadline
+	# NOTE: current date uses the server clock to fetch the date, so make sure the app is deployed on an Eastern Time Server
+	print(current_app.config)
+	upcoming_text = select([Trip]).where(Trip.signup_deadline >= func.current_date()).order_by(Trip.signup_deadline)
+	print(upcoming_text)
+	upcoming_trips = db.session.execute(upcoming_text).fetchall()
+	print(upcoming_trips)
 
-    # number of responses to each trip, in the same order as the upcoming trips list
-    taken_text = select([Response.trip_id, func.count(Response.user_email)]).group_by(Response.trip_id)
-    print(taken_text)
-    taken_spots = db.session.execute(taken_text).fetchall()
-    print(taken_spots)
+	# number of responses to each trip, in the same order as the upcoming trips list
+	taken_text = select([Response.trip_id, func.count(Response.user_email)]).group_by(Response.trip_id)
+	print(taken_text)
+	taken_spots = db.session.execute(taken_text).fetchall()
+	print(taken_spots)
 
-    taken = {}
-    for trip_id, spot in taken_spots:
-        taken[trip_id] = spot
+	taken = {}
+	for trip_id, spot in taken_spots:
+		taken[trip_id] = spot
 
-    # checks if current user email is in adminclearance table
-    is_admin = False
-    logged_in = False
-    if session.get('profile') is not None:
-        currentuser_email = session.get('profile').get('email')
-        is_admin = db.session.query(AdminClearance).filter_by(email=currentuser_email).first() is not None
-        logged_in = True
-    return render_template('upcoming.html', upcoming_trips=upcoming_trips, taken_spots=taken, is_admin=is_admin,
-                           logged_in=logged_in)
+	# checks if current user email is in adminclearance table
+	is_admin = False
+	logged_in = False
+	if session.get('profile') is not None:
+		currentuser_email = session.get('profile').get('email')
+		is_admin = db.session.query(AdminClearance).filter_by(email=currentuser_email).first() is not None
+		logged_in = True
+	return render_template('upcoming.html', upcoming_trips=upcoming_trips, taken_spots=taken, is_admin=is_admin,
+						   logged_in=logged_in)
 
 
 @bp.route('/trip/<int:id>/<int:taken_spots>')
 @login_required
 def individual_trip(id, taken_spots):
-    trip = get_trip(id)
-    signed = False
-    # list of trips that have lotteries the user has signed up for
-    currentuser_email = session.get('profile').get('email')
-    signed_text = select([Response.trip_id]).where(Response.user_email == currentuser_email)
-    signed_up = db.session.execute(signed_text).fetchall()
-    if ((id,) in signed_up):
-        signed = True
-    return render_template('trip.html', trip=trip, taken_spots=taken_spots, signed_up=signed)
+	trip = get_trip(id)
+	signed = False
+	# list of trips that have lotteries the user has signed up for
+	currentuser_email = session.get('profile').get('email')
+	signed_text = select([Response.trip_id]).where(Response.user_email == currentuser_email)
+	signed_up = db.session.execute(signed_text).fetchall()
+	if ((id,) in signed_up):
+		signed = True
+	return render_template('trip.html', trip=trip, taken_spots=taken_spots, signed_up=signed)
 
 
 @bp.route('/confirm/<id>')
 def trip_confirm(id):
-    response = get_response(id)
-    if (response["user_behavior"] != "NoResponse"):
-        return redirect(url_for('trips.dashboard'))
-    return render_template('confirm.html', id=id, trip=get_trip(response["trip_id"]))
+	response = get_response(id)
+	if (response["user_behavior"] != "NoResponse"):
+		return redirect(url_for('trips.dashboard'))
+	return render_template('confirm.html', id=id, trip=get_trip(response["trip_id"]))
 
 
 # displays past trips
-@bp.route('/pasttrips')
-def pasttrips():
-    # selects rows where the current date is after the sign up deadline
-    # NOTE: current date uses the server clock to fetch the date, so make sure the app is deployed on an Eastern Time Server
-    past_text = select([Trip]).where(Trip.signup_deadline < func.current_date()).order_by(Trip.signup_deadline.desc())
-    past_trips = db.session.execute(past_text).fetchall()
+@bp.route('/past_trips')
+def past_trips():
+	# selects rows where the current date is after the sign up deadline
+	# NOTE: current date uses the server clock to fetch the date, so make sure the app is deployed on an Eastern Time Server
+	past_text = select([Trip]).where(Trip.signup_deadline < func.current_date()).order_by(Trip.signup_deadline.desc())
+	past_trips = db.session.execute(past_text).fetchall()
 
-    return render_template('past.html', past_trips=past_trips)
+	return render_template('past.html', past_trips=past_trips)
 
 
 # gets trip object from its id
 def get_trip(id):
-    trip_text = select([Trip]).where(Trip.id == id)
-    trip = db.session.execute(trip_text).fetchone()
+	trip_text = select([Trip]).where(Trip.id == id)
+	trip = db.session.execute(trip_text).fetchone()
 
-    if trip is None:
-        abort(404, "Trip doesn't exist.")
+	if trip is None:
+		abort(404, "Trip doesn't exist.")
 
-    return trip
+	return trip
 
 
 # page linked with "Enter Lottery" from dashboard, should collect information necessary to create Response row in db using a form
-@bp.route('/lotterysignup/<int:id>', methods=['POST'])
+@bp.route('/lottery_signup/<int:id>', methods=['POST'])
 @login_required
-def lotterysignup(id):
-    new_response = Response(
-        trip_id=id, user_email=session.get('profile').get('email'),
-        financial_aid=(request.form.get("financial_aid") is not None), car=(request.form.get("car") is not None)
-    )
-    db.session.add(new_response)
-    db.session.commit()
-    return redirect(url_for('trips.dashboard'))
+def lottery_signup(id):
+	new_response = Response(
+		trip_id=id, user_email=session.get('profile').get('email'),
+		financial_aid=(request.form.get("financial_aid") is not None), car=(request.form.get("car") is not None)
+	)
+	db.session.add(new_response)
+	db.session.commit()
+	return redirect(url_for('trips.dashboard'))
 
 
-@bp.route('/lotterywithdraw/<id>', methods=['POST'])
+@bp.route('/lottery_withdraw/<id>', methods=['POST'])
 @login_required
-def lotterywithdraw(id):
-    response = db.session.query(Response).filter(Response.trip_id == id).filter(
-        Response.user_email == session.get('profile').get('email')).first()
-    db.session.delete(response)
-    db.session.commit()
-    return redirect(url_for('trips.dashboard'))
+def lottery_withdraw(id):
+	response = db.session.query(Response).filter(Response.trip_id == id).filter(
+		Response.user_email == session.get('profile').get('email')).first()
+	db.session.delete(response)
+	db.session.commit()
+	return redirect(url_for('trips.dashboard'))
 
 
 @bp.route('/adminviewguide')
 @login_required
 def guide():
-    # flash("Could not process lottery request", 'error')
-    check_clearance = select([AdminClearance]).where(AdminClearance.email == session.get('profile').get('email'))
-    if check_clearance is not None:
-        return render_template('admin/guide.html')
-    else:
-        flash("Only authorized users can view", 'error')
-        return render_template('upcoming.html')
+	# flash("Could not process lottery request", 'error')
+	check_clearance = select([AdminClearance]).where(AdminClearance.email == session.get('profile').get('email'))
+	if check_clearance is not None:
+		return render_template('admin/guide.html')
+	else:
+		flash("Only authorized users can view", 'error')
+		return render_template('upcoming.html')
 
 
 def get_response(id):
-    response_text = select([Response]).where(Response.id == id)
-    response = db.session.execute(response_text).fetchone()
+	response_text = select([Response]).where(Response.id == id)
+	response = db.session.execute(response_text).fetchone()
 
-    if response is None:
-        abort(404, "Response doesn't exist.")
+	if response is None:
+		abort(404, "Response doesn't exist.")
 
-    return response
+	return response
 
 
 # confirms user attendance for given trip
 # called within confirm.html
-@bp.route('/confirmattendance/<id>', methods=['POST'])
-def confirmattendance(id):
-    to_update = update(Response).where(Response.id == id).values(user_behavior="Confirmed")
-    db.session.execute(to_update)
-    # update user weight for declining
-    get_confirmed_email = select([Response.user_email]).where(Response.id == id)
-    confirmed_email = db.session.execute(get_confirmed_email).fetchone()[0]
-    update_userweights(db, "Confirmed", confirmed_email)
+@bp.route('/confirm_attendance/<id>', methods=['POST'])
+def confirm_attendance(id):
+	to_update = update(Response).where(Response.id == id).values(user_behavior="Confirmed")
+	db.session.execute(to_update)
+	# update user weight for declining
+	get_confirmed_email = select([Response.user_email]).where(Response.id == id)
+	confirmed_email = db.session.execute(get_confirmed_email).fetchone()[0]
+	update_user_weights(db, "Confirmed", confirmed_email)
 
-    db.session.commit()
-    return redirect(url_for('trips.dashboard'))
+	db.session.commit()
+	return redirect(url_for('trips.dashboard'))
 
 
-@bp.route('/declineattendance/<id>', methods=['POST'])
-def declineattendance(id):
-    # update response to declined
-    to_update = update(Response).where(Response.id == id).values(user_behavior="Declined")
-    db.session.execute(to_update)
+@bp.route('/decline_attendance/<id>', methods=['POST'])
+def decline_attendance(id):
+	# update response to declined
+	to_update = update(Response).where(Response.id == id).values(user_behavior="Declined")
+	db.session.execute(to_update)
 
-    declined_response = get_response(id)
-    # get row of waitlist to update since there is an open spot for trip w/ same trip id as declined response
-    get_waitlist = select([Waitlist]).where(
-        and_(Waitlist.trip_id == declined_response["trip_id"], Waitlist.waitlist_rank == 1, Waitlist.off == False))
-    waitlist = db.session.execute(get_waitlist).fetchone()
+	# update user weight for declining
+	get_declined_email = select([Response.user_email]).where(Response.id == id)
+	declined_email = db.session.execute(get_declined_email).fetchone()[0]
+	update_user_weights(db, "Declined", declined_email)
 
-    # update user weight for declining
-    get_declined_email = select([Response.user_email]).where(Response.id == id)
-    declined_email = db.session.execute(get_declined_email).fetchone()[0]
-    update_userweights(db, "Declined", declined_email)
+	# pick a user, if we dont have enough cars, prioritize a car
+	trip_name, car_cap = db.session.execute(select(Trip.name, Trip.car_cap).where(Trip.id == id)).fetchone()
+	# In order to count a car, user must be granted lottery slot and not decline
+	get_cars = select(Response.id).where(and_(
+		Response.lottery_slot == true(),
+		Response.user_behavior != 'Declined',
+		Response.car == true()))
+	car_winners = db.session.session.execute(get_cars).fetchall()
+	get_waitlist = select([Response.user_email, Response.id]).where(Response.lottery_slot == false())
+	if car_cap > len(car_winners):
+		get_waitlist.order_by(desc(Response.car))
+	get_waitlist.order_by(desc(User.weight))
 
-    # if there are still people waiting for the trip in the waitlist
-    if waitlist is not None:
-        # remove user from waitlist
-        wait_text = update(Waitlist).where(
-            and_(Waitlist.trip_id == declined_response["trip_id"], Waitlist.waitlist_rank == 1,
-                 Waitlist.off == False)).values(off=True)
-        db.session.execute(wait_text)
-        # update response from user to reflect getting a lottery slot
-        wait_update = update(Response).where(Response.id == waitlist["response_id"]).values(lottery_slot=True)
-        db.session.execute(wait_update)
-        # update rest of the waitlist to move their positions up on the waitlist
-        db.session.query(Waitlist).filter_by(trip_id=declined_response["trip_id"]).filter_by(off=False).update(
-            {Waitlist.waitlist_rank: Waitlist.waitlist_rank - 1})
-        # email new winner
-        trip = get_trip(declined_response["trip_id"])
-        waitlist_recipient_response = waitlist["response_id"]
-        waitlist_recipient = get_response(waitlist_recipient_response)
-        emails.mail_individual(waitlist_recipient["user_email"], trip["name"], waitlist_recipient["id"], trip)
-    db.session.commit()
-    return redirect(url_for('trips.dashboard'))
+	# Check that there was a user on the waitlist, return immediately if not
+	waitlist_winner = db.session.execute(get_waitlist).fetchone()
+	if waitlist_winner is None:
+		return redirect(url_for('trips.dashboard'))
+	winner_email, response_id = waitlist_winner
+
+	# update response from user to reflect getting a lottery slot
+	wait_update = update(Response).where(Response.id == response_id).values(lottery_slot=True)
+	db.session.execute(wait_update)
+
+	# email new winner
+	emails.mail_individual(winner_email, trip_name, response_id)
+	return redirect(url_for('trips.dashboard'))
 
 # if __name__ == '__main__':
 #     app.run()
