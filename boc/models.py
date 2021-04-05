@@ -1,5 +1,5 @@
-from sqlalchemy import CheckConstraint
 import uuid
+
 from flask_sqlalchemy import SQLAlchemy
 
 db = SQLAlchemy()

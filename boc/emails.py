@@ -1,6 +1,5 @@
 from flask import url_for
 from flask_mail import Mail, Message
-from . import trips
 
 mail = None
 

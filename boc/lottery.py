@@ -1,8 +1,9 @@
 import random
+from decimal import Decimal
 
 from sqlalchemy import desc, and_, false, true
-from sqlalchemy.sql import select, update, insert
-from decimal import Decimal
+from sqlalchemy.sql import select
+
 from .models import *
 
 userweight_floor = Decimal(0.5)

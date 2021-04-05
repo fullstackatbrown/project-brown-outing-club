@@ -1,11 +1,8 @@
-import os
-from flask import Flask, render_template, request, jsonify, redirect, session, url_for, flash
-from flask_sqlalchemy import SQLAlchemy
+from flask import Flask
 from flask_admin import Admin
-from sqlalchemy.sql import select, func, text, delete
-from sqlalchemy import and_, create_engine, Date, cast, update
-from .admin_views import *
+
 from . import config, emails
+from .admin_views import *
 
 
 def create_app(test_config=None):
