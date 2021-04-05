@@ -28,9 +28,7 @@ class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     auth_id = db.Column(db.String(80), unique=True, nullable=True)
     email = db.Column(db.String(120), unique=True, nullable=False)
-
-    # float with 1 digit before decimal, 10 after
-    weight = db.Column(db.Float(1, 10), nullable=False, default=1.0)
+    weight = db.Column(db.Float, nullable=False)
 
     # String representation of this object (for logging)
     def __repr__(self):

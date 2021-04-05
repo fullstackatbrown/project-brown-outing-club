@@ -28,6 +28,12 @@ def run_lottery(id):
 	car_cap, noncar_cap = db.session.execute(get_trip).fetchone()
 	print(car_cap, noncar_cap)
 
+	# increase all weights before (by half of the decrease value)
+	# TODO: does this work?
+	for row in User.query.join(Response, User.email == Response.user_email).filter(Response.trip_id == id):
+		row.weight = row.weight + 5.0
+	db.session.commit()
+
 	# Get winners from car cap
 	user_fields = [Response.user_email, Response.id]
 	get_cars = select(user_fields).where(and_(Response.trip_id == id, Response.car is true()))
@@ -51,20 +57,19 @@ def run_lottery(id):
 
 # updates user weights based on if they declined or did not show
 def update_user_weights(behavior, user_email):
-	# Johnny note: commented out for now, lets just do random to be safe and fair
-
 	# get user weight from user email
-	# get_user_text = select([User.weight]).where(User.email == user_email)
-	# current_weight = db.session.execute(get_user_text).fetchone()
-	# user_weight = current_weight[0]
+	# TODO: this weight update seems broken
+	get_user_text = select([User.weight]).where(User.email == user_email)
+	user_weight = db.session.execute(get_user_text).fetchone()[0]
+	print(user_weight)
 
 	# adjust weight according to behavior
-	# if behavior == "Declined":
-	# 	user_weight *= Decimal(0.9)
-	# elif behavior == "No Response":
-	# 	user_weight *= Decimal(0.8)
-	# elif behavior == "Confirmed":
-	# 	user_weight *= Decimal(0.95)
+	if behavior == "Declined":
+		user_weight -= 0.00001
+	elif behavior == "No Response":
+		user_weight -= 10.0
+	elif behavior == "Confirmed":
+		user_weight -= 3.0
 	# add did not get result
 
 	# ensure weight doesn't drop to below 0.25
@@ -72,5 +77,6 @@ def update_user_weights(behavior, user_email):
 	# 	user_weight = userweight_floor
 	# if user_weight > userweight_roof:
 	# 	user_weight = userweight_roof
-
-	db.session.query(User).update({User.weight: random.uniform(0, 1)})
+	print(user_weight)
+	db.session.query(User).update({User.weight: user_weight})
+	db.session.commit()

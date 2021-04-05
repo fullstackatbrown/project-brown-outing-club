@@ -219,7 +219,7 @@ class ResponseView(ReqClearance):
         response.user_behavior = behavior
 
         # updates the values in the db
-        update_user_weights(self, behavior, user_email)
+        update_user_weights(behavior, user_email)
         try:
             db.session.commit()
         except Exception:

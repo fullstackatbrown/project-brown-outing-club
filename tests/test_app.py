@@ -1,21 +1,22 @@
 import os
 import sys
+import pytest
+from dotenv import load_dotenv
+from pathlib import Path
 
 # Connect this directory to outer scope
 this_path = os.path.dirname(os.path.relpath(__file__))
 sys.path.insert(0, this_path + '/../')
 
-import pytest
-from dotenv import load_dotenv
-from pathlib import Path
 from boc import *
-
 
 @pytest.fixture
 def client():
 	dotenv_path = Path('../.env')
 	load_dotenv(dotenv_path=dotenv_path)
 	test_app = create_app(config.TestConfig())
+	db.drop_all()
+	db.create_all()
 
 	# Create a test client using the Flask application configured for testing
 	with test_app.test_client() as client:

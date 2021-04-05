@@ -69,7 +69,7 @@ def callback_handling():
     check_new_user = select([User]).where(User.email == userinfo['email'])
     if db.session.execute(check_new_user).fetchone() is None:
         # Assign random weight between 1 and 0 initially so that lottery can be run gracefully
-        new_user = User(auth_id=userinfo['sub'], email=userinfo['email'], weight=random.uniform(0, 1))
+        new_user = User(auth_id=userinfo['sub'], email=userinfo['email'], weight=100+random.uniform(0, 1)*0.0000001)
         db.session.add(new_user)
         add_default_admin = select([User]).where(User.email == "test@brown.edu")
         # if db.session.execute(add_default_admin).fetchone() is None:
