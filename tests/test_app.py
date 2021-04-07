@@ -49,11 +49,11 @@ def logout(client):
 	return client.get('/auth/logout')
 
 
-def create_trip():
+def create_trip(car_cap = 0, noncar_cap = 10):
 	new_trip = Trip(
 		name="test name", departure_date=func.current_date(),
 		departure_location="test location", departure_time=func.current_time(),
-		signup_deadline=func.current_date(), price=9.99, noncar_cap=10)
+		signup_deadline=func.current_date(), price=9.99, noncar_cap=noncar_cap, car_cap=car_cap)
 	db.session.add(new_trip)
 	db.session.commit()
 
@@ -260,3 +260,52 @@ def test_lottery_withdraw(client):
 	response = client.post("/lottery_withdraw/1")
 	print(response)
 	assert db.session.query(Response).filter_by(user_email='test@brown.edu').count() == 0
+
+# def test_integration_1(client):
+#     # create trip with normal cap 10 and car cap 10, id = 1
+#     create_trip(10, 10)
+#     # create 25 new accounts without cars
+#     trips.dummy_users(25)
+# 	# create 25 new accounts with cars
+# 	trips.dummy_users(25, True)
+
+#     # sign up all 50 for the trip w id 1
+#     users = db.session.query(User)
+#     for user in users:
+#         db.session.add(Response(trip_id=1, user_email = user.email))
+#     db.session.commit()
+#     assert db.session.query(Response).count() == 50
+
+# 	# run lottery, only 20 should be awarded spot
+#     lottery.runlottery(1)
+# 	assert db.session.query(Response).filter_by(trip_id = 1).filter_by(lottery_slot = True).filter_by(car = True).count() == 10
+
+# 	first_no_car_winners = db.session.query(Response).filter_by(trip_id = 1).filter_by(lottery_slot = True).filter_by(car = False)
+# 	assert first_no_car_winners.count() == 10
+
+# 	# track all the unique emails of the first no car winners
+# 	first_no_car_emails = {}
+# 	for winners in first_no_car_winners:
+# 		first_no_car_emails.add(winners.email)
+
+# 	# create trip with normal cap 20 and car cap 10, id = 2
+# 	# total cap is equal to the number of people not rewarded spot in trip 1
+# 	# car cap is greater than the number of people with cars who did not get first trip (20 > 15)
+# 	create_trip(10, 20)
+
+# 	# sign up all 50 for the trip w id 2
+#     users = db.session.query(User)
+#     for user in users:
+#         db.session.add(Response(trip_id=2, user_email = user.email))
+#     db.session.commit()
+#     assert db.session.query(Response).count() == 50
+
+# 	lottery.runlottery(2)
+# 	assert db.session.query(Response).filter_by(trip_id = 2).filter_by(lottery_slot = True).filter_by(car = True).count() == 20
+	
+# 	second_no_car_winners = db.session.query(Response).filter_by(trip_id = 2).filter_by(lottery_slot = True).filter_by(car = False)
+# 	assert second_no_car_winners.count() == 10
+
+# 	# check to see no second_no_car_winners are got the first trip also
+# 	for winner in second_no_car_winners:
+# 		assert winner.email not in first_no_car_emails

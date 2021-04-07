@@ -13,10 +13,10 @@ from .models import *
 bp = Blueprint('trips', __name__)
 
 
-def dummy_users():  # put into a test file
-	for i in range(50):
+def dummy_users(num = 50, car=False):  # put into a test file
+	for i in range(num):
 		db.session.add(
-			User(email=str(uuid.uuid4()) + "@brown.edu", auth_id=int(uuid.uuid4()), weight=random.randint(-2, 2)))
+			User(email=str(uuid.uuid4()) + "@brown.edu", auth_id=int(uuid.uuid4()), weight=random.randint(-2, 2), car=car))
 	db.session.commit()
 
 
