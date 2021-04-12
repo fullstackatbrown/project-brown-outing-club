@@ -16,7 +16,7 @@ bp = Blueprint('trips', __name__)
 def dummy_users(num = 50, car=False):  # put into a test file
 	for i in range(num):
 		db.session.add(
-			User(email=str(uuid.uuid4()) + "@brown.edu", auth_id=int(uuid.uuid4()), weight=random.randint(-2, 2), car=car))
+			User(email=str(uuid.uuid4()) + "@brown.edu", auth_id=int(uuid.uuid4()), car=car))
 	db.session.commit()
 
 
@@ -58,9 +58,9 @@ def dashboard():
 						   logged_in=logged_in)
 
 
-@bp.route('/trip/<int:id>/<int:taken_spots>')
+@bp.route('/trip/<int:id>')
 @login_required
-def individual_trip(id, taken_spots):
+def individual_trip(id):
 	trip = get_trip(id)
 	signed = False
 	# list of trips that have lotteries the user has signed up for
@@ -69,7 +69,8 @@ def individual_trip(id, taken_spots):
 	signed_up = db.session.execute(signed_text).fetchall()
 	if ((id,) in signed_up):
 		signed = True
-	return render_template('trip.html', trip=trip, taken_spots=taken_spots, signed_up=signed)
+	# TODO: fix taken_spots
+	return render_template('trip.html', trip=trip, taken_spots=0, signed_up=signed)
 
 
 @bp.route('/confirm/<id>')
@@ -156,7 +157,7 @@ def confirm_attendance(id):
 	# update user weight for declining
 	get_confirmed_email = select([Response.user_email]).where(Response.id == id)
 	confirmed_email = db.session.execute(get_confirmed_email).fetchone()[0]
-	update_user_weights(db, "Confirmed", confirmed_email)
+	update_user_weights("Confirmed", confirmed_email)
 
 	db.session.commit()
 	return redirect(url_for('trips.dashboard'))
@@ -171,7 +172,7 @@ def decline_attendance(id):
 	# update user weight for declining
 	get_declined_email = select([Response.user_email]).where(Response.id == id)
 	declined_email = db.session.execute(get_declined_email).fetchone()[0]
-	update_user_weights(db, "Declined", declined_email)
+	update_user_weights("Declined", declined_email)
 
 	# pick a user, if we dont have enough cars, prioritize a car
 	trip_name, car_cap = db.session.execute(select(Trip.name, Trip.car_cap).where(Trip.id == id)).fetchone()

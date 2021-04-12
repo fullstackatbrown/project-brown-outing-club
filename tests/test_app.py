@@ -10,6 +10,7 @@ sys.path.insert(0, this_path + '/../')
 
 from boc import *
 
+
 @pytest.fixture
 def client():
 	dotenv_path = Path('../.env')
@@ -26,68 +27,60 @@ def client():
 
 
 def login(client):
-	with client.session_transaction() as session:
-		session['profile'] = {
-			'user_id': 'auth0|5f3489a68f18aa00689d5333',
-			'email': 'test@brown.edu'
-		}
+	auth_token = str(uuid.uuid4())
+	email = str(uuid.uuid4()) + '@brown.edu'
+	new_user = User(auth_id=auth_token, email=email)
+	db.session.add(new_user)
+	db.session.commit()
+	with client.session_transaction() as transaction:
+		transaction['profile'] = {'user_id': auth_token, 'email': email}
+	return email
 
 
 def login_admin(client):
-	with client.session_transaction() as session:
-		session['profile'] = {
-			'user_id': 'auth0|5f3489a68f18aa00689d5333',
-			'email': 'test@brown.edu'
-		}
-	new_user = User(auth_id='auth0|5f3489a68f18aa00689d5333', email='test@brown.edu')
+	auth_token = str(uuid.uuid4())
+	email = str(uuid.uuid4()) + '@brown.edu'
+	with client.session_transaction() as transaction:
+		transaction['profile'] = {'user_id': auth_token, 'email': email}
+	new_user = User(auth_id=auth_token, email=email)
 	db.session.add(new_user)
-	db.session.add(AdminClearance(email="test@brown.edu", can_create=True, can_edit=True, can_delete=True))
+	db.session.add(AdminClearance(email=email, can_create=True, can_edit=True, can_delete=True))
 	db.session.commit()
+	return email
 
 
 def logout(client):
 	return client.get('/auth/logout')
 
 
-def create_trip(car_cap = 0, noncar_cap = 10):
-	new_trip = Trip(
-		name="test name", departure_date=func.current_date(),
-		departure_location="test location", departure_time=func.current_time(),
-		signup_deadline=func.current_date(), price=9.99, noncar_cap=noncar_cap, car_cap=car_cap)
+def create_trip(car_cap=0, noncar_cap=10):
+	new_trip = Trip(name=str(uuid.uuid4()), departure_date=func.current_date(), departure_location="test location",
+					departure_time=func.current_time(), signup_deadline=func.current_date(), price=9.99,
+					noncar_cap=noncar_cap, car_cap=car_cap)
 	db.session.add(new_trip)
 	db.session.commit()
+	return new_trip.id
 
 
-def create_response():
-	create_trip()
-	new_response = Response(
-		trip_id=1, user_email='test@brown.edu', lottery_slot=True
-	)
+def create_response(trip_id, email):
+	new_response = Response(trip_id=trip_id, user_email=email, lottery_slot=True)
 	db.session.add(new_response)
 	db.session.commit()
-
 	response_text = select([Response.id])
 	response_id = db.session.execute(response_text).fetchone()
-	# returns reponse id
 	return response_id[0]
 
 
 def create_waitlist():
 	response1_id = create_response()
 	new_user = User(auth_id='auth0|5f3489a68f18aa00689d5334', email='test2@brown.edu')
-
-	new_response = Response(
-		trip_id=1, user_email='test2@brown.edu'
-	)
+	new_response = Response(trip_id=1, user_email='test2@brown.edu')
 	db.session.add(new_user)
 	db.session.add(new_response)
 	db.session.commit()
 
 	new_user = User(auth_id='auth0|5f3489a68f18aa00689d5335', email='test3@brown.edu')
-
-	new_response = Response(
-		trip_id=1, user_email='test3@brown.edu'
-	)
+	new_response = Response(trip_id=1, user_email='test3@brown.edu')
 	db.session.add(new_user)
 	db.session.add(new_response)
 	db.session.commit()
@@ -97,18 +90,6 @@ def create_waitlist():
 
 	response_text = select([Response.id]).where(Response.user_email == 'test3@brown.edu')
 	response3_id = db.session.execute(response_text).fetchone()[0]
-
-	new_waitlist1 = Waitlist(
-		trip_id=1, response_id=response2_id, waitlist_rank=1
-	)
-
-	new_waitlist2 = Waitlist(
-		trip_id=1, response_id=response3_id, waitlist_rank=2
-	)
-
-	db.session.add(new_waitlist1)
-	db.session.add(new_waitlist2)
-	db.session.commit()
 
 	return response1_id, response2_id, response3_id
 
@@ -148,32 +129,25 @@ def test_sampletrip(client):
 ### TRIP.PY TESTING OUTLINE ###
 
 def test_confirm_attendance(client):
-	login_admin(client)
-	response_id = create_response()
+	trip_id = create_trip()
+	user_email = login_admin(client)
+	response_id = create_response(trip_id, user_email)
 	assert db.session.query(Response).filter_by(user_behavior='NoResponse').count() == 1
 
 	response_text = select([Response.user_email])
 	email = db.session.execute(response_text).fetchone()[0]
-	assert Decimal.compare(db.session.query(User).filter_by(email=email).one().weight, Decimal('1.0')) == 0
-
-	response = client.post('/confirm_attendance/' + response_id)
+	initial_weight = db.session.query(User).filter_by(email=email).one().weight
+	client.post('/confirm_attendance/' + response_id)
 
 	# check that user behavior changed from NoResponse to Confirmed, and that the weight has lowered
 	assert db.session.query(Response).filter_by(user_behavior='Confirmed').count() == 1
-	assert Decimal.compare(db.session.query(User).filter_by(email=email).one().weight, Decimal('0.95')) == 0
+	assert initial_weight > db.session.query(User).filter_by(email=email).one().weight
 
 
 def test_decline_attendance(client):
 	login_admin(client)
 	response1_id, waitlist_rank1, waitlist_rank2 = create_waitlist()
 	assert db.session.query(Response).filter_by(user_behavior='NoResponse').count() == 3
-
-	# check that both users start with full weight of 1.0 and that the waitlisted user is not off the waitlist
-	assert Decimal.compare(db.session.query(User).filter_by(email='test@brown.edu').one().weight, Decimal('1.0')) == 0
-	assert Decimal.compare(db.session.query(User).filter_by(email='test2@brown.edu').one().weight, Decimal('1.0')) == 0
-	assert Decimal.compare(db.session.query(User).filter_by(email='test3@brown.edu').one().weight, Decimal('1.0')) == 0
-	assert db.session.query(Waitlist).filter_by(response_id=waitlist_rank1).one().off == False
-	assert db.session.query(Waitlist).filter_by(response_id=waitlist_rank2).one().off == False
 
 	# have user test@brown.edu decline their spot
 	response = client.post('/decline_attendance/' + response1_id)
@@ -230,8 +204,7 @@ def test_awardspot(client):
 	db.session.commit()
 
 	assert db.session.query(Waitlist).filter_by(off=False).count() == 1
-	response = client.post('/admin/waitlist/awardspot',
-						   data={'trip_id': 1, 'waitlist_id': 1, 'response_id': response_id})
+	client.post('/admin/waitlist/awardspot', data={'trip_id': 1, 'waitlist_id': 1, 'response_id': response_id})
 	assert db.session.query(Waitlist).filter_by(off=True).count() == 1
 	assert db.session.query(Waitlist).filter_by(off=False).count() == 0
 
@@ -243,7 +216,7 @@ def test_lottery_signup(client):
 
 	assert db.session.query(Response).filter_by(user_email='test@brown.edu').count() == 0
 	assert db.session.query(Trip).filter_by(id=1).count() == 1
-	response = client.post("/lottery_signup/1", data={'financial_aid': 'True'})
+	client.post("/lottery_signup/1", data={'financial_aid': 'True'})
 	assert db.session.query(Response).filter_by(user_email='test@brown.edu').count() == 1
 
 
@@ -254,7 +227,7 @@ def test_lottery_withdraw(client):
 
 	assert db.session.query(Response).filter_by(user_email='test@brown.edu').count() == 0
 	assert db.session.query(Trip).filter_by(id=1).count() == 1
-	response = client.post("/lottery_signup/1", data={'financial_aid': 'True'})
+	client.post("/lottery_signup/1", data={'financial_aid': 'True'})
 	assert db.session.query(Response).filter_by(user_email='test@brown.edu').count() == 1
 
 	response = client.post("/lottery_withdraw/1")
@@ -302,7 +275,7 @@ def test_lottery_withdraw(client):
 
 # 	lottery.runlottery(2)
 # 	assert db.session.query(Response).filter_by(trip_id = 2).filter_by(lottery_slot = True).filter_by(car = True).count() == 20
-	
+
 # 	second_no_car_winners = db.session.query(Response).filter_by(trip_id = 2).filter_by(lottery_slot = True).filter_by(car = False)
 # 	assert second_no_car_winners.count() == 10
 

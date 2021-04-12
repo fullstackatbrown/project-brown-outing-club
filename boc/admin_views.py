@@ -172,7 +172,6 @@ class ResponseView(ReqClearance):
             ("NoResponse", "No Response"),
             ("Confirmed", "Confirmed"),
             ("Declined", "Declined"),
-            ("No Response", "No Response")
         ]
     }
 
