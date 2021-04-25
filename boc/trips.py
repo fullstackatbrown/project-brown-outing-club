@@ -13,13 +13,6 @@ from .models import *
 bp = Blueprint('trips', __name__)
 
 
-def dummy_users(num = 50, car=False):  # put into a test file
-	for i in range(num):
-		db.session.add(
-			User(email=str(uuid.uuid4()) + "@brown.edu", auth_id=int(uuid.uuid4()), car=car))
-	db.session.commit()
-
-
 # redirects user to auth0 login
 # User: test@brown.edu
 # Password: #xzAeGCrTenjR9jt
@@ -31,17 +24,12 @@ def dummy_users(num = 50, car=False):  # put into a test file
 def dashboard():
 	# selects rows where the current date matches or is earlier than the sign up deadline
 	# NOTE: current date uses the server clock to fetch the date, so make sure the app is deployed on an Eastern Time Server
-	print(current_app.config)
 	upcoming_text = select([Trip]).where(Trip.signup_deadline >= func.current_date()).order_by(Trip.signup_deadline)
-	print(upcoming_text)
 	upcoming_trips = db.session.execute(upcoming_text).fetchall()
-	print(upcoming_trips)
 
 	# number of responses to each trip, in the same order as the upcoming trips list
 	taken_text = select([Response.trip_id, func.count(Response.user_email)]).group_by(Response.trip_id)
-	print(taken_text)
 	taken_spots = db.session.execute(taken_text).fetchall()
-	print(taken_spots)
 
 	taken = {}
 	for trip_id, spot in taken_spots:

@@ -47,7 +47,6 @@ auth0 = oauth.register(
 
 @bp.route('/login')
 def login():
-    print(current_app.config['TESTING'])
     return auth0.authorize_redirect(redirect_uri='http://127.0.0.1:5000/auth/callback')
 
 
