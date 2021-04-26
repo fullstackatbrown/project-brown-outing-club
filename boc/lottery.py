@@ -6,16 +6,6 @@ from sqlalchemy.sql import select
 
 from .models import *
 
-userweight_floor = Decimal(0.5)
-userweight_roof = Decimal(5.0)
-
-
-def gotspot(user):
-	if user.weight - Decimal(0.05) < userweight_floor:
-		user.weight = userweight_floor
-	else:
-		user.weight = user.weight - Decimal(0.05)
-
 
 # ACTION REQUIRED:
 # def send_email(user):
@@ -28,8 +18,7 @@ def run_lottery(id):
 	car_cap, noncar_cap = db.session.execute(get_trip).fetchone()
 	print(car_cap, noncar_cap)
 
-	# increase all weights before (by half of the decrease value)
-	# TODO: does this work?
+	# increase all weights before (so that everyone who doesn't get chosen will have higher weights)
 	for row in User.query.join(Response, User.email == Response.user_email).filter(Response.trip_id == id):
 		row.weight = row.weight + 5.0
 	db.session.commit()
@@ -39,16 +28,17 @@ def run_lottery(id):
 	get_cars = select(user_fields).where(and_(Response.trip_id == id, Response.car is true()))
 	get_cars.order_by(desc(User.weight)).limit(car_cap)
 	car_winners = db.session.execute(get_cars).fetchall()
-	for user in car_winners:
-		db.session.query(Response).filter(Response.id == user.id).update({Response.lottery_slot: True})
 
 	# Get remaining winners
 	get_others = select(user_fields).where(and_(Response.trip_id == id, Response.lottery_slot == false()))
 	get_others.order_by(desc(User.weight)).limit(noncar_cap)
 	other_winners = db.session.execute(get_others).fetchall()
 
-	for user in other_winners:
-		db.session.query(Response).filter(Response.id == user.id).update({Response.lottery_slot: true()})
+	# Grant spots and return winners to their original weights (these are treated like no response until responded to)
+	for user in other_winners + car_winners:
+		row = User.query.join(Response, User.email == Response.user_email).filter(Response.id == user.id).first()
+		row.weight = row.weight - 10.0
+		db.session.query(Response).filter(Response.id == user.id).update({Response.lottery_slot: True})
 
 	# return winners
 	print("Winners: ", car_winners + other_winners)
@@ -58,18 +48,21 @@ def run_lottery(id):
 # updates user weights based on if they declined or did not show
 def update_user_weights(behavior, user_email):
 	# get user weight from user email
-	# TODO: this weight update seems broken
-	get_user_text = select([User.weight]).where(User.email == user_email)
-	user_weight = db.session.execute(get_user_text).fetchone()[0]
-	print(user_weight)
-
+	# TODO: this weight update seems broken (it is broken, fix)
+	row = User.query.filter(User.email == user_email).first()
+	print("BOOM " + str(User.email) + " " + str(row.weight) + " " + behavior)
+	# get_user_text = select([User.weight]).where(User.email == user_email)
+	# user_weight = db.session.execute(get_user_text).fetchone()[0]
+	# print("Found initial weight of " + str(user_weight) + " " + str(user_email))
 	# adjust weight according to behavior
 	if behavior == "Declined":
-		user_weight -= 0.00001
+		# print("DECLINING" + str(user_weight + 3.0))
+		row.weight += 3.0
 	elif behavior == "No Response":
-		user_weight -= 10.0
+		row.weight -= 0.0
 	elif behavior == "Confirmed":
-		user_weight -= 3.0
+		# print("CONFIRMING" + str(user_weight + 5.0))
+		row.weight += 5.0
 	# add did not get result
 
 	# ensure weight doesn't drop to below 0.25
@@ -77,6 +70,5 @@ def update_user_weights(behavior, user_email):
 	# 	user_weight = userweight_floor
 	# if user_weight > userweight_roof:
 	# 	user_weight = userweight_roof
-	print(user_weight)
-	db.session.query(User).update({User.weight: user_weight})
-	db.session.commit()
+	# db.session.query(User).filterupdate({User.weight: user_weight})
+	# db.session.commit()

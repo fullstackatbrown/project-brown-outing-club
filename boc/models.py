@@ -29,7 +29,7 @@ class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     auth_id = db.Column(db.String(80), unique=True, nullable=True)
     email = db.Column(db.String(120), unique=True, nullable=False)
-    weight = db.Column(db.Float, nullable=False, default=random.randint(-2, 2))
+    weight = db.Column(db.Float, nullable=False, default=round(random.uniform(0.0001, -0.0001), 5))
 
     # String representation of this object (for logging)
     def __repr__(self):

@@ -168,7 +168,7 @@
                   </div>
                   <div class = "info-cont">
                     <h6 class="content-label">CURRENT LOTTERY ENTRIES</h6>
-                    <h6 class="content">{{taken_spots}}</h6>
+                    <h6 class="content">{{registrations|length}}</h6>
                   </div>
                   <div class = "info-cont">
                     <h6 class="content-label">TOTAL SPOTS IN TRIP</h6>
@@ -189,13 +189,13 @@
                 <li class="list-group-item">
                   <!--
                                 <h5 class="lottery-info">
-                                    {% if trip['car_cap'] is not none%}
-                                        {{trip.car_cap + trip.noncar_cap - taken_spots}} SPOTS AVAILABLE / 
-                                        {{taken_spots}} IN LOTTERY
-                                    {% else %}
-                                        {{trip.noncar_cap - taken_spots}} SPOTS AVAILABLE / 
-                                        {{taken_spots}} IN LOTTERY
-                                    {% endif %} </h2>
+{#                                    {% if trip['car_cap'] is not none%}#}
+{#                                        {{trip.car_cap + trip.noncar_cap - taken_spots}} SPOTS AVAILABLE / #}
+{#                                        {{taken_spots}} IN LOTTERY#}
+{#                                    {% else %}#}
+{#                                        {{trip.noncar_cap - taken_spots}} SPOTS AVAILABLE / #}
+{#                                        {{taken_spots}} IN LOTTERY#}
+{#                                    {% endif %} </h2>#}
                                 -->
                   {% if signed_up %}
                   <form

@@ -50,15 +50,14 @@ def dashboard():
 @login_required
 def individual_trip(id):
 	trip = get_trip(id)
-	signed = False
+	signed_up = False
 	# list of trips that have lotteries the user has signed up for
-	currentuser_email = session.get('profile').get('email')
-	signed_text = select([Response.trip_id]).where(Response.user_email == currentuser_email)
-	signed_up = db.session.execute(signed_text).fetchall()
-	if ((id,) in signed_up):
-		signed = True
-	# TODO: fix taken_spots
-	return render_template('trip.html', trip=trip, taken_spots=0, signed_up=signed)
+	current_user_email = session.get('profile').get('email')
+	query = select([Response.user_email]).where(Response.trip_id == id)
+	registrations = db.session.execute(query).fetchall()
+	if (current_user_email,) in registrations:
+		signed_up = True
+	return render_template('trip.html', trip=trip, taken_spots=0, registrations=registrations, signed_up=signed_up)
 
 
 @bp.route('/confirm/<id>')
@@ -92,6 +91,7 @@ def get_trip(id):
 
 
 # page linked with "Enter Lottery" from dashboard, should collect information necessary to create Response row in db using a form
+@bp.route('/api/lottery_signup/<int:id>', methods=['POST'])
 @bp.route('/lottery_signup/<int:id>', methods=['POST'])
 @login_required
 def lottery_signup(id):
@@ -101,6 +101,8 @@ def lottery_signup(id):
 	)
 	db.session.add(new_response)
 	db.session.commit()
+	if request.path.split("/")[1] == "api":
+		return new_response.id
 	return redirect(url_for('trips.dashboard'))
 
 
@@ -158,18 +160,18 @@ def decline_attendance(id):
 	db.session.execute(to_update)
 
 	# update user weight for declining
-	get_declined_email = select([Response.user_email]).where(Response.id == id)
-	declined_email = db.session.execute(get_declined_email).fetchone()[0]
+	get_response_info = select([Response.user_email, Response.trip_id]).where(Response.id == id)
+	declined_email, trip_id = db.session.execute(get_response_info).fetchone()
 	update_user_weights("Declined", declined_email)
 
 	# pick a user, if we dont have enough cars, prioritize a car
-	trip_name, car_cap = db.session.execute(select(Trip.name, Trip.car_cap).where(Trip.id == id)).fetchone()
+	trip_name, car_cap = db.session.execute(select([Trip.name, Trip.car_cap]).where(Trip.id == trip_id)).fetchone()
 	# In order to count a car, user must be granted lottery slot and not decline
-	get_cars = select(Response.id).where(and_(
+	get_cars = select([Response.user_email, Response.id]).where(and_(
 		Response.lottery_slot == true(),
 		Response.user_behavior != 'Declined',
 		Response.car == true()))
-	car_winners = db.session.session.execute(get_cars).fetchall()
+	car_winners = db.session.execute(get_cars).fetchall()
 	get_waitlist = select([Response.user_email, Response.id]).where(Response.lottery_slot == false())
 	if car_cap > len(car_winners):
 		get_waitlist.order_by(desc(Response.car))
@@ -180,6 +182,7 @@ def decline_attendance(id):
 	if waitlist_winner is None:
 		return redirect(url_for('trips.dashboard'))
 	winner_email, response_id = waitlist_winner
+	print(winner_email, response_id)
 
 	# update response from user to reflect getting a lottery slot
 	wait_update = update(Response).where(Response.id == response_id).values(lottery_slot=True)
