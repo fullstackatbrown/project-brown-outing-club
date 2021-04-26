@@ -169,6 +169,10 @@ def test_lottery_withdraw(client):
 	run_lottery(trip_id)
 	assert Response.query.filter_by(lottery_slot=True).count() == 2
 
+# TODO: test decline attendance chooses the right person from the waitlist
+
+# TODO: large integration tests (finish below)
+
 # def test_integration_1(client):
 #     # create trip with normal cap 10 and car cap 10, id = 1
 #     create_trip(10, 10)
