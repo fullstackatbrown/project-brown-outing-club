@@ -157,44 +157,17 @@ def test_cars_only(client):
 	assert Response.query.filter_by(lottery_slot=True).count() == 3
 
 
-def test_award_spot(client):
-	login_admin(client)
-	response_id = create_response()
-	new_waitlist = Waitlist(
-		trip_id=1, response_id=response_id, waitlist_rank=1
-	)
-	db.session.add(new_waitlist)
-	db.session.commit()
-
-	assert db.session.query(Waitlist).filter_by(off=False).count() == 1
-	client.post('/admin/waitlist/awardspot', data={'trip_id': 1, 'waitlist_id': 1, 'response_id': response_id})
-	assert db.session.query(Waitlist).filter_by(off=True).count() == 1
-	assert db.session.query(Waitlist).filter_by(off=False).count() == 0
-
-
-def test_lottery_signup(client):
-	login_admin(client)
-	create_trip()
-	trips.dummy_users()
-
-	assert Response.query.filter_by(user_email='test@brown.edu').count() == 0
-	assert db.session.query(Trip).filter_by(id=1).count() == 1
-	client.post("/lottery_signup/1", data={'financial_aid': 'True'})
-	assert Response.query.filter_by(user_email='test@brown.edu').count() == 1
-
-
 def test_lottery_withdraw(client):
-	login_admin(client)
-	create_trip()
-	trips.dummy_users()
-
-	assert db.session.query(Response).filter_by(user_email='test@brown.edu').count() == 0
-	assert db.session.query(Trip).filter_by(id=1).count() == 1
-	client.post("/lottery_signup/1", data={'financial_aid': 'True'})
-	assert db.session.query(Response).filter_by(user_email='test@brown.edu').count() == 1
-
-	response = client.post("/lottery_withdraw/1")
-	assert db.session.query(Response).filter_by(user_email='test@brown.edu').count() == 0
+	trip_id = create_trip(3, 3)
+	users = create_users(3)
+	for auth_token, email in users:
+		create_response(client, trip_id, auth_token, email)
+	assert Response.query.filter_by(lottery_slot=True).count() == 0
+	with client.session_transaction() as transaction:
+		transaction['profile'] = {'user_id': users[0][0], 'email': users[0][1]}
+	client.post("/lottery_withdraw/" + str(trip_id))
+	run_lottery(trip_id)
+	assert Response.query.filter_by(lottery_slot=True).count() == 2
 
 # def test_integration_1(client):
 #     # create trip with normal cap 10 and car cap 10, id = 1
