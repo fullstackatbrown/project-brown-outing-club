@@ -58,7 +58,7 @@ class Trip(db.Model):
     signup_deadline = db.Column(db.Date(), nullable=False)
     price = db.Column(db.Numeric(5, 2), nullable=False)
     car_cap = db.Column(db.Integer)
-    noncar_cap = db.Column(db.Integer, nullable=False)
+    non_car_cap = db.Column(db.Integer, nullable=False)
 
     # boolean indicating if lottery has been for the trip run or not
     lottery_completed = db.Column(db.Boolean, default=False, nullable=False)

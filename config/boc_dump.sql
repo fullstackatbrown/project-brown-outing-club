@@ -16,7 +16,7 @@ create table trips
 	signup_deadline date not null,
 	price decimal(5,2) not null,
 	car_cap int null,
-	noncar_cap int not null,
+	non_car_cap int not null,
 	lottery_completed tinyint(1) not null,
 	constraint name
 		unique (name)

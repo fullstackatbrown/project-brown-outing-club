@@ -182,7 +182,6 @@ def decline_attendance(id):
 	if waitlist_winner is None:
 		return redirect(url_for('trips.dashboard'))
 	winner_email, response_id = waitlist_winner
-	print(winner_email, response_id)
 
 	# update response from user to reflect getting a lottery slot
 	wait_update = update(Response).where(Response.id == response_id).values(lottery_slot=True)

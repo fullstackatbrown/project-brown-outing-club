@@ -1,3 +1,5 @@
+import json
+
 from boc import *
 
 
@@ -40,19 +42,20 @@ def logout(client):
 	return client.get('/auth/logout')
 
 
-def create_trip(car_cap=0, noncar_cap=10):
+def create_trip(car_cap, non_car_cap):
 	new_trip = Trip(name=str(uuid.uuid4()), departure_date=func.current_date(), departure_location="test location",
 					departure_time=func.current_time(), signup_deadline=func.current_date(), price=9.99,
-					noncar_cap=noncar_cap, car_cap=car_cap)
+					non_car_cap=non_car_cap, car_cap=car_cap)
 	db.session.add(new_trip)
 	db.session.commit()
 	return new_trip.id
 
 
-def create_response(client, trip_id, auth_token, email):
+def create_response(client, trip_id, auth_token, email, car=False):
 	with client.session_transaction() as transaction:
 		transaction['profile'] = {'user_id': auth_token, 'email': email}
-	response = client.post('/api/lottery_signup/' + str(trip_id))
+	response = client.post('/api/lottery_signup/' + str(trip_id), content_type='multipart/form-data',
+						data={"car": "true"} if car else None)
 	return response.data.decode('UTF-8')
 
 

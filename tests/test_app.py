@@ -34,7 +34,7 @@ def test_landing(client):
 	assert b'Logout' in response.data
 
 
-def test_sampletrip(client):
+def test_sample_trip(client):
 	login(client)
 	new_trip = Trip(
 		id=1, name="Adirondack Hiking", description="people literally are going hiking",
@@ -42,15 +42,13 @@ def test_sampletrip(client):
 		departure_location="Adirondacks", departure_time=func.current_time(),
 		return_date=func.current_date(), return_time=func.current_time(),
 		car_cap=10,
-		signup_deadline=func.current_date(), price=9.99, noncar_cap=10)
+		signup_deadline=func.current_date(), price=9.99, non_car_cap=10)
 	db.session.add(new_trip)
 	db.session.commit()
 	trip_page = client.get('/trip/1').data
 	assert b"Adirondack Hiking" in trip_page
 	assert b"people literally are going hiking" in trip_page
 
-
-### TRIP.PY TESTING OUTLINE ###
 
 def test_confirm_attendance(client):
 	trip_id = create_trip(4, 8)
@@ -59,14 +57,14 @@ def test_confirm_attendance(client):
 	trip_page = client.get('/trip/' + str(trip_id)).data
 	assert b'<h6 class="content">1</h6>' in trip_page
 	assert b'12' in trip_page
-	initial_weight = db.session.query(User).filter_by(email=email).one().weight
-	assert db.session.query(Response).filter_by(user_behavior='NoResponse').count() == 1
+	initial_weight = User.query.filter_by(email=email).one().weight
+	assert Response.query.filter_by(user_behavior='NoResponse').count() == 1
 	run_lottery(trip_id)
-	assert initial_weight - 5 == db.session.query(User).filter_by(email=email).one().weight
+	assert initial_weight - 5 == User.query.filter_by(email=email).one().weight
 	client.post('/confirm_attendance/' + response_id)
-	assert db.session.query(Response).filter_by(user_behavior='Confirmed').count() == 1
-	assert initial_weight == db.session.query(User).filter_by(email=email).one().weight
-	assert db.session.query(Response).filter_by(user_behavior='NoResponse').count() == 0
+	assert Response.query.filter_by(user_behavior='Confirmed').count() == 1
+	assert initial_weight == User.query.filter_by(email=email).one().weight
+	assert Response.query.filter_by(user_behavior='NoResponse').count() == 0
 
 
 def test_decline_attendance(client):
@@ -78,68 +76,88 @@ def test_decline_attendance(client):
 	trip_page = client.get('/trip/' + str(trip_id)).data
 	assert b'<h6 class="content">2</h6>' in trip_page
 	assert b'13' in trip_page
-	assert db.session.query(Response).filter_by(user_behavior='NoResponse').count() == 2
-	initial_weight_confirm = db.session.query(User).filter_by(email=email1).one().weight
-	initial_weight_decline = db.session.query(User).filter_by(email=email2).one().weight
+	assert Response.query.filter_by(user_behavior='NoResponse').count() == 2
+	initial_weight_confirm = User.query.filter_by(email=email1).one().weight
+	initial_weight_decline = User.query.filter_by(email=email2).one().weight
 	run_lottery(trip_id)
-	assert initial_weight_confirm - 5 == db.session.query(User).filter_by(email=email1).one().weight
-	assert initial_weight_decline - 5 == db.session.query(User).filter_by(email=email2).one().weight
+	assert initial_weight_confirm - 5 == User.query.filter_by(email=email1).one().weight
+	assert initial_weight_decline - 5 == User.query.filter_by(email=email2).one().weight
 	client.post('/confirm_attendance/' + response_id1)
 	client.post('/decline_attendance/' + response_id2)
-	assert db.session.query(Response).filter_by(user_behavior='Confirmed').count() == 1
-	assert db.session.query(Response).filter_by(user_behavior='Declined').count() == 1
-	assert db.session.query(Response).filter_by(user_behavior='NoResponse').count() == 0
-	print(db.session.query(User).filter_by(email=email1).one().weight, db.session.query(User).filter_by(email=email2).one().weight)
-	assert initial_weight_confirm == db.session.query(User).filter_by(email=email1).one().weight
-	assert initial_weight_decline - 2 == db.session.query(User).filter_by(email=email2).one().weight
+	assert Response.query.filter_by(user_behavior='Confirmed').count() == 1
+	assert Response.query.filter_by(user_behavior='Declined').count() == 1
+	assert Response.query.filter_by(user_behavior='NoResponse').count() == 0
+	assert initial_weight_confirm == User.query.filter_by(email=email1).one().weight
+	assert initial_weight_decline - 2 == User.query.filter_by(email=email2).one().weight
 
 
-	# # have user test@brown.edu decline their spot
-	# response = client.post('/decline_attendance/' + response1_id)
-	# # check that user behavior changed from NoResponse to Declined, and that the weight has lowered accordingly
-	# assert db.session.query(Response).filter_by(user_behavior='Declined').filter_by(
-	# 	user_email='test@brown.edu').count() == 1
-	# assert db.session.query(Response).filter_by(user_behavior='NoResponse').count() == 2
-	# assert Decimal.compare(db.session.query(User).filter_by(email='test@brown.edu').one().weight, Decimal('0.9')) == 0
-	# # check that the waitlisted user is now awarded a spot and is off the list
-	# assert db.session.query(Response).filter_by(lottery_slot=True).count() == 2
-	# assert db.session.query(Waitlist).filter_by(response_id=waitlist_rank1).one().off == True
-	# # check that second in line becomes first in line
-	# new_first = db.session.query(Waitlist).filter_by(response_id=waitlist_rank2).one()
-	# assert new_first.off == False
-	# assert new_first.waitlist_rank == 1
-
-
-### ADMINVIEWS.PY TESTING OUTLINE ###
-
-# (/admin/user/)
-def test_resetweights(client):
-	# modify weights of users
-	# query the count of all users and query the count of all users with weight 1 and check if matching
-	trips.dummy_users()
-	assert db.session.query(User).filter_by(weight=1.0).count() < 51
-
+def test_reset_weights(client):
+	trip_id = create_trip(4, 8)
+	users = create_users(4)
+	for auth_token, email in users:
+		create_response(client, trip_id, auth_token, email)
+		assert abs(User.query.filter_by(email=email).one().weight) < 1
+	run_lottery(trip_id)
+	for auth_token, email in users:
+		assert abs(User.query.filter_by(email=email).one().weight) > 1
 	login_admin(client)
-
-	response = client.post('/admin/user/reset')
-
-	assert db.session.query(User).filter_by(weight=1.0).count() == 51
-
-
-# def test_run_lottery(client):
-
-def test_updatebehavior(client):
-	login_admin(client)
-	response_id = create_response()
-
-	assert db.session.query(Response).filter_by(user_behavior='NoResponse').count() == 1
-	response = client.post('/admin/response/updatebehavior',
-						   data={'user_email': 'test@brown.edu', 'response_id': response_id, 'behavior': 'No Response'})
-	assert db.session.query(Response).filter_by(user_behavior='No Response').count() == 1
-	assert db.session.query(Response).filter_by(user_behavior='NoResponse').count() == 0
+	client.post('/admin/user/reset')
+	for auth_token, email in users:
+		assert abs(User.query.filter_by(email=email).one().weight) < 1
 
 
-def test_awardspot(client):
+def test_not_enough_spots(client):
+	trip_id = create_trip(2, 1)
+	users = create_users(6)
+	for auth_token, email in users:
+		create_response(client, trip_id, auth_token, email)
+	assert Response.query.filter_by(lottery_slot=True).count() == 0
+	run_lottery(trip_id)
+	assert Response.query.filter_by(lottery_slot=True).count() == 1
+
+
+def test_too_many_spots(client):
+	trip_id = create_trip(200, 100)
+	users = create_users(20)
+	for auth_token, email in users:
+		create_response(client, trip_id, auth_token, email)
+	assert Response.query.filter_by(lottery_slot=True).count() == 0
+	run_lottery(trip_id)
+	assert Response.query.filter_by(lottery_slot=True).count() == 20
+
+
+def test_car_spots(client):
+	trip_id = create_trip(2, 1)
+	users = create_users(5)
+	for i, (auth_token, email) in enumerate(users):
+		create_response(client, trip_id, auth_token, email, True if i < 2 else False)
+	assert Response.query.filter_by(lottery_slot=True).count() == 0
+	run_lottery(trip_id)
+	assert Response.query.filter_by(lottery_slot=True).count() == 3
+	assert Response.query.filter(Response.lottery_slot == True, Response.car == True).count() == 2
+
+
+def test_car_spots_only(client):
+	trip_id = create_trip(2, 0)
+	users = create_users(4)
+	for auth_token, email in users:
+		create_response(client, trip_id, auth_token, email, False)
+	assert Response.query.filter_by(lottery_slot=True).count() == 0
+	run_lottery(trip_id)
+	assert Response.query.filter_by(lottery_slot=True).count() == 0
+
+
+def test_cars_only(client):
+	trip_id = create_trip(0, 3)
+	users = create_users(3)
+	for auth_token, email in users:
+		create_response(client, trip_id, auth_token, email, True)
+	assert Response.query.filter_by(lottery_slot=True).count() == 0
+	run_lottery(trip_id)
+	assert Response.query.filter_by(lottery_slot=True).count() == 3
+
+
+def test_award_spot(client):
 	login_admin(client)
 	response_id = create_response()
 	new_waitlist = Waitlist(
@@ -159,10 +177,10 @@ def test_lottery_signup(client):
 	create_trip()
 	trips.dummy_users()
 
-	assert db.session.query(Response).filter_by(user_email='test@brown.edu').count() == 0
+	assert Response.query.filter_by(user_email='test@brown.edu').count() == 0
 	assert db.session.query(Trip).filter_by(id=1).count() == 1
 	client.post("/lottery_signup/1", data={'financial_aid': 'True'})
-	assert db.session.query(Response).filter_by(user_email='test@brown.edu').count() == 1
+	assert Response.query.filter_by(user_email='test@brown.edu').count() == 1
 
 
 def test_lottery_withdraw(client):

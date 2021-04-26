@@ -174,7 +174,7 @@
                     <h6 class="content-label">TOTAL SPOTS IN TRIP</h6>
                     <h6 class="content">
                       {% if trip['car_cap'] is not none%} {{trip.car_cap +
-                      trip.noncar_cap}} {% else %} {{trip.noncar_cap}} {% endif
+                      trip.non_car_cap}} {% else %} {{trip.non_car_cap}} {% endif
                       %}
                     </h6>
                   </div>
@@ -190,10 +190,10 @@
                   <!--
                                 <h5 class="lottery-info">
 {#                                    {% if trip['car_cap'] is not none%}#}
-{#                                        {{trip.car_cap + trip.noncar_cap - taken_spots}} SPOTS AVAILABLE / #}
+{#                                        {{trip.car_cap + trip.non_car_cap - taken_spots}} SPOTS AVAILABLE / #}
 {#                                        {{taken_spots}} IN LOTTERY#}
 {#                                    {% else %}#}
-{#                                        {{trip.noncar_cap - taken_spots}} SPOTS AVAILABLE / #}
+{#                                        {{trip.non_car_cap - taken_spots}} SPOTS AVAILABLE / #}
 {#                                        {{taken_spots}} IN LOTTERY#}
 {#                                    {% endif %} </h2>#}
                                 -->
