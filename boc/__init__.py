@@ -34,7 +34,6 @@ def create_app(test_config=None):
 	admin.add_view(UserView(User, db.session))
 	admin.add_view(TripView(Trip, db.session))
 	admin.add_view(ResponseView(Response, db.session))
-	admin.add_view(WaitlistView(Waitlist, db.session))
 	admin.add_view(BackToDashboard(name="Back to Main Site"))
 
 	from . import auth, trips

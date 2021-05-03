@@ -1,7 +1,8 @@
 {% include "partials/head.html" %}
-<body>
+<body class="d-flex flex-column h-100">
 <div class="container py-3">
     {% include "partials/header.html" %}
     {% block content %}{% endblock %}
 </div>
+{% include "partials/footer.html" %}
 </body>

@@ -1,7 +1,8 @@
-<div class="card">
+<div class="card mb-3">
     <div class="card-body">
-        <h5>{{ trip.name }} -
-            {% if trip['price'] is not none or trip['price']==0 %}
+        <h5>{{ trip.name }}
+            -
+            {% if trip['price'] is not none and not trip['price'] == 0 %}
                 ${{ trip['price'] }}
             {% else %}
                 FREE

@@ -74,26 +74,3 @@ create index trip_id
 
 create index user_email
 	on responses (user_email);
-
-create table waitlist
-(
-	id int auto_increment
-		primary key,
-	trip_id int not null,
-	response_id varchar(36) not null,
-	waitlist_rank int not null,
-	off tinyint(1) null,
-	constraint waitlist_ibfk_1
-		foreign key (trip_id) references trips (id)
-			on delete cascade,
-	constraint waitlist_ibfk_2
-		foreign key (response_id) references responses (id)
-			on delete cascade
-);
-
-create index response_id
-	on waitlist (response_id);
-
-create index trip_id
-	on waitlist (trip_id);
-
