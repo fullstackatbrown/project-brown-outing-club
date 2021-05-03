@@ -6,17 +6,11 @@ from sqlalchemy import and_, desc, false, true
 from sqlalchemy.sql import select, func, update
 
 from . import emails
-from .auth import login_required
+from .auth import login_required, authenticated
 from .lottery import update_user_weights
 from .models import *
 
 bp = Blueprint('trips', __name__)
-
-
-# redirects user to auth0 login
-# User: test@brown.edu
-# Password: #xzAeGCrTenjR9jt
-
 
 # dashboard that is the target of redirect from login page
 @bp.route('/')
@@ -36,13 +30,8 @@ def dashboard():
 		taken[trip_id] = spot
 
 	# checks if current user email is in adminclearance table
-	is_admin = False
-	logged_in = False
-	if session.get('profile') is not None:
-		currentuser_email = session.get('profile').get('email')
-		is_admin = db.session.query(AdminClearance).filter_by(email=currentuser_email).first() is not None
-		logged_in = True
-	return render_template('upcoming.html', upcoming_trips=upcoming_trips, taken_spots=taken, is_admin=is_admin,
+	is_admin, logged_in = authenticated()
+	return render_template('index.html', upcoming_trips=upcoming_trips, taken_spots=taken, is_admin=is_admin,
 						   logged_in=logged_in)
 
 
@@ -57,7 +46,10 @@ def individual_trip(id):
 	registrations = db.session.execute(query).fetchall()
 	if (current_user_email,) in registrations:
 		signed_up = True
-	return render_template('trip.html', trip=trip, taken_spots=0, registrations=registrations, signed_up=signed_up)
+	# checks if current user email is in adminclearance table
+	is_admin, logged_in = authenticated()
+	return render_template('trip.html', trip=trip, taken_spots=0, registrations=registrations, signed_up=signed_up,
+						   is_admin=is_admin, logged_in=logged_in)
 
 
 @bp.route('/confirm/<id>')
@@ -66,17 +58,6 @@ def trip_confirm(id):
 	if (response["user_behavior"] != "NoResponse"):
 		return redirect(url_for('trips.dashboard'))
 	return render_template('confirm.html', id=id, trip=get_trip(response["trip_id"]))
-
-
-# displays past trips
-@bp.route('/past_trips')
-def past_trips():
-	# selects rows where the current date is after the sign up deadline
-	# NOTE: current date uses the server clock to fetch the date, so make sure the app is deployed on an Eastern Time Server
-	past_text = select([Trip]).where(Trip.signup_deadline < func.current_date()).order_by(Trip.signup_deadline.desc())
-	past_trips = db.session.execute(past_text).fetchall()
-
-	return render_template('past.html', past_trips=past_trips)
 
 
 # gets trip object from its id
@@ -125,7 +106,7 @@ def guide():
 		return render_template('admin/guide.html')
 	else:
 		flash("Only authorized users can view", 'error')
-		return render_template('upcoming.html')
+		return render_template('index.html')
 
 
 def get_response(id):

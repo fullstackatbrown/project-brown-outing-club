@@ -10,8 +10,8 @@ from .lottery import *
 
 class ReqClearance(ModelView):
 	def is_accessible(self):
-		if (session.get('profile') is not None):
-			if (session.get('profile').get('email') is not None):
+		if session.get('profile') is not None:
+			if session.get('profile').get('email') is not None:
 				check_clearance = select([AdminClearance]).where(
 					AdminClearance.email == session.get('profile').get('email'))
 				admin = db.session.execute(check_clearance).fetchone()
@@ -73,8 +73,8 @@ class TripView(ReqClearance):
             <form action="{lottery_view}" method="POST">
                 <input id="trip_id" name="trip_id"  type="hidden" value="{trip_id}">
                 <button type='submit'>Run</button>
-            </form>
-        '''.format(lottery_view=url_for('.lottery_view'), trip_id=model.id)
+			</form>
+		'''.format(lottery_view=url_for('.lottery_view'), trip_id=model.id)
 
 		return Markup(run_lottery_button)
 
@@ -133,7 +133,7 @@ class TripView(ReqClearance):
 
 		# to change to pull from the database
 		winners = db.session.query(Response).filter_by(trip_id=trip_id, lottery_slot=True).join(Trip,
-																								Response.trip_id == Trip.id).all()
+		                                                                                        Response.trip_id == Trip.id).all()
 		if winners is not None:
 			emails.mail_group(winners, trips.get_trip(trip_id))
 		return redirect(trip_index)
@@ -297,7 +297,7 @@ class WaitlistView(ReqClearance):
                 <button type='submit'>Move Off Waitlist</button>
             </form>
         '''.format(award_spot=url_for('.award_spot'), trip_id=model.trip_id, waitlist_id=model.id,
-				   response_id=model.response_id)
+		           response_id=model.response_id)
 
 		return Markup(award_button)
 
@@ -362,9 +362,3 @@ class BackToDashboard(BaseView):
 	@expose('/')
 	def back_to_dashboard(self):
 		return redirect(url_for('trips.dashboard'))
-
-
-class UserGuide(BaseView):
-	@expose('/')
-	def user_guide(self):
-		return redirect(url_for('trips.guide'))

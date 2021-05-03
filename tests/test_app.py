@@ -55,7 +55,6 @@ def test_confirm_attendance(client):
 	auth_token, email = create_users(1)[0]
 	response_id = create_response(client, trip_id, auth_token, email)
 	trip_page = client.get('/trip/' + str(trip_id)).data
-	assert b'<h6 class="content">1</h6>' in trip_page
 	assert b'12' in trip_page
 	initial_weight = User.query.filter_by(email=email).one().weight
 	assert Response.query.filter_by(user_behavior='NoResponse').count() == 1
@@ -74,7 +73,6 @@ def test_decline_attendance(client):
 	response_id1 = create_response(client, trip_id, auth_token1, email1)
 	response_id2 = create_response(client, trip_id, auth_token2, email2)
 	trip_page = client.get('/trip/' + str(trip_id)).data
-	assert b'<h6 class="content">2</h6>' in trip_page
 	assert b'13' in trip_page
 	assert Response.query.filter_by(user_behavior='NoResponse').count() == 2
 	initial_weight_confirm = User.query.filter_by(email=email1).one().weight

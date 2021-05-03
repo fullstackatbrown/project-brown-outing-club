@@ -1,0 +1,33 @@
+<div class="card">
+    <div class="card-body">
+        <h5>{{ trip.name }} -
+            {% if trip['price'] is not none or trip['price']==0 %}
+                ${{ trip['price'] }}
+            {% else %}
+                FREE
+            {% endif %}
+        </h5>
+        <p class="text-muted">
+            Signups close on {{ trip['signup_deadline'].strftime('%b %d, %Y') }}
+        </p>
+        <p class="card-text">{{ trip.description }}</p>
+        <p class="card-text">
+            Departs: {{ trip['departure_date'].strftime('%b %d, %Y') }}
+            {% if trip['departure_time'] is not none %}
+                @ {{ trip['departure_time'].strftime("%_I:%M %p") }}
+            {% endif %}
+            |
+            Returns: {% if trip['return_date'] is not none %}
+            {{ trip['return_date'].strftime('%b %d, %Y') }}
+        {% endif %}
+            {% if trip['return_time'] is not none %}
+                @ {{ trip['return_time'].strftime("%_I:%M %p") }}
+            {% endif %}
+        </p>
+        <p class="card-text">
+            Contact: <a href="mailto:{{ trip['contact'] }}subject:{{ trip.name }}">{{ trip['contact'] }}</a>
+        </p>
+        <a href="{{ url_for('trips.individual_trip', id = trip.id, taken_spots=taken_spots.get(trip.id, 0)) }}"
+           class="btn btn-light">See more</a>
+    </div>
+</div>

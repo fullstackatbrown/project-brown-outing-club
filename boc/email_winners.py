@@ -22,17 +22,17 @@ mail = Mail(app)
 
 @app.route('/')
 def index():
-    # to change to pull from the database
-    winners = [{'name': 'name', 'email': 'email'}]
+	# to change to pull from the database
+	winners = [{'name': 'name', 'email': 'email'}]
 
-    with mail.connect() as conn:
-        for user in winners:
-            msg = Message('Lottery Selection', recipients=[user['email']])
-            # to add specific lottery trip based on database pull
-            msg.body = 'Hey ' + user['name'] + '! You have been selected for this lottery trip'
-            conn.send(msg)
-    return 'message sent'
+	with mail.connect() as conn:
+		for user in winners:
+			msg = Message('Lottery Selection', recipients=[user['email']])
+			# to add specific lottery trip based on database pull
+			msg.body = 'Hey ' + user['name'] + '! You have been selected for this lottery trip'
+			conn.send(msg)
+	return 'message sent'
 
 
 if __name__ == '__main__':
-    app.run()
+	app.run()
