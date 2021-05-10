@@ -22,18 +22,17 @@ def run_lottery(id):
 
 	# Get winners from car cap
 	car_winners = Response.query.join(User, User.email == Response.user_email).filter(
-		Response.trip_id == id, Response.lottery_slot == False, Response.car == True).order_by(
+		Response.trip_id == id, Response.lottery_slot == false(), Response.car == true()).order_by(
 		desc(User.weight)).limit(car_cap).all()
 	for response in car_winners:
-		row = Response.query.filter(Response.id == response.id).first()
-		row.lottery_slot = True
+		response.lottery_slot = True
 
 	# Get remaining winners
 	other_winners = Response.query.join(User, User.email == Response.user_email).filter(
-		Response.trip_id == id, Response.lottery_slot == False).order_by(desc(User.weight)).limit(non_car_cap).all()
+		Response.trip_id == id, Response.lottery_slot == false()).order_by(desc(User.weight)).limit(
+		car_cap or 0 + non_car_cap - len(car_winners)).all()
 	for response in other_winners:
-		row = Response.query.filter(Response.id == response.id).first()
-		row.lottery_slot = True
+		response.lottery_slot = True
 
 	# Grant spots and return winners to their original weights (these are treated like no response until responded to)
 	for response in other_winners + car_winners:

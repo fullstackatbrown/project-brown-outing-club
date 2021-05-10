@@ -28,7 +28,7 @@
         <p class="card-text">
             Contact: <a href="mailto:{{ trip['contact'] }}subject:{{ trip.name }}">{{ trip['contact'] }}</a>
         </p>
-        <a href="{{ url_for('trips.individual_trip', id = trip.id, taken_spots=taken_spots.get(trip.id, 0)) }}"
+        <a href="{{ url_for('trips.individual_trip', id = trip.id) }}"
            class="btn btn-light">See more</a>
     </div>
 </div>

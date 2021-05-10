@@ -61,54 +61,35 @@
     <p>
         Contact: <a href="mailto:{{ trip['contact'] }}subject:{{ trip.name }}">{{ trip['contact'] }}</a>
     </p>
-    <p>
-        Current lottery entries: {{ registrations|length }} | Total spots in trip:
-        {% if trip['car_cap'] is not none %}
-            {{ trip.car_cap + trip.non_car_cap }}
-        {% else %}
-            {{ trip.non_car_cap }}
-        {% endif %}
-    </p>
     <p>{{ trip['description'] }}</p>
     {% if signed_up %}
         <form action="{{ url_for('trips.lottery_withdraw', id=trip['id']) }}" method="post"
               onsubmit="return confirm('Are you sure you want to leave the lottery?');">
-            <button type="submit" class="btn btn-danger" type="submit">
+            <button type="button" class="btn btn-danger" type="submit">
                 Withdraw from lottery
             </button>
         </form>
     {% else %}
-        <form action="{{ url_for('trips.lottery_signup', id=trip['id']) }}" method="POST" class="border-top"
-              onsubmit="return confirm('Are you sure you want to enter the lottery?');">
-            <p>
-                <input type="checkbox" id="car" name="car" value="True"/>
-                <label class="mt-3" for="car">
-                    Can you can bring a car?
-                </label>
-                <i style="margin-left: 6px" data-toggle="tooltip" data-placement="right"
-                   title="We run separate lotteries, one for those with cars and one for those without cars.
-                   We need a certain number of people with cars to drive the group there!"
-                   class="bi bi-info-square"></i>
-            </p>
-            <p>
-                <input type="checkbox" id="financial_aid" name="financial_aid" value="True"/>
-                <label for="financial_aid">
-                    Do you need financial aid?
-                </label>
-                <i data-toggle="tooltip" data-placement="right"
-                   title="The BOC offers financial aid on all trips, no questions asked!" style="margin-left: 6px"
-                   class="bi bi-info-square same-line"></i>
-            </p>
-            <button type="submit"
-                    class="btn btn-primary">
-               Enter Lottery
-            </button>
-        </form>
+        {% if signed_up %}
+            <form action="{{ url_for('trips.confirm_attendance', id=id) }}" method="POST">
+                </button>
+            </form>
+        {% else %}
+            <form action="{{ url_for('trips.confirm_attendance', id=id) }}" method="POST">
+                <button class="btn btn-success"
+                        onclick="return confirm('Are you sure you want to confirm your trip?');"
+                        type="submit">
+                    Confirm trip enrollment
+                </button>
+            </form>
+            <form action="{{ url_for('trips.decline_attendance', id=id) }}" method="POST">
+                <button class="btn btn-danger"
+                        onclick="return confirm('Are you sure you want to decline your trip spot? This action cannot be undone.');"
+                        type="submit">
+                    Decline trip enrollment
+                </button>
+            </form>
+            </form>
+        {% endif %}
     {% endif %}
-    <footer></footer>
-    <script>
-        $(function () {
-            $('[data-toggle="tooltip"]').tooltip();
-        });
-    </script>
 {% endblock %}

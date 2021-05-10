@@ -1,10 +1,14 @@
-from flask import session, url_for, Markup, flash, redirect
+import csv
+import tempfile
+
+from flask import session, url_for, Markup, flash, redirect, send_file
 from flask_admin import expose, BaseView
 from flask_admin.contrib.sqla import ModelView
 from flask_admin.helpers import get_form_data
+from flask import current_app
 from sqlalchemy.sql import func
 
-from . import emails, trips
+from . import emails, trips, config
 from .lottery import *
 
 
@@ -61,64 +65,66 @@ class TripView(ReqClearance):
 	# exlude admin from being able to input responses or lottery_completed values when creating a trip
 	form_excluded_columns = ('lottery_completed')
 
-	# creates the html form with a button that will call lottery_view method to run for a specific trip
+	# creates the html form with a button that will call run_lottery method to run for a specific trip
 	def format_run_lottery(view, context, model, name):
 		# if model.signup_deadline > datetime.date.today():
 		#   return "Signup Deadline Hasn't Passed"
-
+		download_csv_button = '''
+			<form action="{run_lottery}" method="POST">
+				<input id="trip_id" name="trip_id"  type="hidden" value="{trip_id}">
+				<button type='submit'>Download CSV</button>
+			</form>
+			'''.format(run_lottery=url_for('.download_csv'), trip_id=model.id)
 		if model.lottery_completed:
-			return 'Completed'
+			return Markup(download_csv_button)
 
 		run_lottery_button = '''
-            <form action="{lottery_view}" method="POST">
-                <input id="trip_id" name="trip_id"  type="hidden" value="{trip_id}">
-                <button type='submit'>Run</button>
+			<form action="{run_lottery}" method="POST">
+				<input id="trip_id" name="trip_id"  type="hidden" value="{trip_id}">
+				<button type='submit'>Run</button>
 			</form>
-		'''.format(lottery_view=url_for('.lottery_view'), trip_id=model.id)
-
+			'''.format(run_lottery=url_for('.run_lottery'), trip_id=model.id)
 		return Markup(run_lottery_button)
+
+	@expose('download_csv', methods=['POST'])
+	def download_csv(self):
+		temp_file = tempfile.NamedTemporaryFile()
+		with open(temp_file.name, 'w', newline='') as temp_csv:
+			temp_writer = csv.writer(temp_csv)
+			temp_writer.writerow(['Email', 'Financial Aid', 'Car', 'Given Spot', 'User Behavior', 'Link'])
+			responses = Response.query.filter(Response.trip_id == get_form_data()['trip_id'])
+			for response in responses:
+				temp_writer.writerow([response.user_email, response.financial_aid, response.car, response.lottery_slot,
+				                      response.user_behavior,
+				                      current_app.config.get('BASE_URL') + url_for('trips.respond', response_id=response.id)])
+		return send_file(temp_file.name, as_attachment=True, attachment_filename='trip.csv')
 
 	# creates a /trip/run_lottery endpoint that runs the run_lottery method on the trip id from the form
 	@expose('run_lottery', methods=['POST'])
-	def lottery_view(self):
-		trip_index = self.get_url('.index_view')
-		form = get_form_data()
-
-		if not form:
-			flash("Could not process lottery request", 'error')
-			return redirect(trip_index)
-
-		# get trip id and trip from the form submission
-		trip_id = form['trip_id']
-		trip = self.get_one(trip_id)
-
-		# set lottery_complete field to true
-		trip.lottery_completed = True
-
-		# updates the values in the db
+	def run_lottery(self):
+		trip_id = get_form_data()['trip_id']
 		run_lottery(trip_id)
+		trip = self.get_one(trip_id)
+		trip.lottery_completed = True
 		try:
 			db.session.commit()
 		except Exception:
 			flash('Failed to run lottery on the trip', 'error')
-
-		return redirect(trip_index)
+		return redirect(self.get_url('.index_view'))
 
 	def format_emailWinners(view, context, model, name):
 		# if model.signup_deadline > datetime.date.today():
 		#   return "Signup Deadline Hasn't Passed"
-
 		emailWinners_button = '''
-            <form action="{emailwinners}" method="POST">
-                <input id="trip_id" name="trip_id"  type="hidden" value="{trip_id}">
-                <button type='submit'>Run</button>
-            </form>
-        '''.format(emailwinners=url_for('.emailWinners_view'), trip_id=model.id)
-
+			<form action="{emailwinners}" method="POST">
+				<input id="trip_id" name="trip_id"  type="hidden" value="{trip_id}">
+				<button type='submit'>Run</button>
+			</form>
+			'''.format(emailwinners=url_for('.emailWinners_view'), trip_id=model.id)
 		return Markup(emailWinners_button)
 
-	# sets the format of the column Run Lottery
-	# displays a button to run the lottery or message saying lottery is complete depending on Trips column lottery_completed
+	# sets the format of the column Run Lottery displays a button to run the lottery or message saying lottery is
+	# complete depending on Trips column lottery_completed
 	column_formatters = {
 		'Run Lottery': format_run_lottery,
 		'Email Winners': format_emailWinners
@@ -128,14 +134,13 @@ class TripView(ReqClearance):
 	def emailWinners_view(self):
 		trip_index = self.get_url('.index_view')
 		form = get_form_data()
-
 		trip_id = form['trip_id']
-
 		# to change to pull from the database
-		winners = db.session.query(Response).filter_by(trip_id=trip_id, lottery_slot=True).join(Trip,
-		                                                                                        Response.trip_id == Trip.id).all()
+		winners = db.session.query(Response).filter_by(trip_id=trip_id, lottery_slot=True) \
+			.join(Trip, Response.trip_id == Trip.id).all()
 		if winners is not None:
-			emails.mail_group(winners, trips.get_trip(trip_id))
+			emails.mail_group(current_app, winners)
+		flash("Sent " + str(len(winners)) + " emails!")
 		return redirect(trip_index)
 
 
@@ -173,27 +178,24 @@ class ResponseView(ReqClearance):
 		]
 	}
 
-	# creates the html form with a button that will call lottery_view method to run for a specific trip
+	# creates the html form with a button that will call run_lottery method to run for a specific trip
 	def format_userbehavior(view, context, model, name):
 		if not model.lottery_slot:
 			return 'Not Given a Spot'
-
 		if (model.user_behavior != "NoResponse"):
 			return model.user_behavior
-
 		select_behavior = '''
-            <form action="{update_behavior}" method="POST" onsubmit="return confirm('Are you sure you want to update user behavior?');">
-                <input id="user_email" name="user_email"  type="hidden" value="{user_email}">
-                <input id="response_id" name="response_id"  type="hidden" value="{response_id}">
-                <select id="behavior" name="behavior">
-                    <option value="No Response">No Response</option>
-                    <option value="Confirmed">Confirmed</option>
-                    <option value="Declined">Declined</option>
-                </select>
-                <button type='submit'>Submit</button>
-            </form>
-        '''.format(update_behavior=url_for('.update_behavior'), response_id=model.id, user_email=model.user_email)
-
+			<form action="{update_behavior}" method="POST" onsubmit="return confirm('Are you sure you want to update user behavior?');">
+				<input id="user_email" name="user_email"  type="hidden" value="{user_email}">
+				<input id="response_id" name="response_id"  type="hidden" value="{response_id}">
+				<select id="behavior" name="behavior">
+					<option value="No Response">No Response</option>
+					<option value="Confirmed">Confirmed</option>
+					<option value="Declined">Declined</option>
+				</select>
+				<button type='submit'>Submit</button>
+			</form>
+		'''.format(update_behavior=url_for('.update_behavior'), response_id=model.id, user_email=model.user_email)
 		return Markup(select_behavior)
 
 	# creates a /response/updatebehavior endpoint that lowers user weights according to their behavior
@@ -229,11 +231,11 @@ class ResponseView(ReqClearance):
 		#   return "Signup Deadline Hasn't Passed"
 
 		resendEmail_button = '''
-            <form action="{resendemail}" method="POST">
-                <input id="response_id" name="response_id"  type="hidden" value="{response_id}">
-                <button type='submit'>Resend Email</button>
-            </form>
-        '''.format(resendemail=url_for('.resend_email'), response_id=model.id)
+			<form action="{resendemail}" method="POST">
+			<input id="response_id" name="response_id"  type="hidden" value="{response_id}">
+			<button type='submit'>Resend Email</button>
+			</form>
+			'''.format(resendemail=url_for('.resend_email'), response_id=model.id)
 
 		return Markup(resendEmail_button)
 
@@ -253,7 +255,7 @@ class ResponseView(ReqClearance):
 		response = self.get_one(response_id)
 		trip = db.session.query(Trip).filter_by(id=response.trip_id).first()
 
-		emails.mail_individual(response.user_email, trip.name, response.id)
+		emails.mail_individual(current_app, response.user_email, trip.name, response.id)
 		return redirect(response_index)
 
 

@@ -2,7 +2,7 @@ import random
 
 from flask import abort, Blueprint, render_template, request, redirect, session, url_for, flash, \
 	current_app
-from sqlalchemy import and_, desc, false, true
+from sqlalchemy import and_, desc, false, true, asc
 from sqlalchemy.sql import select, func, update
 
 from . import emails
@@ -12,27 +12,20 @@ from .models import *
 
 bp = Blueprint('trips', __name__)
 
+
 # dashboard that is the target of redirect from login page
 @bp.route('/')
 # @login_required
 def dashboard():
 	# selects rows where the current date matches or is earlier than the sign up deadline
-	# NOTE: current date uses the server clock to fetch the date, so make sure the app is deployed on an Eastern Time Server
-	upcoming_text = select([Trip]).where(Trip.signup_deadline >= func.current_date()).order_by(Trip.signup_deadline)
-	upcoming_trips = db.session.execute(upcoming_text).fetchall()
-
-	# number of responses to each trip, in the same order as the upcoming trips list
-	taken_text = select([Response.trip_id, func.count(Response.user_email)]).group_by(Response.trip_id)
-	taken_spots = db.session.execute(taken_text).fetchall()
-
-	taken = {}
-	for trip_id, spot in taken_spots:
-		taken[trip_id] = spot
+	upcoming_trips = Trip.query.filter(Trip.signup_deadline >= func.current_date()). \
+		order_by(asc(Trip.signup_deadline)).all()
+	past_trips = Trip.query.filter(Trip.signup_deadline < func.current_date()).order_by(asc(Trip.signup_deadline)).all()
 
 	# checks if current user email is in adminclearance table
 	is_admin, logged_in = authenticated()
-	return render_template('index.html', upcoming_trips=upcoming_trips, taken_spots=taken, is_admin=is_admin,
-						   logged_in=logged_in)
+	return render_template('index.html', upcoming_trips=upcoming_trips, past_trips=past_trips, is_admin=is_admin,
+	                       logged_in=logged_in)
 
 
 @bp.route('/trip/<int:id>')
@@ -49,15 +42,17 @@ def individual_trip(id):
 	# checks if current user email is in adminclearance table
 	is_admin, logged_in = authenticated()
 	return render_template('trip.html', trip=trip, taken_spots=0, registrations=registrations, signed_up=signed_up,
-						   is_admin=is_admin, logged_in=logged_in)
+	                       is_admin=is_admin, logged_in=logged_in)
 
 
-@bp.route('/confirm/<id>')
-def trip_confirm(id):
-	response = get_response(id)
-	if (response["user_behavior"] != "NoResponse"):
+@bp.route('/respond/<response_id>')
+def respond(response_id):
+	response = get_response(response_id)
+	is_admin, logged_in = authenticated()
+	if response["user_behavior"] != "NoResponse":
 		return redirect(url_for('trips.dashboard'))
-	return render_template('confirm.html', id=id, trip=get_trip(response["trip_id"]))
+	return render_template('respond.html', id=response_id, trip=get_trip(response["trip_id"]), is_admin=is_admin,
+	                       logged_in=logged_in)
 
 
 # gets trip object from its id
@@ -90,8 +85,11 @@ def lottery_signup(id):
 @bp.route('/lottery_withdraw/<id>', methods=['POST'])
 @login_required
 def lottery_withdraw(id):
+	current_email = session.get('profile').get('email')
+	print("THIS IS OK")
+	print(current_email)
 	response = db.session.query(Response).filter(Response.trip_id == id).filter(
-		Response.user_email == session.get('profile').get('email')).first()
+		Response.user_email == current_email).first()
 	db.session.delete(response)
 	db.session.commit()
 	return redirect(url_for('trips.dashboard'))
@@ -120,7 +118,7 @@ def get_response(id):
 
 
 # confirms user attendance for given trip
-# called within confirm.html
+# called within respond.html
 @bp.route('/confirm_attendance/<id>', methods=['POST'])
 def confirm_attendance(id):
 	to_update = update(Response).where(Response.id == id).values(user_behavior="Confirmed")
@@ -137,8 +135,8 @@ def confirm_attendance(id):
 @bp.route('/decline_attendance/<id>', methods=['POST'])
 def decline_attendance(id):
 	# update response to declined
-	to_update = update(Response).where(Response.id == id).values(user_behavior="Declined")
-	db.session.execute(to_update)
+	db.session.execute(update(Response).where(Response.id == id).values(user_behavior="Declined"))
+	db.session.commit()
 
 	# update user weight for declining
 	get_response_info = select([Response.user_email, Response.trip_id]).where(Response.id == id)
@@ -151,25 +149,30 @@ def decline_attendance(id):
 	get_cars = select([Response.user_email, Response.id]).where(and_(
 		Response.lottery_slot == true(),
 		Response.user_behavior != 'Declined',
-		Response.car == true()))
+		Response.car == true(),
+		Response.trip_id == trip_id
+	))
 	car_winners = db.session.execute(get_cars).fetchall()
-	get_waitlist = select([Response.user_email, Response.id]).where(Response.lottery_slot == false())
-	if car_cap > len(car_winners):
-		get_waitlist.order_by(desc(Response.car))
-	get_waitlist.order_by(desc(User.weight))
+	get_wait_list = db.session.query(Response.user_email, Response.id, Response.lottery_slot). \
+		join(User, User.email == Response.user_email). \
+		filter(Response.lottery_slot == false(), Response.trip_id == trip_id)
+	if car_cap or 0 > len(car_winners):
+		get_wait_list = get_wait_list.order_by(desc(Response.car))
+	get_wait_list = get_wait_list.order_by(desc(User.weight))
 
-	# Check that there was a user on the waitlist, return immediately if not
-	waitlist_winner = db.session.execute(get_waitlist).fetchone()
-	if waitlist_winner is None:
+	# Check that there was a user on the wait list, return immediately if not
+	wait_list_winner = db.session.execute(get_wait_list).fetchone()
+	if wait_list_winner is None:
 		return redirect(url_for('trips.dashboard'))
-	winner_email, response_id = waitlist_winner
+	winner_email, response_id, _ = wait_list_winner
 
 	# update response from user to reflect getting a lottery slot
 	wait_update = update(Response).where(Response.id == response_id).values(lottery_slot=True)
 	db.session.execute(wait_update)
+	db.session.commit()
 
 	# email new winner
-	emails.mail_individual(winner_email, trip_name, response_id)
+	emails.mail_individual(current_app, winner_email, trip_name, response_id)
 	return redirect(url_for('trips.dashboard'))
 
 # if __name__ == '__main__':
