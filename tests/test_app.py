@@ -112,6 +112,7 @@ def test_decline_more_cars(client):
 	create_response(client, trip_id, auth_token2, email2)
 	run_lottery(trip_id)
 	winners1 = Response.query.filter_by(lottery_slot=True).all()
+	print(winners1)
 	assert len(winners1) == 1
 	assert winners1[0].id == response_id1
 	response_id3 = create_response(client, trip_id, auth_token3, email3, car=True)

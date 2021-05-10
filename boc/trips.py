@@ -59,10 +59,8 @@ def respond(response_id):
 def get_trip(id):
 	trip_text = select([Trip]).where(Trip.id == id)
 	trip = db.session.execute(trip_text).fetchone()
-
 	if trip is None:
 		abort(404, "Trip doesn't exist.")
-
 	return trip
 
 
@@ -86,8 +84,6 @@ def lottery_signup(id):
 @login_required
 def lottery_withdraw(id):
 	current_email = session.get('profile').get('email')
-	print("THIS IS OK")
-	print(current_email)
 	response = db.session.query(Response).filter(Response.trip_id == id).filter(
 		Response.user_email == current_email).first()
 	db.session.delete(response)
@@ -156,7 +152,7 @@ def decline_attendance(id):
 	get_wait_list = db.session.query(Response.user_email, Response.id, Response.lottery_slot). \
 		join(User, User.email == Response.user_email). \
 		filter(Response.lottery_slot == false(), Response.trip_id == trip_id)
-	if car_cap or 0 > len(car_winners):
+	if (car_cap or 0) > len(car_winners):
 		get_wait_list = get_wait_list.order_by(desc(Response.car))
 	get_wait_list = get_wait_list.order_by(desc(User.weight))
 

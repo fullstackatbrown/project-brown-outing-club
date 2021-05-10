@@ -24,13 +24,15 @@ def run_lottery(id):
 	car_winners = Response.query.join(User, User.email == Response.user_email).filter(
 		Response.trip_id == id, Response.lottery_slot == false(), Response.car == true()).order_by(
 		desc(User.weight)).limit(car_cap).all()
+	print("GOT CAR WINNERS")
+	print(len(car_winners))
 	for response in car_winners:
 		response.lottery_slot = True
 
 	# Get remaining winners
 	other_winners = Response.query.join(User, User.email == Response.user_email).filter(
 		Response.trip_id == id, Response.lottery_slot == false()).order_by(desc(User.weight)).limit(
-		car_cap or 0 + non_car_cap - len(car_winners)).all()
+		(car_cap or 0) + non_car_cap - len(car_winners)).all()
 	for response in other_winners:
 		response.lottery_slot = True
 
