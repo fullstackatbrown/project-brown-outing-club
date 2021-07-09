@@ -1,4 +1,5 @@
 import csv
+import os
 import tempfile
 
 from flask import session, url_for, Markup, flash, redirect, send_file
@@ -96,7 +97,7 @@ class TripView(ReqClearance):
 			for response in responses:
 				temp_writer.writerow([response.user_email, response.financial_aid, response.car, response.lottery_slot,
 				                      response.user_behavior,
-				                      current_app.config.get('BASE_URL') + url_for('trips.respond', response_id=response.id)])
+				                      os.environ['BASE_URL'] + url_for('trips.respond', response_id=response.id)])
 		return send_file(temp_file.name, as_attachment=True, attachment_filename='trip.csv')
 
 	# creates a /trip/run_lottery endpoint that runs the run_lottery method on the trip id from the form

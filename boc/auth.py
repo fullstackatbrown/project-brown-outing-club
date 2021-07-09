@@ -34,11 +34,11 @@ oauth = OAuth()
 
 auth0 = oauth.register(
 	'auth0',
-	client_id='J28X7Tck3Wh7xrch1Z3OQYN379zanO6Z',
-	client_secret='S1PAZdX5lAm3eGIv5tnmJfycfIW9W4Msv8Bi5_5N3uhjVmOVONCUbjaI0Ht6fp_k',
-	api_base_url='https://dev-h395rto6.us.auth0.com',
-	access_token_url='https://dev-h395rto6.us.auth0.com/oauth/token',
-	authorize_url='https://dev-h395rto6.us.auth0.com/authorize',
+	client_id=os.environ['AUTH_CLIENTID'],
+	client_secret=os.environ['AUTH_CLIENTSECRET'],
+	api_base_url='https://fsab.us.auth0.com',
+	access_token_url='https://fsab.us.auth0.com/oauth/token',
+	authorize_url='https://fsab.us.auth0.com/authorize',
 	client_kwargs={
 		'scope': 'openid profile email',
 	},
@@ -56,7 +56,7 @@ def authenticated():
 
 @bp.route('/login')
 def login():
-	return auth0.authorize_redirect(redirect_uri='http://127.0.0.1:5000/auth/callback')
+	return auth0.authorize_redirect(redirect_uri=os.environ['BASE_URL']+'/auth/callback')
 
 
 # called after authentication

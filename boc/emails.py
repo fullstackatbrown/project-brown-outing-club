@@ -1,3 +1,5 @@
+import os
+
 from flask import url_for, current_app
 from flask_mail import Mail, Message
 
@@ -18,7 +20,7 @@ def mail_individual(app, email, trip_name, response_id):
 	msg.body = (
 			'Hey! You have been selected for ' + trip_name +
 			'! Please confirm or decline your attendance by clicking on the link below:\n' +
-			app.config['BASE_URL'] + url_for('trips.respond', response_id=response_id))
+			os.environ['BASE_URL'] + url_for('trips.respond', response_id=response_id))
 	mail.send(msg)
 
 
@@ -31,5 +33,5 @@ def mail_group(app, recipients):
 			msg.body = (
 					'Hey! You have been selected for ' + response.trip.name +
 					'! Please confirm or decline your attendance by clicking on the link below:\n' +
-					app.config['BASE_URL'] + url_for('trips.respond', response_id=response.id))
+					os.environ['BASE_URL'] + url_for('trips.respond', response_id=response.id))
 			conn.send(msg)
