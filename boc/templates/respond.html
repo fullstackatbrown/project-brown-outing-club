@@ -1,0 +1,95 @@
+{% extends "layouts/base.html" %}
+{% block content %}
+    <h1>{{ trip.name }}</h1>
+    <p>
+    <div style="display: flex; align-items: center">
+        <span class="text-muted">
+            Signups close on {{ trip['signup_deadline'].strftime('%b %d, %Y') }}
+        </span>
+        <i data-toggle="tooltip"
+           data-placement="right"
+           title="All lotteries close at 11:59 pm ET."
+           class="bi bi-info-square content-label first-column same-line text-muted" style="margin-left: 6px"></i>
+    </div>
+    </p>
+    <div style="display: flex; align-items: center">
+        <i style="margin-right: 10px" class="bi bi-geo-alt"></i>
+        {{ trip.destination }}
+    </div>
+    <p>
+    <div style="display: flex; align-items: center">
+        <i style="margin-right: 10px" class="bi bi-tags"></i>
+        <span>
+            {% if trip['price'] is not none or trip['price']==0 %}
+                ${{ trip['price'] }}
+            {% else %}
+                FREE
+            {% endif %}
+        </span>
+        <i class="bi bi-info-square" style="margin-left: 6px"
+           data-toggle="tooltip"
+           data-placement="right"
+           title="The BOC offers financial aid on all trips, no questions asked!"
+           class="content-label same-line"></i>
+    </div>
+    </p>
+    <ul class="list-group list-group-horizontal-sm mb-3">
+        <li class="list-group-item">
+            <h6 class="content-label">Departs From</h6>
+            {{ trip.departure_location }}
+        </li>
+        <li class="list-group-item">
+            <h6 class="content-label">Departs On</h6>
+            {{ trip['departure_date'].strftime('%b %d, %Y') }}
+            {% if trip['departure_time'] is not none %} :
+                {{ trip['departure_time'].strftime("%_I:%M %p") }} {% endif %}
+        </li>
+        <li class="list-group-item">
+            <h6 class="content">
+                Returns On
+            </h6>
+            {% if trip['return_date'] is not none %}
+                {{ trip['return_date'].strftime('%b %d, %Y') }}
+            {% endif %}
+            {% if trip['return_time'] is not none %} @
+                {{ trip['return_time'].strftime("%_I:%M %p") }} {% endif %}
+        </li>
+    </ul>
+    <p>
+        Leaders: {{ trip['boc_leaders'] }}
+    </p>
+    <p>
+        Contact: <a href="mailto:{{ trip['contact'] }}subject:{{ trip.name }}">{{ trip['contact'] }}</a>
+    </p>
+    <p>{{ trip['description'] }}</p>
+    {% if signed_up %}
+        <form action="{{ url_for('trips.lottery_withdraw', id=trip['id']) }}" method="post"
+              onsubmit="return confirm('Are you sure you want to leave the lottery?');">
+            <button type="button" class="btn btn-danger" type="submit">
+                Withdraw from lottery
+            </button>
+        </form>
+    {% else %}
+        {% if signed_up %}
+            <form action="{{ url_for('trips.confirm_attendance', id=id) }}" method="POST">
+                </button>
+            </form>
+        {% else %}
+            <form action="{{ url_for('trips.confirm_attendance', id=id) }}" method="POST">
+                <button class="btn btn-success"
+                        onclick="return confirm('Are you sure you want to confirm your trip?');"
+                        type="submit">
+                    Confirm trip enrollment
+                </button>
+            </form>
+            <form action="{{ url_for('trips.decline_attendance', id=id) }}" method="POST">
+                <button class="btn btn-danger"
+                        onclick="return confirm('Are you sure you want to decline your trip spot? This action cannot be undone.');"
+                        type="submit">
+                    Decline trip enrollment
+                </button>
+            </form>
+            </form>
+        {% endif %}
+    {% endif %}
+{% endblock %}

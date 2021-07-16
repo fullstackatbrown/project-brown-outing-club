@@ -1,0 +1,26 @@
+{% extends "layouts/base.html" %}
+{% block content %}
+    <div class="row section-label">
+        <h2 class="section-title mb-3">Upcoming Trips</h2>
+    </div>
+    {% if not upcoming_trips|length %}
+        <p>
+            Sorry, no upcoming trips right now, check back later!
+        </p>
+    {% endif %}
+    {% for trip in upcoming_trips %}
+        {% include "partials/trip.html" %}
+    {% endfor %}
+    <br>
+    <div class="row section-label">
+        <h2 class="section-title mb-3">Past Trips</h2>
+    </div>
+    {% if not past_trips|length %}
+        <p>
+            Nothing to see here
+        </p>
+    {% endif %}
+    {% for trip in past_trips %}
+        {% include "partials/trip.html" %}
+    {% endfor %}
+{% endblock %}
