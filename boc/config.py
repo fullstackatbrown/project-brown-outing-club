@@ -10,7 +10,7 @@ class Config(object):
 	SQLALCHEMY_DATABASE_URI = os.environ['DATABASE_URL']
 	SQLALCHEMY_TRACK_MODIFICATIONS = False
 	MAIL_SERVER = 'smtp.gmail.com' # need to change based on server
-	MAIL_PORT = True  # need to change based on port
+	MAIL_PORT = 587  # need to change based on port
 	MAIL_USE_TLS = True
 	MAIL_USE_SSL = False
 	MAIL_DEBUG = False  # based on app debug setting
