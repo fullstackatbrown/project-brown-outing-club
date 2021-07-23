@@ -10,7 +10,7 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
 def mail_individual(receiver_address, trip_name, response_id):
-	print(0)
+	print("0")
 	if current_app.config['TESTING']:
 		return
 	mail_content = ('Hey! You have been selected for ' + trip_name +
