@@ -1,4 +1,5 @@
 import os
+import sys
 
 from flask import url_for, current_app
 
@@ -24,11 +25,15 @@ def mail_individual(receiver_address, trip_name, response_id):
 	# The body and the attachments for the mail
 	message.attach(MIMEText(mail_content, 'plain'))
 	# Create SMTP session for sending the mail
-	session = smtplib.SMTP_SSL(current_app.config['MAIL_SERVER'], 465)  # use gmail with port
-	session.ehlo()
-	session.login(current_app.config['MAIL_USERNAME'], current_app.config['MAIL_PASSWORD'])  # login with mail_id and password
-	session.sendmail(sender_address, receiver_address, message.as_string())
-	session.quit()
+	try:
+		session = smtplib.SMTP_SSL(current_app.config['MAIL_SERVER'], 465)  # use gmail with port
+		session.ehlo()
+		session.login(current_app.config['MAIL_USERNAME'], current_app.config['MAIL_PASSWORD'])  # login with mail_id and password
+		session.sendmail(sender_address, receiver_address, message.as_string())
+		session.quit()
+	except:
+		e = sys.exc_info()[0]
+		print(e)
 
 
 def mail_group(app, recipients):
