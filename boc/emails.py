@@ -28,6 +28,8 @@ def mail_individual(receiver_address, trip_name, response_id):
 	message.attach(MIMEText(mail_content, 'plain'))
 	# Create SMTP session for sending the mail
 	try:
+		print("01")
+		sys.stdout.flush()
 		session = smtplib.SMTP_SSL(current_app.config['MAIL_SERVER'], 465)  # use gmail with port
 		print("1")
 		sys.stdout.flush()
