@@ -249,7 +249,7 @@ class ResponseView(ReqClearance):
 
 	@expose('resendemail', methods=['POST'])
 	def resend_email(self):
-		return redirect(response_index)
+		return
 		print("-2")
 		response_index = self.get_url('.index_view')
 		form = get_form_data()
