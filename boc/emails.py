@@ -11,6 +11,7 @@ from email.mime.text import MIMEText
 
 def mail_individual(receiver_address, trip_name, response_id):
 	print("0")
+	sys.stdout.flush()
 	if current_app.config['TESTING']:
 		return
 	mail_content = ('Hey! You have been selected for ' + trip_name +
@@ -29,15 +30,16 @@ def mail_individual(receiver_address, trip_name, response_id):
 	try:
 		session = smtplib.SMTP_SSL(current_app.config['MAIL_SERVER'], 465)  # use gmail with port
 		print("1")
+		sys.stdout.flush()
 		session.ehlo()
 		print("2")
-
+		sys.stdout.flush()
 		session.login(current_app.config['MAIL_USERNAME'], current_app.config['MAIL_PASSWORD'])  # login with mail_id and password
 		print("3")
-
+		sys.stdout.flush()
 		session.sendmail(sender_address, receiver_address, message.as_string())
 		print("4")
-
+		sys.stdout.flush()
 		session.quit()
 	except:
 		e = sys.exc_info()[0]
