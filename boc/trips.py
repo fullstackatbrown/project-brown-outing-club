@@ -168,7 +168,7 @@ def decline_attendance(id):
 	db.session.commit()
 
 	# email new winner
-	emails.mail_individual(current_app, winner_email, trip_name, response_id)
+	emails.mail_individual(winner_email, trip_name, response_id)
 	return redirect(url_for('trips.dashboard'))
 
 # if __name__ == '__main__':

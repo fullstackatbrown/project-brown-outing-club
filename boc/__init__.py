@@ -25,8 +25,6 @@ def create_app(test_config=None):
 	from .auth import oauth
 	oauth.init_app(app)
 
-	emails.init_mail(app)
-
 	# instantiate flask-admin
 	# Check out /admin/{table name}/
 	admin = Admin(app, template_mode='bootstrap4')

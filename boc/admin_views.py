@@ -256,7 +256,7 @@ class ResponseView(ReqClearance):
 		response = self.get_one(response_id)
 		trip = db.session.query(Trip).filter_by(id=response.trip_id).first()
 
-		emails.mail_individual(current_app, response.user_email, trip.name, response.id)
+		emails.mail_individual(response.user_email, trip.name, response.id)
 		return redirect(response_index)
 
 
