@@ -249,7 +249,6 @@ class ResponseView(ReqClearance):
 
 	@expose('resendemail', methods=['POST'])
 	def resend_email(self):
-		return
 		print("-2")
 		response_index = self.get_url('.index_view')
 		form = get_form_data()
@@ -258,6 +257,7 @@ class ResponseView(ReqClearance):
 		response = self.get_one(response_id)
 		trip = db.session.query(Trip).filter_by(id=response.trip_id).first()
 		print("-1")
+		return redirect(response_index)
 		emails.mail_individual(response.user_email, trip.name, response.id)
 		return redirect(response_index)
 
