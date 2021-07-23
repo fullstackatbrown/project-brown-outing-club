@@ -30,10 +30,10 @@ def mail_individual(receiver_address, trip_name, response_id):
 	try:
 		print("01")
 		sys.stdout.flush()
-		session = smtplib.SMTP_SSL(current_app.config['MAIL_SERVER'], 465)  # use gmail with port
+		session = smtplib.SMTP(current_app.config['MAIL_SERVER'], 587)  # use gmail with port
 		print("1")
 		sys.stdout.flush()
-		session.ehlo()
+		session.starttls()
 		print("2")
 		sys.stdout.flush()
 		session.login(current_app.config['MAIL_USERNAME'], current_app.config['MAIL_PASSWORD'])  # login with mail_id and password
