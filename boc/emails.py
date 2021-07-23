@@ -28,15 +28,15 @@ def mail_individual(receiver_address, trip_name, response_id):
 	# Create SMTP session for sending the mail
 	try:
 		session = smtplib.SMTP_SSL(current_app.config['MAIL_SERVER'], 465)  # use gmail with port
-		print(1)
+		print("1")
 		session.ehlo()
-		print(2)
+		print("2")
 
 		session.login(current_app.config['MAIL_USERNAME'], current_app.config['MAIL_PASSWORD'])  # login with mail_id and password
-		print(3)
+		print("3")
 
 		session.sendmail(sender_address, receiver_address, message.as_string())
-		print(4)
+		print("4")
 
 		session.quit()
 	except:
