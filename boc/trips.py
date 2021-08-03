@@ -1,5 +1,6 @@
 import random
 import sys
+import traceback
 
 from flask import abort, Blueprint, render_template, request, redirect, session, url_for, flash, \
 	current_app
@@ -171,9 +172,8 @@ def decline_attendance(id):
 	# email new winner
 	try:
 		emails.mail_individual(winner_email, trip_name, response_id)
-	except Exception as e:
-		print(e)
-		sys.stdout.flush()
+	except Exception:
+		traceback.print_exc()
 	return redirect(url_for('trips.dashboard'))
 
 # if __name__ == '__main__':

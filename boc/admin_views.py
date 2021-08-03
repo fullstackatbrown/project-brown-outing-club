@@ -262,8 +262,8 @@ class ResponseView(ReqClearance):
 		try:
 			emails.mail_individual(response.user_email, trip.name, response.id)
 			flash("Resent email!")
-		except Exception as e:
-			flash(e)
+		except Exception:
+			flash(traceback.format_exception(*sys.exc_info()))
 		return redirect(response_index)
 
 
