@@ -9,7 +9,7 @@ class Config(object):
 	# correctly: comment 9 and leave 10 uncommented
 	SQLALCHEMY_DATABASE_URI = os.environ['DATABASE_URL']
 	SQLALCHEMY_TRACK_MODIFICATIONS = False
-	MAIL_SERVER = 'email-smtp.us-east-1.amazonaws.com' # need to change based on server
+	MAIL_SERVER = 'smtp.gmail.com' # need to change based on server
 	MAIL_USERNAME = os.environ['EMAIL_USERNAME']
 	MAIL_PASSWORD = os.environ['EMAIL_PASSWORD']
 	MAIL_ADDRESS = "fsabbearbot@gmail.com"
