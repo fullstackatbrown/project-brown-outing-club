@@ -146,7 +146,7 @@ class TripView(ReqClearance):
 				emails.mail_group(current_app, winners)
 				flash("Sent " + str(len(winners)) + " emails!")
 			except Exception as e:
-				flash(traceback.extract_exception(e))
+				flash(traceback.format_exception(e))
 		return redirect(trip_index)
 
 
