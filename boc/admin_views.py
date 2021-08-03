@@ -1,5 +1,6 @@
 import csv
 import os
+import sys
 import tempfile
 
 from flask import session, url_for, Markup, flash, redirect, send_file
@@ -140,8 +141,12 @@ class TripView(ReqClearance):
 		winners = db.session.query(Response).filter_by(trip_id=trip_id, lottery_slot=True) \
 			.join(Trip, Response.trip_id == Trip.id).all()
 		if winners is not None:
-			emails.mail_group(current_app, winners)
-		flash("Sent " + str(len(winners)) + " emails!")
+			try:
+				emails.mail_group(current_app, winners)
+				flash("Sent " + str(len(winners)) + " emails!")
+			except:
+				e = sys.exc_info()[0]
+				flash(e)
 		return redirect(trip_index)
 
 
@@ -251,12 +256,15 @@ class ResponseView(ReqClearance):
 	def resend_email(self):
 		response_index = self.get_url('.index_view')
 		form = get_form_data()
-
 		response_id = form['response_id']
 		response = self.get_one(response_id)
 		trip = db.session.query(Trip).filter_by(id=response.trip_id).first()
-		emails.mail_individual(response.user_email, trip.name, response.id)
-		flash("Resent email!")
+		try:
+			emails.mail_individual(response.user_email, trip.name, response.id)
+			flash("Resent email!")
+		except:
+			e = sys.exc_info()[0]
+			flash(e)
 		return redirect(response_index)
 
 

@@ -1,4 +1,5 @@
 import random
+import sys
 
 from flask import abort, Blueprint, render_template, request, redirect, session, url_for, flash, \
 	current_app
@@ -168,7 +169,12 @@ def decline_attendance(id):
 	db.session.commit()
 
 	# email new winner
-	emails.mail_individual(winner_email, trip_name, response_id)
+	try:
+		emails.mail_individual(winner_email, trip_name, response_id)
+	except:
+		e = sys.exc_info()[0]
+		print(e)
+		sys.stdout.flush()
 	return redirect(url_for('trips.dashboard'))
 
 # if __name__ == '__main__':
