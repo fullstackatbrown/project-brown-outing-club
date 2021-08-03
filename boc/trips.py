@@ -171,8 +171,7 @@ def decline_attendance(id):
 	# email new winner
 	try:
 		emails.mail_individual(winner_email, trip_name, response_id)
-	except:
-		e = sys.exc_info()[0]
+	except Exception as e:
 		print(e)
 		sys.stdout.flush()
 	return redirect(url_for('trips.dashboard'))

@@ -144,8 +144,7 @@ class TripView(ReqClearance):
 			try:
 				emails.mail_group(current_app, winners)
 				flash("Sent " + str(len(winners)) + " emails!")
-			except:
-				e = sys.exc_info()[0]
+			except Exception as e:
 				flash(e)
 		return redirect(trip_index)
 
@@ -262,8 +261,7 @@ class ResponseView(ReqClearance):
 		try:
 			emails.mail_individual(response.user_email, trip.name, response.id)
 			flash("Resent email!")
-		except:
-			e = sys.exc_info()[0]
+		except Exception as e:
 			flash(e)
 		return redirect(response_index)
 
