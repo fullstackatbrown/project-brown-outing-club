@@ -28,6 +28,7 @@ def mail_individual(receiver_address, trip_name, response_id):
 	# Create SMTP session for sending the mail
 	session = smtplib.SMTP(current_app.config['MAIL_SERVER'], 587)  # use gmail with port
 	session.starttls()
+	print(current_app.config['MAIL_USERNAME'] + " " + current_app.config['MAIL_PASSWORD'] + " " + current_app.config['MAIL_SERVER'], flush=True)
 	session.login(current_app.config['MAIL_USERNAME'],
 	              current_app.config['MAIL_PASSWORD'])  # login with mail_id and password
 	session.sendmail(sender_address, receiver_address, message.as_string())
