@@ -31,9 +31,10 @@ def mail_individual(receiver_address, trip_name, response_id):
 		session.login(current_app.config['MAIL_USERNAME'], current_app.config['MAIL_PASSWORD'])  # login with mail_id and password
 		session.sendmail(sender_address, receiver_address, message.as_string())
 		session.quit()
+		print("Sent email")
 	except:
 		e = sys.exc_info()[0]
-		print(e)
+		print("Error encountered sending email", e)
 
 
 def mail_group(app, recipients):
